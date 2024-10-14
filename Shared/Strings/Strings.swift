@@ -194,6 +194,8 @@ internal enum L10n {
   internal static let confirm = L10n.tr("Localizable", "confirm", fallback: "Confirm")
   /// Confirm Close
   internal static let confirmClose = L10n.tr("Localizable", "confirmClose", fallback: "Confirm Close")
+  /// Confirm New Password
+  internal static let confirmNewPassword = L10n.tr("Localizable", "confirmNewPassword", fallback: "Confirm New Password")
   /// Connect
   internal static let connect = L10n.tr("Localizable", "connect", fallback: "Connect")
   /// Connect Manually
@@ -218,6 +220,8 @@ internal enum L10n {
   internal static let continueWatching = L10n.tr("Localizable", "continueWatching", fallback: "Continue Watching")
   /// Current
   internal static let current = L10n.tr("Localizable", "current", fallback: "Current")
+  /// Current Password
+  internal static let currentPassword = L10n.tr("Localizable", "currentPassword", fallback: "Current Password")
   /// Current Position
   internal static let currentPosition = L10n.tr("Localizable", "currentPosition", fallback: "Current Position")
   /// Custom
@@ -516,6 +520,8 @@ internal enum L10n {
   internal static let never = L10n.tr("Localizable", "never", fallback: "Never")
   /// Never run
   internal static let neverRun = L10n.tr("Localizable", "neverRun", fallback: "Never run")
+  /// New Password
+  internal static let newPassword = L10n.tr("Localizable", "newPassword", fallback: "New Password")
   /// News
   internal static let news = L10n.tr("Localizable", "news", fallback: "News")
   /// Next
@@ -596,6 +602,10 @@ internal enum L10n {
   }
   /// Password
   internal static let password = L10n.tr("Localizable", "password", fallback: "Password")
+  /// Changes the Jellyfin server user password. This does not change any Swiftfin settings.
+  internal static let passwordChangeInfo = L10n.tr("Localizable", "passwordChangeInfo", fallback: "Changes the Jellyfin server user password. This does not change any Swiftfin settings.")
+  /// New passwords do not match
+  internal static let passwordMismatch = L10n.tr("Localizable", "passwordMismatch", fallback: "New passwords do not match")
   /// Pause on background
   internal static let pauseOnBackground = L10n.tr("Localizable", "pauseOnBackground", fallback: "Pause on background")
   /// People
@@ -638,6 +648,8 @@ internal enum L10n {
   internal static let previousItem = L10n.tr("Localizable", "previousItem", fallback: "Previous Item")
   /// Primary
   internal static let primary = L10n.tr("Localizable", "primary", fallback: "Primary")
+  /// Profile
+  internal static let profile = L10n.tr("Localizable", "profile", fallback: "Profile")
   /// Profiles
   internal static let profiles = L10n.tr("Localizable", "profiles", fallback: "Profiles")
   /// Programs
@@ -706,6 +718,14 @@ internal enum L10n {
   internal static let resetAllSettings = L10n.tr("Localizable", "resetAllSettings", fallback: "Reset all settings back to defaults.")
   /// Reset App Settings
   internal static let resetAppSettings = L10n.tr("Localizable", "resetAppSettings", fallback: "Reset App Settings")
+  /// Reset Password
+  internal static let resetPassword = L10n.tr("Localizable", "resetPassword", fallback: "Reset Password")
+  /// Resets the User's password on the Jellyfin server. This results in the user having no password until one is set.
+  internal static let resetPasswordInfo = L10n.tr("Localizable", "resetPasswordInfo", fallback: "Resets the User's password on the Jellyfin server. This results in the user having no password until one is set.")
+  /// Are you sure you want to reset %1$@'s password? This user will have no password until one is set.
+  internal static func resetPasswordWarning(_ p1: Any) -> String {
+    return L10n.tr("Localizable", "resetPasswordWarning", String(describing: p1), fallback: "Are you sure you want to reset %1$@'s password? This user will have no password until one is set.")
+  }
   /// Reset User Settings
   internal static let resetUserSettings = L10n.tr("Localizable", "resetUserSettings", fallback: "Reset User Settings")
   /// Restart Server
@@ -880,6 +900,8 @@ internal enum L10n {
   internal static let subtitlesDisclaimer = L10n.tr("Localizable", "subtitlesDisclaimer", fallback: "Settings only affect some subtitle types")
   /// Subtitle Size
   internal static let subtitleSize = L10n.tr("Localizable", "subtitleSize", fallback: "Subtitle Size")
+  /// Success
+  internal static let success = L10n.tr("Localizable", "success", fallback: "Success")
   /// Suggestions
   internal static let suggestions = L10n.tr("Localizable", "suggestions", fallback: "Suggestions")
   /// Switch User
@@ -972,6 +994,8 @@ internal enum L10n {
   internal static let unplayed = L10n.tr("Localizable", "unplayed", fallback: "Unplayed")
   /// You have unsaved changes. Are you sure you want to discard them?
   internal static let unsavedChangesMessage = L10n.tr("Localizable", "unsavedChangesMessage", fallback: "You have unsaved changes. Are you sure you want to discard them?")
+  /// Update Password
+  internal static let updatePassword = L10n.tr("Localizable", "updatePassword", fallback: "Update Password")
   /// URL
   internal static let url = L10n.tr("Localizable", "url", fallback: "URL")
   /// Use as Transcoding Profile
@@ -988,6 +1012,8 @@ internal enum L10n {
   }
   /// Username
   internal static let username = L10n.tr("Localizable", "username", fallback: "Username")
+  /// User password has been changed.
+  internal static let userPasswordChanged = L10n.tr("Localizable", "userPasswordChanged", fallback: "User password has been changed.")
   /// Users
   internal static let users = L10n.tr("Localizable", "users", fallback: "Users")
   /// Version

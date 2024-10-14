@@ -42,8 +42,9 @@ struct ResetUserPasswordView: View {
     var body: some View {
         List {
 
-            Section("Current Password") {
-                UnmaskSecureField("Current Password", text: $currentPassword) {
+            /* Current Password Input Field */
+            Section(L10n.currentPassword) {
+                UnmaskSecureField(L10n.currentPassword, text: $currentPassword) {
                     focusedPassword = 1
                 }
                 .autocorrectionDisabled()
@@ -52,8 +53,9 @@ struct ResetUserPasswordView: View {
                 .disabled(viewModel.state == .resetting)
             }
 
-            Section("New Password") {
-                UnmaskSecureField("New Password", text: $newPassword) {
+            /* New Password Input Field */
+            Section(L10n.newPassword) {
+                UnmaskSecureField(L10n.newPassword, text: $newPassword) {
                     focusedPassword = 2
                 }
                 .autocorrectionDisabled()
@@ -62,8 +64,9 @@ struct ResetUserPasswordView: View {
                 .disabled(viewModel.state == .resetting)
             }
 
+            /* Confirm New Password Input Field */
             Section {
-                UnmaskSecureField("Confirm New Password", text: $confirmNewPassword) {
+                UnmaskSecureField(L10n.confirmNewPassword, text: $confirmNewPassword) {
                     viewModel.send(.reset(current: currentPassword, new: confirmNewPassword))
                 }
                 .autocorrectionDisabled()
@@ -71,10 +74,10 @@ struct ResetUserPasswordView: View {
                 .focused($focusedPassword, equals: 2)
                 .disabled(viewModel.state == .resetting)
             } header: {
-                Text("Confirm New Password")
+                Text(L10n.confirmNewPassword)
             } footer: {
                 if newPassword != confirmNewPassword {
-                    Label("New passwords to not match", systemImage: "exclamationmark.circle.fill")
+                    Label(L10n.passwordMismatch, systemImage: "exclamationmark.circle.fill")
                         .labelStyle(.sectionFooterWithImage(imageStyle: .orange))
                 }
             }
@@ -87,7 +90,7 @@ struct ResetUserPasswordView: View {
                     }
                     .foregroundStyle(.red, .red.opacity(0.2))
                 } else {
-                    ListRowButton("Save") {
+                    ListRowButton(L10n.save) {
                         focusedPassword = nil
                         viewModel.send(.reset(current: currentPassword, new: confirmNewPassword))
                     }
@@ -96,7 +99,7 @@ struct ResetUserPasswordView: View {
                     .opacity(newPassword != confirmNewPassword ? 0.5 : 1)
                 }
             } footer: {
-                Text("Changes the Jellyfin server user password. This does not change any Swiftfin settings.")
+                Text(L10n.passwordChangeInfo)
             }
         }
         .interactiveDismissDisabled(viewModel.state == .resetting)
@@ -135,14 +138,14 @@ struct ResetUserPasswordView: View {
             Text(error.localizedDescription)
         }
         .alert(
-            "Success",
+            L10n.success.text,
             isPresented: $isPresentingSuccess
         ) {
             Button(L10n.dismiss, role: .cancel) {
                 router.pop()
             }
         } message: {
-            Text("User password has been changed.")
+            Text(L10n.userPasswordChanged)
         }
     }
 }

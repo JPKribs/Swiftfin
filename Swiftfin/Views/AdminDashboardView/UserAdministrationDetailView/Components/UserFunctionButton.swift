@@ -17,15 +17,17 @@ extension UserAdministrationDetailView {
         let title: String
         let systemImage: String
         let warningMessage: String
-        let isPresented: Binding<Bool>
         let isDestructive: Bool
         let action: () -> Void
+
+        @State
+        private var isPresented: Bool = false
 
         // MARK: - Body
 
         var body: some View {
             Button(role: isDestructive ? .destructive : .none) {
-                isPresented.wrappedValue = true
+                isPresented = true
             } label: {
                 Text(title)
             }
@@ -33,7 +35,7 @@ extension UserAdministrationDetailView {
             .padding()
             .confirmationDialog(
                 title,
-                isPresented: isPresented,
+                isPresented: $isPresented,
                 titleVisibility: .hidden
             ) {
                 Button(title, role: .destructive, action: action)

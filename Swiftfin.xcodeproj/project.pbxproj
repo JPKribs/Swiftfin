@@ -31,6 +31,8 @@
 		4E24D5E02CBCBED7000FD1C0 /* UserAdministrationRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E24D5D92CBCBED7000FD1C0 /* UserAdministrationRow.swift */; };
 		4E24D5E12CBCBED7000FD1C0 /* UserAdministrationButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E24D5D82CBCBED7000FD1C0 /* UserAdministrationButton.swift */; };
 		4E24D5E32CBCC9E3000FD1C0 /* UserFunctionButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E24D5E22CBCC9DA000FD1C0 /* UserFunctionButton.swift */; };
+		4E24D5E52CBD7E91000FD1C0 /* PasswordView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E24D5E42CBD7E86000FD1C0 /* PasswordView.swift */; };
+		4E24D5E92CBD84CF000FD1C0 /* PolicyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E24D5E82CBD84CC000FD1C0 /* PolicyView.swift */; };
 		4E2AC4BE2C6C48D200DD600D /* CustomDeviceProfileAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E2AC4BD2C6C48D200DD600D /* CustomDeviceProfileAction.swift */; };
 		4E2AC4BF2C6C48D200DD600D /* CustomDeviceProfileAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E2AC4BD2C6C48D200DD600D /* CustomDeviceProfileAction.swift */; };
 		4E2AC4C22C6C491200DD600D /* AudoCodec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E2AC4C12C6C491200DD600D /* AudoCodec.swift */; };
@@ -1069,6 +1071,8 @@
 		4E24D5DA2CBCBED7000FD1C0 /* UserProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfileView.swift; sourceTree = "<group>"; };
 		4E24D5DC2CBCBED7000FD1C0 /* UserAdministrationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserAdministrationView.swift; sourceTree = "<group>"; };
 		4E24D5E22CBCC9DA000FD1C0 /* UserFunctionButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserFunctionButton.swift; sourceTree = "<group>"; };
+		4E24D5E42CBD7E86000FD1C0 /* PasswordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordView.swift; sourceTree = "<group>"; };
+		4E24D5E82CBD84CC000FD1C0 /* PolicyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PolicyView.swift; sourceTree = "<group>"; };
 		4E2AC4BD2C6C48D200DD600D /* CustomDeviceProfileAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomDeviceProfileAction.swift; sourceTree = "<group>"; };
 		4E2AC4C12C6C491200DD600D /* AudoCodec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudoCodec.swift; sourceTree = "<group>"; };
 		4E2AC4C42C6C492700DD600D /* MediaContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaContainer.swift; sourceTree = "<group>"; };
@@ -1906,6 +1910,7 @@
 		4E24D5C92CBC9846000FD1C0 /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				4E24D5E72CBD832D000FD1C0 /* Sections */,
 				4E24D5E22CBCC9DA000FD1C0 /* UserFunctionButton.swift */,
 			);
 			path = Components;
@@ -1937,6 +1942,15 @@
 				4E24D5DC2CBCBED7000FD1C0 /* UserAdministrationView.swift */,
 			);
 			path = UserAdministrationView;
+			sourceTree = "<group>";
+		};
+		4E24D5E72CBD832D000FD1C0 /* Sections */ = {
+			isa = PBXGroup;
+			children = (
+				4E24D5E42CBD7E86000FD1C0 /* PasswordView.swift */,
+				4E24D5E82CBD84CC000FD1C0 /* PolicyView.swift */,
+			);
+			path = Sections;
 			sourceTree = "<group>";
 		};
 		4E2AC4C02C6C48EB00DD600D /* MediaComponents */ = {
@@ -4947,6 +4961,7 @@
 				E1401CA02937DFF500E8B599 /* AppIconSelectorView.swift in Sources */,
 				BD39577E2C1140810078CEF8 /* TransitionSection.swift in Sources */,
 				E1092F4C29106F9F00163F57 /* GestureAction.swift in Sources */,
+				4E24D5E52CBD7E91000FD1C0 /* PasswordView.swift in Sources */,
 				E11BDF772B8513B40045C54A /* ItemGenre.swift in Sources */,
 				E16DEAC228EFCF590058F196 /* EnvironmentValue+Keys.swift in Sources */,
 				E1BDF2F129524AB700CC0294 /* AutoPlayActionButton.swift in Sources */,
@@ -5120,6 +5135,7 @@
 				4E9DB3FE2CB7972A00D36A26 /* TriggersSection.swift in Sources */,
 				E18E01E0288747230022598C /* iPadOSMovieItemContentView.swift in Sources */,
 				E1A7F0DF2BD4EC7400620DDD /* Dictionary.swift in Sources */,
+				4E24D5E92CBD84CF000FD1C0 /* PolicyView.swift in Sources */,
 				E10231442BCF8A51009D71FC /* ChannelProgram.swift in Sources */,
 				E1937A3B288E54AD00CB80AA /* BaseItemDto+Images.swift in Sources */,
 				E1401CA5293813F400E8B599 /* InvertedDarkAppIcon.swift in Sources */,

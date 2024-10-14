@@ -10,19 +10,38 @@ import Combine
 import Foundation
 import JellyfinAPI
 
-final class UserAdministrationObserver: ViewModel, Stateful, Identifiable {
+final class UserAdministrationObserver: ViewModel, Eventful, Stateful, Identifiable {
+
+    // MARK: Event
+
+    enum Event {
+        case error(JellyfinAPIError)
+        case success
+    }
+
+    // MARK: Action
 
     enum Action: Equatable {
+        case cancel
         case resetPassword
         case updatePassword(currentPassword: String?, newPassword: String)
-        case stopObserving
+        case updatePolicy(policy: UserPolicy)
     }
+
+    // MARK: State
 
     enum State: Hashable {
         case error(JellyfinAPIError)
         case initial
         case updating
-        case running
+    }
+
+    // MARK: Published Values
+
+    var events: AnyPublisher<Event, Never> {
+        eventSubject
+            .receive(on: RunLoop.main)
+            .eraseToAnyPublisher()
     }
 
     @Published
@@ -30,8 +49,8 @@ final class UserAdministrationObserver: ViewModel, Stateful, Identifiable {
     @Published
     private(set) var user: UserDto
 
-    private var progressCancellable: AnyCancellable?
-    private var cancelCancellable: AnyCancellable?
+    private var resetTask: AnyCancellable?
+    private var eventSubject: PassthroughSubject<Event, Never> = .init()
 
     var id: String? { user.id }
 
@@ -41,58 +60,82 @@ final class UserAdministrationObserver: ViewModel, Stateful, Identifiable {
 
     func respond(to action: Action) -> State {
         switch action {
+        case .cancel:
+            resetTask?.cancel()
+
+            return .initial
         case .resetPassword:
-            if case .running = state {
+            if case .updating = state {
                 return state
             }
 
-            progressCancellable = Task {
+            resetTask = Task {
                 do {
                     try await resetPassword()
-
                     await MainActor.run {
                         self.state = .initial
+                        self.eventSubject.send(.success)
                     }
                 } catch {
                     await MainActor.run {
-                        self.state = .error(.init(error.localizedDescription))
+                        let jellyfinError = JellyfinAPIError(error.localizedDescription)
+                        self.state = .error(jellyfinError)
+                        self.eventSubject.send(.error(jellyfinError))
                     }
                 }
             }
             .asAnyCancellable()
 
-            return .running
-
+            return .updating
         case let .updatePassword(currentPassword, newPassword):
-            if case .running = state {
+            if case .updating = state {
                 return state
             }
 
-            progressCancellable = Task {
+            resetTask = Task {
                 do {
                     try await updatePassword(
                         currentPw: currentPassword,
                         newPw: newPassword
                     )
-
                     await MainActor.run {
                         self.state = .initial
+                        self.eventSubject.send(.success)
                     }
                 } catch {
                     await MainActor.run {
-                        self.state = .error(.init(error.localizedDescription))
+                        let jellyfinError = JellyfinAPIError(error.localizedDescription)
+                        self.state = .error(jellyfinError)
+                        self.eventSubject.send(.error(jellyfinError))
                     }
                 }
             }
             .asAnyCancellable()
 
-            return .running
+            return .updating
+        case let .updatePolicy(policy: policy):
+            if case .updating = state {
+                return state
+            }
 
-        case .stopObserving:
-            progressCancellable?.cancel()
-            cancelCancellable?.cancel()
+            resetTask = Task {
+                do {
+                    try await updatePolicy(policy: policy)
+                    await MainActor.run {
+                        self.state = .initial
+                        self.eventSubject.send(.success)
+                    }
+                } catch {
+                    await MainActor.run {
+                        let jellyfinError = JellyfinAPIError(error.localizedDescription)
+                        self.state = .error(jellyfinError)
+                        self.eventSubject.send(.error(jellyfinError))
+                    }
+                }
+            }
+            .asAnyCancellable()
 
-            return .initial
+            return .updating
         }
     }
 
@@ -103,6 +146,10 @@ final class UserAdministrationObserver: ViewModel, Stateful, Identifiable {
         let parameters = UpdateUserPassword(isResetPassword: true)
         let updateRequest = Paths.updateUserPassword(userID: userId, parameters)
         try await userSession.client.send(updateRequest)
+
+        await MainActor.run {
+            self.user.hasPassword = false
+        }
     }
 
     // MARK: - Update Password
@@ -115,5 +162,33 @@ final class UserAdministrationObserver: ViewModel, Stateful, Identifiable {
         )
         let updateRequest = Paths.updateUserPassword(userID: userId, parameters)
         try await userSession.client.send(updateRequest)
+
+        await MainActor.run {
+            self.user.hasPassword = (newPw != "")
+        }
+    }
+
+    // MARK: - Update User Policy
+
+    private func updatePolicy(policy: UserPolicy) async throws {
+        guard let userId = user.id else { return }
+        let updateRequest = Paths.updateUserPolicy(userID: userId, policy)
+        try await userSession.client.send(updateRequest)
+
+        await MainActor.run {
+            self.user.policy = policy
+        }
+    }
+
+    // MARK: - Update User Configuration
+
+    private func updatePolicy(configuration: UserConfiguration) async throws {
+        guard let userId = user.id else { return }
+        let updateRequest = Paths.updateUserConfiguration(userID: userId, configuration)
+        try await userSession.client.send(updateRequest)
+
+        await MainActor.run {
+            self.user.configuration = configuration
+        }
     }
 }

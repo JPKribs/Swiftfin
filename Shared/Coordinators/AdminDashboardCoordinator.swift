@@ -30,6 +30,10 @@ final class AdminDashboardCoordinator: NavigationCoordinatable {
     @Route(.push)
     var userDetails = makeUserDetails
     @Route(.push)
+    var userPassword = makeUserPassword
+    @Route(.push)
+    var userPolicy = makeUserPolicy
+    @Route(.push)
     var editScheduledTask = makeEditScheduledTask
     @Route(.modal)
     var addScheduledTaskTrigger = makeAddScheduledTaskTrigger
@@ -64,6 +68,16 @@ final class AdminDashboardCoordinator: NavigationCoordinatable {
     @ViewBuilder
     func makeUserDetails(observer: UserAdministrationObserver) -> some View {
         UserAdministrationDetailView(observer: observer)
+    }
+
+    @ViewBuilder
+    func makeUserPassword(observer: UserAdministrationObserver) -> some View {
+        UserAdministrationDetailView.PasswordView(observer: observer)
+    }
+
+    @ViewBuilder
+    func makeUserPolicy(observer: UserAdministrationObserver) -> some View {
+        UserAdministrationDetailView.PolicyView(observer: observer)
     }
 
     @ViewBuilder
