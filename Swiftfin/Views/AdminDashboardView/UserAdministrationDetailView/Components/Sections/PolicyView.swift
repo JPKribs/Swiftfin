@@ -239,9 +239,10 @@ extension UserAdministrationDetailView {
             ChevronInputButton(
                 title: "Maximum failed login attempts",
                 subtitle: (
-                    tempPolicy.loginAttemptsBeforeLockout == -1 || tempPolicy.loginAttemptsBeforeLockout == nil ? L10n
+                    tempPolicy.loginAttemptsBeforeLockout == -1 ? L10n
                         .disabled : (
-                            tempPolicy.loginAttemptsBeforeLockout == 0 ? "Default" : tempPolicy
+                            tempPolicy.loginAttemptsBeforeLockout == 0 || tempPolicy
+                                .loginAttemptsBeforeLockout == nil ? "Default" : tempPolicy
                                 .loginAttemptsBeforeLockout?.description
                         )!
                 ),
