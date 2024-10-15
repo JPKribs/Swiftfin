@@ -53,9 +53,14 @@ extension UserAdministrationDetailView {
 
         var body: some View {
             List {
-                ProfileSectionView()
-                ManagementPermissionsSectionView()
-                RemoteConnectionsSectionView()
+                UsernameView()
+                ManagementPermissionsView()
+                FeatureAccessView()
+                MediaPlaybackView()
+                ExternalAccessView()
+                SyncPlayView()
+                MediaDeletionSection()
+                RemoteControlView()
                 PermissionsSectionView()
                 SessionConfigurationSectionView()
                 SaveButtonSectionView()
@@ -99,7 +104,7 @@ extension UserAdministrationDetailView {
         }
 
         @ViewBuilder
-        private func ProfileSectionView() -> some View {
+        private func UsernameView() -> some View {
             Section(L10n.username) {
                 TextField(L10n.name, text: Binding(
                     get: {
@@ -116,22 +121,123 @@ extension UserAdministrationDetailView {
         }
 
         @ViewBuilder
-        private func RemoteConnectionsSectionView() -> some View {
-            Section("Remote Connections") {
-                Toggle("Remote Connections", isOn: Binding(
-                    get: { tempPolicy.enableRemoteAccess ?? false },
-                    set: { tempPolicy.enableRemoteAccess = $0 }
+        private func MediaDeletionSection() -> some View {
+            Section("Allow media deletion") {
+                Toggle("Allow media deletion", isOn: Binding(
+                    get: { tempPolicy.enableContentDeletion ?? false },
+                    set: { tempPolicy.enableContentDeletion = $0 }
+                ))
+                .disabled(observer.state == .updating)
+
+                // TODO: Add the 'Allow media deletion from' Libaries
+            }
+        }
+
+        @ViewBuilder
+        private func SyncPlayView() -> some View {
+            Section("SyncPlay access") {
+                Picker(
+                    "SyncPlace",
+                    selection: Binding(
+                        get: { tempPolicy.syncPlayAccess ?? SyncPlayUserAccessType.none },
+                        set: { tempPolicy.syncPlayAccess = $0 }
+                    )
+                ) {
+                    ForEach(SyncPlayUserAccessType.allCases, id: \.self) { type in
+                        Text(type.displayTitle).tag(type)
+                    }
+                }
+            }
+        }
+
+        @ViewBuilder
+        private func RemoteControlView() -> some View {
+            Section("Remote control") {
+                Toggle("Control other users", isOn: Binding(
+                    get: { tempPolicy.enableRemoteControlOfOtherUsers ?? false },
+                    set: { tempPolicy.enableRemoteControlOfOtherUsers = $0 }
+                ))
+                .disabled(observer.state == .updating)
+
+                Toggle("Control shared devices", isOn: Binding(
+                    get: { tempPolicy.enableSharedDeviceControl ?? false },
+                    set: { tempPolicy.enableSharedDeviceControl = $0 }
                 ))
                 .disabled(observer.state == .updating)
             }
         }
 
         @ViewBuilder
-        private func ManagementPermissionsSectionView() -> some View {
+        private func ExternalAccessView() -> some View {
+            Section("Remote Connections") {
+                Toggle("Remote Connections", isOn: Binding(
+                    get: { tempPolicy.enableRemoteAccess ?? false },
+                    set: { tempPolicy.enableRemoteAccess = $0 }
+                ))
+                .disabled(observer.state == .updating)
+
+                MaxBitrateButtonView()
+            }
+        }
+
+        @ViewBuilder
+        private func ManagementPermissionsView() -> some View {
             Section("Management Permissions") {
-                Toggle("Management Permissions", isOn: Binding(
+                Toggle("Adminstrator", isOn: Binding(
                     get: { tempPolicy.isAdministrator ?? false },
                     set: { tempPolicy.isAdministrator = $0 }
+                ))
+                .disabled(observer.state == .updating)
+            }
+        }
+
+        @ViewBuilder
+        private func FeatureAccessView() -> some View {
+            Section("Feature access") {
+                Toggle("Live TV access", isOn: Binding(
+                    get: { tempPolicy.enableLiveTvAccess ?? false },
+                    set: { tempPolicy.enableLiveTvAccess = $0 }
+                ))
+                .disabled(observer.state == .updating)
+
+                Toggle("Live TV recording management", isOn: Binding(
+                    get: { tempPolicy.enableLiveTvManagement ?? false },
+                    set: { tempPolicy.enableLiveTvManagement = $0 }
+                ))
+                .disabled(observer.state == .updating)
+            }
+        }
+
+        @ViewBuilder
+        private func MediaPlaybackView() -> some View {
+            Section("Media playback") {
+                Toggle("Allow media playback", isOn: Binding(
+                    get: { tempPolicy.enableMediaPlayback ?? false },
+                    set: { tempPolicy.enableMediaPlayback = $0 }
+                ))
+                .disabled(observer.state == .updating)
+
+                Toggle("Allow audio transcoding", isOn: Binding(
+                    get: { tempPolicy.enableAudioPlaybackTranscoding ?? false },
+                    set: { tempPolicy.enableAudioPlaybackTranscoding = $0 }
+                ))
+                .disabled(observer.state == .updating)
+
+                Toggle("Allow video transcoding", isOn: Binding(
+                    get: { tempPolicy.enableVideoPlaybackTranscoding ?? false },
+                    set: { tempPolicy.enableVideoPlaybackTranscoding = $0 }
+                ))
+                .disabled(observer.state == .updating)
+
+                Toggle("Allow video remuxing", isOn: Binding(
+                    get: { tempPolicy.enablePlaybackRemuxing ?? false },
+                    set: { tempPolicy.enablePlaybackRemuxing = $0 }
+                ))
+                .disabled(observer.state == .updating)
+
+                Toggle("Force remote media transcoding", isOn: Binding(
+                    get: { tempPolicy.isForceRemoteSourceTranscoding ?? false },
+                    set: { tempPolicy.isForceRemoteSourceTranscoding = $0 }
                 ))
                 .disabled(observer.state == .updating)
             }
@@ -143,12 +249,6 @@ extension UserAdministrationDetailView {
                 Toggle("Allow media downloads", isOn: Binding(
                     get: { tempPolicy.enableContentDownloading ?? false },
                     set: { tempPolicy.enableContentDownloading = $0 }
-                ))
-                .disabled(observer.state == .updating)
-
-                Toggle("Allow media deletion", isOn: Binding(
-                    get: { tempPolicy.enableContentDeletion ?? false },
-                    set: { tempPolicy.enableContentDeletion = $0 }
                 ))
                 .disabled(observer.state == .updating)
 
@@ -164,7 +264,6 @@ extension UserAdministrationDetailView {
         @ViewBuilder
         private func SessionConfigurationSectionView() -> some View {
             Section(L10n.session) {
-                MaxBitrateButtonView()
                 MaxFailedLoginsButtonView()
                 MaxSessionsButtonView()
             }
