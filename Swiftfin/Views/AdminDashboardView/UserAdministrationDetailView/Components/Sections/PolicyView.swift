@@ -118,6 +118,12 @@ extension UserAdministrationDetailView {
                 .textInputAutocapitalization(.none)
                 .disabled(observer.state == .updating)
             }
+
+            Toggle(L10n.disabled, isOn: Binding(
+                get: { tempPolicy.isDisabled ?? false },
+                set: { tempPolicy.isDisabled = $0 }
+            ))
+            .disabled(observer.state == .updating)
         }
 
         @ViewBuilder
