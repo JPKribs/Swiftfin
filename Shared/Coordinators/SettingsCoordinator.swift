@@ -69,6 +69,8 @@ final class SettingsCoordinator: NavigationCoordinatable {
     @Route(.push)
     var userPassword = makeUserPassword
     @Route(.push)
+    var userPermissions = makeUserPermissions
+    @Route(.push)
     var editScheduledTask = makeEditScheduledTask
     @Route(.push)
     var serverLogs = makeServerLogs
@@ -196,22 +198,27 @@ final class SettingsCoordinator: NavigationCoordinatable {
 
     @ViewBuilder
     func makeUsers() -> some View {
-        UserAdministrationView()
+        UserAdminView()
     }
 
     @ViewBuilder
-    func makeUserDetails(observer: UserAdministrationObserver) -> some View {
-        UserAdministrationDetailView(observer: observer)
+    func makeUserDetails(observer: UserAdminObserver) -> some View {
+        UserAdminDetailView(observer: observer)
     }
 
     @ViewBuilder
     func makeUserDevices(userId: String) -> some View {
-        DevicesView(userId: userId)
+        // DevicesView(userId: userId)
     }
 
     @ViewBuilder
-    func makeUserPassword(observer: UserAdministrationObserver) -> some View {
-        UserAdmininstrationPasswordView(observer: observer)
+    func makeUserPassword(observer: UserAdminObserver) -> some View {
+        UserAdminDetailView.UserAdminPasswordView(observer: observer)
+    }
+
+    @ViewBuilder
+    func makeUserPermissions(observer: UserAdminObserver) -> some View {
+        UserAdminDetailView.UserAdminPermissionsView(observer: observer)
     }
 
     @ViewBuilder

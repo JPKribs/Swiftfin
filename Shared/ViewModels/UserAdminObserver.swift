@@ -10,7 +10,7 @@ import Combine
 import Foundation
 import JellyfinAPI
 
-final class UserAdministrationObserver: ViewModel, Eventful, Stateful, Identifiable {
+final class UserAdminObserver: ViewModel, Eventful, Stateful, Identifiable {
 
     // MARK: Event
 
@@ -24,7 +24,7 @@ final class UserAdministrationObserver: ViewModel, Eventful, Stateful, Identifia
     enum Action: Equatable {
         case cancel
         case resetPassword
-        case updatePassword(currentPassword: String?, newPassword: String)
+        case updatePassword(currentPassword: String? = nil, newPassword: String)
         case updatePolicy(policy: UserPolicy)
     }
 

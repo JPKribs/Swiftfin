@@ -21,6 +21,8 @@ struct ActiveSessionDetailView: View {
 
     @ObservedObject
     var box: BindingBox<SessionInfo?>
+    @ObservedObject
+    var viewModel = UserAdminViewModel()
 
     // MARK: Create Idle Content View
 
@@ -28,13 +30,18 @@ struct ActiveSessionDetailView: View {
     private func idleContent(session: SessionInfo) -> some View {
         List {
             Section(L10n.user) {
-                if let userID = session.userID {
+                if let user = viewModel.user {
                     SettingsView.UserProfileRow(
                         user: .init(
-                            id: userID,
-                            name: session.userName
+                            id: user.id,
+                            name: user.name
                         )
-                    )
+                    ) {
+                        router.route(
+                            to: \.userDetails,
+                            UserAdminObserver(user: user)
+                        )
+                    }
                 }
 
                 if let client = session.client {
@@ -82,13 +89,18 @@ struct ActiveSessionDetailView: View {
             }
 
             Section(L10n.user) {
-                if let userID = session.userID {
+                if let user = viewModel.user {
                     SettingsView.UserProfileRow(
                         user: .init(
-                            id: userID,
-                            name: session.userName
+                            id: user.id,
+                            name: user.name
                         )
-                    )
+                    ) {
+                        router.route(
+                            to: \.userDetails,
+                            UserAdminObserver(user: user)
+                        )
+                    }
                 }
 
                 if let client = session.client {
@@ -204,5 +216,10 @@ struct ActiveSessionDetailView: View {
         }
         .animation(.linear(duration: 0.2), value: box.value)
         .navigationTitle(L10n.session)
+        .onAppear {
+            if let userID = box.value?.userID {
+                viewModel.send(.getUserByID(userID))
+            }
+        }
     }
 }

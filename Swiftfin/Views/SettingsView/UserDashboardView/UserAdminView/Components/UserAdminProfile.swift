@@ -12,13 +12,13 @@ import Factory
 import JellyfinAPI
 import SwiftUI
 
-extension UserAdministrationView {
-    struct UserProfileImage: View {
+extension UserAdminView {
+    struct UserAdminProfile: View {
         @Injected(\.currentUserSession)
         private var userSession: UserSession!
 
         @ObservedObject
-        var observer: UserAdministrationObserver
+        var observer: UserAdminObserver
 
         @ViewBuilder
         var body: some View {

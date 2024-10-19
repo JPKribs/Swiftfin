@@ -12,15 +12,15 @@
 		4E0253BD2CBF0C06007EB9CD /* DeviceType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E12F9152CBE9615006C217E /* DeviceType.swift */; };
 		4E0A8FFB2CAF74D20014B047 /* TaskCompletionStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E0A8FFA2CAF74CD0014B047 /* TaskCompletionStatus.swift */; };
 		4E0A8FFC2CAF74D20014B047 /* TaskCompletionStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E0A8FFA2CAF74CD0014B047 /* TaskCompletionStatus.swift */; };
-		4E0DA7082CC0B91900EAAADA /* UserAdministrationViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E0DA7072CC0B91900EAAADA /* UserAdministrationViewModel.swift */; };
-		4E0DA7092CC0B91900EAAADA /* UserAdministrationObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E0DA7062CC0B91900EAAADA /* UserAdministrationObserver.swift */; };
-		4E0DA70A2CC0B91900EAAADA /* UserAdministrationViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E0DA7072CC0B91900EAAADA /* UserAdministrationViewModel.swift */; };
-		4E0DA70B2CC0B91900EAAADA /* UserAdministrationObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E0DA7062CC0B91900EAAADA /* UserAdministrationObserver.swift */; };
-		4E0DA7112CC0B93300EAAADA /* UserProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E0DA70D2CC0B93300EAAADA /* UserProfileView.swift */; };
-		4E0DA7122CC0B93300EAAADA /* UserAdministrationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E0DA70F2CC0B93300EAAADA /* UserAdministrationView.swift */; };
-		4E0DA7132CC0B93300EAAADA /* UserAdministrationRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E0DA70C2CC0B93300EAAADA /* UserAdministrationRow.swift */; };
-		4E0DA7162CC0C1A200EAAADA /* UserAdministrationDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E0DA7152CC0C18500EAAADA /* UserAdministrationDetailView.swift */; };
-		4E0DA7192CC0C33000EAAADA /* UserAdministrationPasswordView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E0DA7182CC0C32B00EAAADA /* UserAdministrationPasswordView.swift */; };
+		4E0DA7082CC0B91900EAAADA /* UserAdminViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E0DA7072CC0B91900EAAADA /* UserAdminViewModel.swift */; };
+		4E0DA7092CC0B91900EAAADA /* UserAdminObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E0DA7062CC0B91900EAAADA /* UserAdminObserver.swift */; };
+		4E0DA70A2CC0B91900EAAADA /* UserAdminViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E0DA7072CC0B91900EAAADA /* UserAdminViewModel.swift */; };
+		4E0DA70B2CC0B91900EAAADA /* UserAdminObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E0DA7062CC0B91900EAAADA /* UserAdminObserver.swift */; };
+		4E0DA7112CC0B93300EAAADA /* UserAdminProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E0DA70D2CC0B93300EAAADA /* UserAdminProfile.swift */; };
+		4E0DA7122CC0B93300EAAADA /* UserAdminView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E0DA70F2CC0B93300EAAADA /* UserAdminView.swift */; };
+		4E0DA7132CC0B93300EAAADA /* UserAdminRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E0DA70C2CC0B93300EAAADA /* UserAdminRow.swift */; };
+		4E0DA7162CC0C1A200EAAADA /* UserAdminDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E0DA7152CC0C18500EAAADA /* UserAdminDetailView.swift */; };
+		4E0DA7192CC0C33000EAAADA /* UserAdminPasswordView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E0DA7182CC0C32B00EAAADA /* UserAdminPasswordView.swift */; };
 		4E11805F2CBF52380077A588 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5377CBF8263B596B003A4E83 /* Assets.xcassets */; };
 		4E12F9172CBE9619006C217E /* DeviceType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E12F9152CBE9615006C217E /* DeviceType.swift */; };
 		4E16FD512C0183DB00110147 /* LetterPickerButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E16FD502C0183DB00110147 /* LetterPickerButton.swift */; };
@@ -85,6 +85,19 @@
 		4EC1C86D2C80903A00E2879E /* CustomProfileButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EC1C86C2C80903A00E2879E /* CustomProfileButton.swift */; };
 		4EC50D612C934B3A00FC3D0E /* ScheduledTasksViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EC50D602C934B3A00FC3D0E /* ScheduledTasksViewModel.swift */; };
 		4EC50D622C934B3A00FC3D0E /* ScheduledTasksViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EC50D602C934B3A00FC3D0E /* ScheduledTasksViewModel.swift */; };
+		4EC687532CC2AEE100B536DF /* UserAdminPermissionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EC687512CC2AEE100B536DF /* UserAdminPermissionsView.swift */; };
+		4EC687572CC2AFF000B536DF /* SyncPlaySection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EC687562CC2AFEC00B536DF /* SyncPlaySection.swift */; };
+		4EC687592CC2B19B00B536DF /* SyncPlayUserAccessType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EC687582CC2B19600B536DF /* SyncPlayUserAccessType.swift */; };
+		4EC6875A2CC2B19B00B536DF /* SyncPlayUserAccessType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EC687582CC2B19600B536DF /* SyncPlayUserAccessType.swift */; };
+		4EC6875C2CC2B43E00B536DF /* StatusSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EC6875B2CC2B43700B536DF /* StatusSection.swift */; };
+		4EC6875E2CC2B8DE00B536DF /* MediaManagementSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EC6875D2CC2B8D900B536DF /* MediaManagementSection.swift */; };
+		4EC687602CC2B98700B536DF /* RemoteControlSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EC6875F2CC2B98100B536DF /* RemoteControlSection.swift */; };
+		4EC687622CC2BA4300B536DF /* MediaPlaybackSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EC687612CC2BA3D00B536DF /* MediaPlaybackSection.swift */; };
+		4EC687642CC2BED500B536DF /* OtherSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EC687632CC2BED000B536DF /* OtherSection.swift */; };
+		4EC687662CC2BF7000B536DF /* SessionSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EC687652CC2BF6C00B536DF /* SessionSection.swift */; };
+		4EC687682CC2C18000B536DF /* ExternalSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EC687672CC2C17000B536DF /* ExternalSection.swift */; };
+		4EC6876A2CC2C2B900B536DF /* LiveTVSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EC687692CC2C29F00B536DF /* LiveTVSection.swift */; };
+		4EC6876C2CC2C34B00B536DF /* ManagementSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EC6876B2CC2C34800B536DF /* ManagementSection.swift */; };
 		4EC6C16B2C92999800FC904B /* TranscodeSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EC6C16A2C92999800FC904B /* TranscodeSection.swift */; };
 		4ECDAA9E2C920A8E0030F2F5 /* TranscodeReason.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ECDAA9D2C920A8E0030F2F5 /* TranscodeReason.swift */; };
 		4ECDAA9F2C920A8E0030F2F5 /* TranscodeReason.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ECDAA9D2C920A8E0030F2F5 /* TranscodeReason.swift */; };
@@ -1037,13 +1050,13 @@
 /* Begin PBXFileReference section */
 		091B5A872683142E00D78B61 /* ServerDiscovery.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ServerDiscovery.swift; sourceTree = "<group>"; };
 		4E0A8FFA2CAF74CD0014B047 /* TaskCompletionStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskCompletionStatus.swift; sourceTree = "<group>"; };
-		4E0DA7062CC0B91900EAAADA /* UserAdministrationObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserAdministrationObserver.swift; sourceTree = "<group>"; };
-		4E0DA7072CC0B91900EAAADA /* UserAdministrationViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserAdministrationViewModel.swift; sourceTree = "<group>"; };
-		4E0DA70C2CC0B93300EAAADA /* UserAdministrationRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserAdministrationRow.swift; sourceTree = "<group>"; };
-		4E0DA70D2CC0B93300EAAADA /* UserProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfileView.swift; sourceTree = "<group>"; };
-		4E0DA70F2CC0B93300EAAADA /* UserAdministrationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserAdministrationView.swift; sourceTree = "<group>"; };
-		4E0DA7152CC0C18500EAAADA /* UserAdministrationDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserAdministrationDetailView.swift; sourceTree = "<group>"; };
-		4E0DA7182CC0C32B00EAAADA /* UserAdministrationPasswordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserAdministrationPasswordView.swift; sourceTree = "<group>"; };
+		4E0DA7062CC0B91900EAAADA /* UserAdminObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserAdminObserver.swift; sourceTree = "<group>"; };
+		4E0DA7072CC0B91900EAAADA /* UserAdminViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserAdminViewModel.swift; sourceTree = "<group>"; };
+		4E0DA70C2CC0B93300EAAADA /* UserAdminRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserAdminRow.swift; sourceTree = "<group>"; };
+		4E0DA70D2CC0B93300EAAADA /* UserAdminProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserAdminProfile.swift; sourceTree = "<group>"; };
+		4E0DA70F2CC0B93300EAAADA /* UserAdminView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserAdminView.swift; sourceTree = "<group>"; };
+		4E0DA7152CC0C18500EAAADA /* UserAdminDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserAdminDetailView.swift; sourceTree = "<group>"; };
+		4E0DA7182CC0C32B00EAAADA /* UserAdminPasswordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserAdminPasswordView.swift; sourceTree = "<group>"; };
 		4E12F9152CBE9615006C217E /* DeviceType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceType.swift; sourceTree = "<group>"; };
 		4E16FD502C0183DB00110147 /* LetterPickerButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LetterPickerButton.swift; sourceTree = "<group>"; };
 		4E16FD522C01840C00110147 /* LetterPickerBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LetterPickerBar.swift; sourceTree = "<group>"; };
@@ -1089,6 +1102,18 @@
 		4EC1C8682C808FBB00E2879E /* CustomDeviceProfileSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomDeviceProfileSettingsView.swift; sourceTree = "<group>"; };
 		4EC1C86C2C80903A00E2879E /* CustomProfileButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomProfileButton.swift; sourceTree = "<group>"; };
 		4EC50D602C934B3A00FC3D0E /* ScheduledTasksViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduledTasksViewModel.swift; sourceTree = "<group>"; };
+		4EC687512CC2AEE100B536DF /* UserAdminPermissionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserAdminPermissionsView.swift; sourceTree = "<group>"; };
+		4EC687562CC2AFEC00B536DF /* SyncPlaySection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncPlaySection.swift; sourceTree = "<group>"; };
+		4EC687582CC2B19600B536DF /* SyncPlayUserAccessType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncPlayUserAccessType.swift; sourceTree = "<group>"; };
+		4EC6875B2CC2B43700B536DF /* StatusSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusSection.swift; sourceTree = "<group>"; };
+		4EC6875D2CC2B8D900B536DF /* MediaManagementSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaManagementSection.swift; sourceTree = "<group>"; };
+		4EC6875F2CC2B98100B536DF /* RemoteControlSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteControlSection.swift; sourceTree = "<group>"; };
+		4EC687612CC2BA3D00B536DF /* MediaPlaybackSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaPlaybackSection.swift; sourceTree = "<group>"; };
+		4EC687632CC2BED000B536DF /* OtherSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OtherSection.swift; sourceTree = "<group>"; };
+		4EC687652CC2BF6C00B536DF /* SessionSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionSection.swift; sourceTree = "<group>"; };
+		4EC687672CC2C17000B536DF /* ExternalSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExternalSection.swift; sourceTree = "<group>"; };
+		4EC687692CC2C29F00B536DF /* LiveTVSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveTVSection.swift; sourceTree = "<group>"; };
+		4EC6876B2CC2C34800B536DF /* ManagementSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManagementSection.swift; sourceTree = "<group>"; };
 		4EC6C16A2C92999800FC904B /* TranscodeSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscodeSection.swift; sourceTree = "<group>"; };
 		4ECDAA9D2C920A8E0030F2F5 /* TranscodeReason.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscodeReason.swift; sourceTree = "<group>"; };
 		4EDBDCD02CBDD6510033D347 /* SessionInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionInfo.swift; sourceTree = "<group>"; };
@@ -1837,35 +1862,37 @@
 		4E0DA70E2CC0B93300EAAADA /* Components */ = {
 			isa = PBXGroup;
 			children = (
-				4E0DA70C2CC0B93300EAAADA /* UserAdministrationRow.swift */,
-				4E0DA70D2CC0B93300EAAADA /* UserProfileView.swift */,
+				4E0DA70C2CC0B93300EAAADA /* UserAdminRow.swift */,
+				4E0DA70D2CC0B93300EAAADA /* UserAdminProfile.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
 		};
-		4E0DA7102CC0B93300EAAADA /* UserAdministrationView */ = {
+		4E0DA7102CC0B93300EAAADA /* UserAdminView */ = {
 			isa = PBXGroup;
 			children = (
 				4E0DA70E2CC0B93300EAAADA /* Components */,
-				4E0DA70F2CC0B93300EAAADA /* UserAdministrationView.swift */,
+				4E0DA70F2CC0B93300EAAADA /* UserAdminView.swift */,
 			);
-			path = UserAdministrationView;
+			path = UserAdminView;
 			sourceTree = "<group>";
 		};
-		4E0DA7142CC0C17800EAAADA /* UserAdministrationDetailView */ = {
+		4E0DA7142CC0C17800EAAADA /* UserDetailView */ = {
 			isa = PBXGroup;
 			children = (
-				4E0DA7152CC0C18500EAAADA /* UserAdministrationDetailView.swift */,
+				4E0DA7152CC0C18500EAAADA /* UserAdminDetailView.swift */,
+				4EC687522CC2AEE100B536DF /* UserAdminPermissionView */,
+				4E0DA7172CC0C31C00EAAADA /* UserAdminPasswordView */,
 			);
-			path = UserAdministrationDetailView;
+			path = UserDetailView;
 			sourceTree = "<group>";
 		};
-		4E0DA7172CC0C31C00EAAADA /* UserAdministrationPasswordView */ = {
+		4E0DA7172CC0C31C00EAAADA /* UserAdminPasswordView */ = {
 			isa = PBXGroup;
 			children = (
-				4E0DA7182CC0C32B00EAAADA /* UserAdministrationPasswordView.swift */,
+				4E0DA7182CC0C32B00EAAADA /* UserAdminPasswordView.swift */,
 			);
-			path = UserAdministrationPasswordView;
+			path = UserAdminPasswordView;
 			sourceTree = "<group>";
 		};
 		4E16FD4E2C0183B500110147 /* LetterPickerBar */ = {
@@ -1931,9 +1958,8 @@
 				E1ED7FD52CA8A7FD00ACB6E3 /* EditScheduledTaskView.swift */,
 				4E182C9A2C94991800FBEFD5 /* ScheduledTasksView */,
 				E1ED7FDF2CAA685900ACB6E3 /* ServerLogsView.swift */,
-				4E0DA7142CC0C17800EAAADA /* UserAdministrationDetailView */,
-				4E0DA7172CC0C31C00EAAADA /* UserAdministrationPasswordView */,
-				4E0DA7102CC0B93300EAAADA /* UserAdministrationView */,
+				4E0DA7142CC0C17800EAAADA /* UserDetailView */,
+				4E0DA7102CC0B93300EAAADA /* UserAdminView */,
 				4E63B9F42C8A5BEF00C25378 /* UserDashboardView.swift */,
 			);
 			path = UserDashboardView;
@@ -2062,6 +2088,40 @@
 			path = Components;
 			sourceTree = "<group>";
 		};
+		4EC687522CC2AEE100B536DF /* UserAdminPermissionView */ = {
+			isa = PBXGroup;
+			children = (
+				4EC687542CC2AF7600B536DF /* Components */,
+				4EC687512CC2AEE100B536DF /* UserAdminPermissionsView.swift */,
+			);
+			path = UserAdminPermissionView;
+			sourceTree = "<group>";
+		};
+		4EC687542CC2AF7600B536DF /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				4EC687552CC2AF7D00B536DF /* Sections */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		4EC687552CC2AF7D00B536DF /* Sections */ = {
+			isa = PBXGroup;
+			children = (
+				4EC687672CC2C17000B536DF /* ExternalSection.swift */,
+				4EC687692CC2C29F00B536DF /* LiveTVSection.swift */,
+				4EC6876B2CC2C34800B536DF /* ManagementSection.swift */,
+				4EC6875D2CC2B8D900B536DF /* MediaManagementSection.swift */,
+				4EC687612CC2BA3D00B536DF /* MediaPlaybackSection.swift */,
+				4EC687632CC2BED000B536DF /* OtherSection.swift */,
+				4EC6875F2CC2B98100B536DF /* RemoteControlSection.swift */,
+				4EC6875B2CC2B43700B536DF /* StatusSection.swift */,
+				4EC687652CC2BF6C00B536DF /* SessionSection.swift */,
+				4EC687562CC2AFEC00B536DF /* SyncPlaySection.swift */,
+			);
+			path = Sections;
+			sourceTree = "<group>";
+		};
 		4EF18B232CB9932F00343666 /* PagingLibraryView */ = {
 			isa = PBXGroup;
 			children = (
@@ -2118,8 +2178,8 @@
 				E1ED7FE12CAA6BAF00ACB6E3 /* ServerLogsViewModel.swift */,
 				E1ED7FD72CA8AF7400ACB6E3 /* ServerTaskObserver.swift */,
 				5321753A2671BCFC005491E6 /* SettingsViewModel.swift */,
-				4E0DA7062CC0B91900EAAADA /* UserAdministrationObserver.swift */,
-				4E0DA7072CC0B91900EAAADA /* UserAdministrationViewModel.swift */,
+				4E0DA7062CC0B91900EAAADA /* UserAdminObserver.swift */,
+				4E0DA7072CC0B91900EAAADA /* UserAdminViewModel.swift */,
 				E19D41A62BEEDC450082B8B2 /* UserLocalSecurityViewModel.swift */,
 				E14EA1682BF7330A00DE757A /* UserProfileImageViewModel.swift */,
 				E13DD3EB27178A54009D4DAF /* UserSignInViewModel.swift */,
@@ -3648,6 +3708,7 @@
 				E148128428C15472003B8787 /* SortOrder+ItemSortOrder.swift */,
 				E1DA654B28E69B0500592A73 /* SpecialFeatureType.swift */,
 				E1CB757E2C80F28F00217C76 /* SubtitleProfile.swift */,
+				4EC687582CC2B19600B536DF /* SyncPlayUserAccessType.swift */,
 				4ECDAA9D2C920A8E0030F2F5 /* TranscodeReason.swift */,
 				E1CB757B2C80F00D00217C76 /* TranscodingProfile.swift */,
 				E18CE0B128A229E70092E7F1 /* UserDto.swift */,
@@ -4371,6 +4432,7 @@
 				E1A1529128FD23D600600579 /* PlaybackSettingsCoordinator.swift in Sources */,
 				E187A60529AD2E25008387E6 /* StepperView.swift in Sources */,
 				E1575E71293E77B5001665B1 /* RepeatingTimer.swift in Sources */,
+				4EC687592CC2B19B00B536DF /* SyncPlayUserAccessType.swift in Sources */,
 				E1D4BF8B2719D3D000A11E64 /* AppSettingsCoordinator.swift in Sources */,
 				E10231452BCF8A51009D71FC /* ChannelProgram.swift in Sources */,
 				E146A9D92BE6E9830034DA1E /* StoredValue.swift in Sources */,
@@ -4686,8 +4748,8 @@
 				E187A60329AB28F0008387E6 /* RotateContentView.swift in Sources */,
 				4EBE064E2C7EB6D3004A6C03 /* VideoPlayerType.swift in Sources */,
 				E1575E94293E7B1E001665B1 /* VerticalAlignment.swift in Sources */,
-				4E0DA7082CC0B91900EAAADA /* UserAdministrationViewModel.swift in Sources */,
-				4E0DA7092CC0B91900EAAADA /* UserAdministrationObserver.swift in Sources */,
+				4E0DA7082CC0B91900EAAADA /* UserAdminViewModel.swift in Sources */,
+				4E0DA7092CC0B91900EAAADA /* UserAdminObserver.swift in Sources */,
 				E1575EA3293E7B1E001665B1 /* UIDevice.swift in Sources */,
 				E193D547271941C500900D82 /* SelectUserView.swift in Sources */,
 				E1BDF2E62951475300CC0294 /* VideoPlayerActionButton.swift in Sources */,
@@ -4787,6 +4849,7 @@
 				62C29EA126D102A500C1D2E7 /* iOSMainTabCoordinator.swift in Sources */,
 				E1B4E4382CA7795200DC49DE /* OrderedDictionary.swift in Sources */,
 				E18E01E8288747230022598C /* SeriesItemContentView.swift in Sources */,
+				4EC6875A2CC2B19B00B536DF /* SyncPlayUserAccessType.swift in Sources */,
 				E16AA60828A364A6009A983C /* PosterButton.swift in Sources */,
 				E1E1644128BB301900323B0A /* Array.swift in Sources */,
 				E18CE0AF28A222240092E7F1 /* PublicUserRow.swift in Sources */,
@@ -4805,6 +4868,7 @@
 				4E2AC4BE2C6C48D200DD600D /* CustomDeviceProfileAction.swift in Sources */,
 				E18E01FA288747580022598C /* AboutAppView.swift in Sources */,
 				E170D103294CE8BF0017224C /* LoadingView.swift in Sources */,
+				4EC687602CC2B98700B536DF /* RemoteControlSection.swift in Sources */,
 				6220D0AD26D5EABB00B8E046 /* ViewExtensions.swift in Sources */,
 				E15D63ED2BD622A700AA665D /* CompactChannelView.swift in Sources */,
 				E18A8E8528D60D0000333B9A /* VideoPlayerCoordinator.swift in Sources */,
@@ -4818,12 +4882,12 @@
 				E154966A296CA2EF00C4EF88 /* DownloadManager.swift in Sources */,
 				E133328829538D8D00EE76AB /* Files.swift in Sources */,
 				C44FA6E12AACD19C00EDEB56 /* LiveLargePlaybackButtons.swift in Sources */,
-				4E0DA70A2CC0B91900EAAADA /* UserAdministrationViewModel.swift in Sources */,
-				4E0DA70B2CC0B91900EAAADA /* UserAdministrationObserver.swift in Sources */,
+				4E0DA70A2CC0B91900EAAADA /* UserAdminViewModel.swift in Sources */,
+				4E0DA70B2CC0B91900EAAADA /* UserAdminObserver.swift in Sources */,
 				E1401CA02937DFF500E8B599 /* AppIconSelectorView.swift in Sources */,
 				BD39577E2C1140810078CEF8 /* TransitionSection.swift in Sources */,
 				E1092F4C29106F9F00163F57 /* GestureAction.swift in Sources */,
-				4E0DA7162CC0C1A200EAAADA /* UserAdministrationDetailView.swift in Sources */,
+				4E0DA7162CC0C1A200EAAADA /* UserAdminDetailView.swift in Sources */,
 				E11BDF772B8513B40045C54A /* ItemGenre.swift in Sources */,
 				E16DEAC228EFCF590058F196 /* EnvironmentValue+Keys.swift in Sources */,
 				E1BDF2F129524AB700CC0294 /* AutoPlayActionButton.swift in Sources */,
@@ -4889,6 +4953,7 @@
 				E1153DCC2BBB633B00424D36 /* FastSVGView.swift in Sources */,
 				E10432F62BE4426F006FF9DD /* FormatStyle.swift in Sources */,
 				E1E5D5492783CDD700692DFE /* VideoPlayerSettingsView.swift in Sources */,
+				4EC687532CC2AEE100B536DF /* UserAdminPermissionsView.swift in Sources */,
 				E14EDEC52B8FB64E000F00A4 /* AnyItemFilter.swift in Sources */,
 				E11245B728D97ED200D8A977 /* TopBarView.swift in Sources */,
 				E145EB222BDCCA43003BF6F3 /* BulletedList.swift in Sources */,
@@ -4948,8 +5013,9 @@
 				E1002B642793CEE800E47059 /* ChapterInfo.swift in Sources */,
 				C46DD8E52A8FA6510046A504 /* LiveTopBarView.swift in Sources */,
 				E18E01AD288746AF0022598C /* DotHStack.swift in Sources */,
-				4E0DA7192CC0C33000EAAADA /* UserAdministrationPasswordView.swift in Sources */,
+				4E0DA7192CC0C33000EAAADA /* UserAdminPasswordView.swift in Sources */,
 				E170D107294D23BA0017224C /* MediaSourceInfoCoordinator.swift in Sources */,
+				4EC687662CC2BF7000B536DF /* SessionSection.swift in Sources */,
 				E102313B2BCF8A3C009D71FC /* ProgramProgressOverlay.swift in Sources */,
 				E1937A61288F32DB00CB80AA /* Poster.swift in Sources */,
 				4E2182E62CAF67F50094806B /* PlayMethod.swift in Sources */,
@@ -4999,9 +5065,9 @@
 				E113133228BDC72000930F75 /* FilterView.swift in Sources */,
 				62E632F3267D54030063E547 /* ItemViewModel.swift in Sources */,
 				E102313D2BCF8A3C009D71FC /* ProgramsView.swift in Sources */,
-				4E0DA7112CC0B93300EAAADA /* UserProfileView.swift in Sources */,
-				4E0DA7122CC0B93300EAAADA /* UserAdministrationView.swift in Sources */,
-				4E0DA7132CC0B93300EAAADA /* UserAdministrationRow.swift in Sources */,
+				4E0DA7112CC0B93300EAAADA /* UserAdminProfile.swift in Sources */,
+				4E0DA7122CC0B93300EAAADA /* UserAdminView.swift in Sources */,
+				4E0DA7132CC0B93300EAAADA /* UserAdminRow.swift in Sources */,
 				E170D105294D21FA0017224C /* MediaSourceInfoView.swift in Sources */,
 				E1D37F4B2B9CEA5C00343D2B /* ImageSource.swift in Sources */,
 				E1CAF6622BA363840087D991 /* UIHostingController.swift in Sources */,
@@ -5013,6 +5079,7 @@
 				E1DE84142B9531C1008CCE21 /* OrderedSectionSelectorView.swift in Sources */,
 				E13DD3FC2717EAE8009D4DAF /* SelectUserView.swift in Sources */,
 				E18E01DE288747230022598C /* iPadOSSeriesItemView.swift in Sources */,
+				4EC687642CC2BED500B536DF /* OtherSection.swift in Sources */,
 				E1EF4C412911B783008CC695 /* StreamType.swift in Sources */,
 				6220D0CC26D640C400B8E046 /* AppURLHandler.swift in Sources */,
 				E1A3E4CF2BB7E02B005C59F8 /* DelayedProgressView.swift in Sources */,
@@ -5031,11 +5098,15 @@
 				4EDBDCD22CBDD6590033D347 /* SessionInfo.swift in Sources */,
 				E10231392BCF8A3C009D71FC /* ProgramButtonContent.swift in Sources */,
 				E1DC9844296DECB600982F06 /* ProgressIndicator.swift in Sources */,
+				4EC6875E2CC2B8DE00B536DF /* MediaManagementSection.swift in Sources */,
 				6220D0B126D5EC9900B8E046 /* SettingsCoordinator.swift in Sources */,
 				E10B1ECA2BD9AF8200A92EAF /* SwiftfinStore+V1.swift in Sources */,
 				E1AA331D2782541500F6439C /* PrimaryButton.swift in Sources */,
+				4EC6876A2CC2C2B900B536DF /* LiveTVSection.swift in Sources */,
 				4E2AC4D92C6C4D9400DD600D /* PlaybackQualitySettingsView.swift in Sources */,
 				E18E01E3288747230022598C /* CompactPortraitScrollView.swift in Sources */,
+				4EC687622CC2BA4300B536DF /* MediaPlaybackSection.swift in Sources */,
+				4EC6876C2CC2C34B00B536DF /* ManagementSection.swift in Sources */,
 				62C29EA626D1036A00C1D2E7 /* HomeCoordinator.swift in Sources */,
 				531AC8BF26750DE20091C7EB /* ImageView.swift in Sources */,
 				E18A8E8328D60BC400333B9A /* VideoPlayer.swift in Sources */,
@@ -5043,6 +5114,7 @@
 				E1366A222C826DA700A36DED /* EditCustomDeviceProfileCoordinator.swift in Sources */,
 				E1CCF12E28ABF989006CAC9E /* PosterDisplayType.swift in Sources */,
 				E10B1EC12BD9AD6100A92EAF /* V1UserModel.swift in Sources */,
+				4EC687572CC2AFF000B536DF /* SyncPlaySection.swift in Sources */,
 				E1E7506A2A33E9B400B2C1EE /* RatingsCard.swift in Sources */,
 				E1D842912933F87500D1041A /* ItemFields.swift in Sources */,
 				E1BDF2F729524ECD00CC0294 /* PlaybackSpeedActionButton.swift in Sources */,
@@ -5065,6 +5137,7 @@
 				E11042752B8013DF00821020 /* Stateful.swift in Sources */,
 				E1AA331F2782639D00F6439C /* OverlayType.swift in Sources */,
 				E12376AE2A33D680001F5B44 /* AboutView+Card.swift in Sources */,
+				4EC6875C2CC2B43E00B536DF /* StatusSection.swift in Sources */,
 				E1A2C154279A7D5A005EC829 /* UIApplication.swift in Sources */,
 				4E6C27082C8BD0AD00FD2185 /* ActiveSessionDetailView.swift in Sources */,
 				E11C15352BF7C505006BC9B6 /* UserProfileImageCoordinator.swift in Sources */,
@@ -5166,6 +5239,7 @@
 				E1E5D54C2783E27200692DFE /* ExperimentalSettingsView.swift in Sources */,
 				E111D8F528D03B7500400001 /* PagingLibraryViewModel.swift in Sources */,
 				E16AF11C292C98A7001422A8 /* GestureSettingsView.swift in Sources */,
+				4EC687682CC2C18000B536DF /* ExternalSection.swift in Sources */,
 				E1581E27291EF59800D6C640 /* SplitContentView.swift in Sources */,
 				C46DD8DC2A8DC3420046A504 /* LiveVideoPlayer.swift in Sources */,
 				E11BDF972B865F550045C54A /* ItemTag.swift in Sources */,

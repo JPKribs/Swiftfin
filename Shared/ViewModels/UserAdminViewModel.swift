@@ -12,18 +12,20 @@ import JellyfinAPI
 import OrderedCollections
 import SwiftUI
 
-final class UserAdministrationViewModel: ViewModel, Stateful {
+final class UserAdminViewModel: ViewModel, Stateful {
 
     // MARK: - Action
 
     enum Action: Equatable {
         case getUsers
+        case getUserByID(String)
     }
 
     // MARK: - BackgroundState
 
     enum BackgroundState: Hashable {
         case gettingUsers
+        case gettingUserByID
     }
 
     // MARK: - State
@@ -35,12 +37,13 @@ final class UserAdministrationViewModel: ViewModel, Stateful {
     }
 
     @Published
-    final var backgroundStates: OrderedSet<BackgroundState> = []
+    final var user: UserDto? = nil
     @Published
     final var users: OrderedDictionary<String, BindingBox<UserDto?>> = [:]
-
     @Published
     final var state: State = .initial
+    @Published
+    final var backgroundStates: OrderedSet<BackgroundState> = []
 
     private var userTask: AnyCancellable?
 
@@ -73,6 +76,32 @@ final class UserAdministrationViewModel: ViewModel, Stateful {
             .asAnyCancellable()
 
             return state
+
+        case let .getUserByID(userID):
+            userTask?.cancel()
+
+            backgroundStates.append(.gettingUserByID)
+
+            userTask = Task { [weak self] in
+                do {
+                    try await self?.loadUserByID(userID: userID)
+                    await MainActor.run {
+                        self?.state = .content
+                    }
+                } catch {
+                    guard let self else { return }
+                    await MainActor.run {
+                        self.state = .error(.init(error.localizedDescription))
+                    }
+                }
+
+                await MainActor.run {
+                    self?.backgroundStates.remove(.gettingUserByID)
+                }
+            }
+            .asAnyCancellable()
+
+            return state
         }
     }
 
@@ -100,6 +129,19 @@ final class UserAdministrationViewModel: ViewModel, Stateful {
                 let user1 = y.value.value
                 return (user0?.name ?? "") < (user1?.name ?? "")
             }
+        }
+    }
+
+    // MARK: - Load User by ID
+
+    private func loadUserByID(userID: String) async throws {
+        let request = Paths.getUserByID(userID: userID)
+        let response = try await userSession.client.send(request)
+
+        await MainActor.run {
+            guard let id = response.value.id else { return }
+
+            self.user = response.value
         }
     }
 }

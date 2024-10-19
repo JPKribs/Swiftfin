@@ -11,13 +11,13 @@ import Defaults
 import JellyfinAPI
 import SwiftUI
 
-struct UserAdministrationView: View {
+struct UserAdminView: View {
 
     @EnvironmentObject
     private var router: SettingsCoordinator.Router
 
     @StateObject
-    private var viewModel = UserAdministrationViewModel()
+    private var viewModel = UserAdminViewModel()
 
     // MARK: - Body
 
@@ -58,8 +58,8 @@ struct UserAdministrationView: View {
                 layout: .columns(1, insets: .edgeInsets, itemSpacing: 8, lineSpacing: 8)
             ) { id in
                 if let user = viewModel.users[id]?.value {
-                    UserAdministrationRow(
-                        observer: UserAdministrationObserver(user: user)
+                    UserAdminRow(
+                        observer: UserAdminObserver(user: user)
                     )
                     .frame(maxWidth: .infinity)
                 }

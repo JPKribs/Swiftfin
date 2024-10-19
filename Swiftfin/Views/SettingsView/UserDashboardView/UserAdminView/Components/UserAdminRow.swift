@@ -12,16 +12,13 @@ import Factory
 import JellyfinAPI
 import SwiftUI
 
-extension UserAdministrationView {
-    struct UserAdministrationRow: View {
-        @Injected(\.currentUserSession)
-        private var userSession: UserSession!
-
+extension UserAdminView {
+    struct UserAdminRow: View {
         @EnvironmentObject
         private var router: SettingsCoordinator.Router
 
         @ObservedObject
-        var observer: UserAdministrationObserver
+        var observer: UserAdminObserver
 
         // MARK: - Body
 
@@ -31,7 +28,7 @@ extension UserAdministrationView {
             } label: {
                 VStack(spacing: 8) {
                     HStack {
-                        UserProfileImage(observer: observer)
+                        UserAdminProfile(observer: observer)
                             .frame(width: 60, height: 60)
                         VStack(alignment: .leading) {
                             Text(observer.user.name ?? L10n.unknown)

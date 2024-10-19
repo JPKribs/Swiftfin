@@ -105,3 +105,29 @@ struct TimeIntervalFormatStyle: FormatStyle {
         ).format(t ..< t.addingTimeInterval(value))
     }
 }
+
+/// Represent an Int as Bits
+struct BitRateFormatStyle: FormatStyle {
+
+    func format(_ value: Int) -> String {
+        let bitValue = Double(value)
+
+        switch bitValue {
+        case 1_000_000_000_000...:
+            return String(format: "%.2f Tbps", bitValue / 1_000_000_000_000)
+        case 1_000_000_000...:
+            return String(format: "%.2f Gbps", bitValue / 1_000_000_000)
+        case 1_000_000...:
+            return String(format: "%.2f Mbps", bitValue / 1_000_000)
+        case 1000...:
+            return String(format: "%.2f Kbps", bitValue / 1000)
+        default:
+            return "\(value) bps"
+        }
+    }
+}
+
+extension FormatStyle where Self == BitRateFormatStyle {
+
+    static var bitRate: BitRateFormatStyle { BitRateFormatStyle() }
+}
