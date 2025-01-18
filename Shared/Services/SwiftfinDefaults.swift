@@ -110,6 +110,7 @@ extension Defaults.Keys {
     /// /// Only use for `set`, use `appearance` for `get`.
     static var userAppearance: Key<AppAppearance> { UserKey("userAppearance", default: .system) }
 
+    // TODO: Moved to StoredValues+Customize ->
     enum Customization {
 
         static let itemViewType: Key<ItemViewType> = UserKey("itemViewType", default: .compactLogo)
@@ -181,6 +182,8 @@ extension Defaults.Keys {
             )
         }
     }
+
+    // TODO: <- Moved to StoredValues+Customize
 
     enum VideoPlayer {
 

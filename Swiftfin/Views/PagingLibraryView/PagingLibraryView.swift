@@ -43,16 +43,16 @@ struct PagingLibraryView<Element: Poster>: View {
     @Default(.Customization.Library.rememberLayout)
     private var rememberLayout
 
-    @Default
+    @StoredValue
     private var defaultDisplayType: LibraryDisplayType
-    @Default
+    @StoredValue
     private var defaultListColumnCount: Int
-    @Default
+    @StoredValue
     private var defaultPosterType: PosterDisplayType
 
-    @Default(.Customization.Library.letterPickerEnabled)
+    @StoredValue(.Customize.Library.Filters.letterPickerEnabled)
     private var letterPickerEnabled
-    @Default(.Customization.Library.letterPickerOrientation)
+    @StoredValue(.Customize.Library.Filters.letterPickerOrientation)
     private var letterPickerOrientation
 
     @EnvironmentObject
@@ -81,13 +81,13 @@ struct PagingLibraryView<Element: Poster>: View {
 
         // have to set these properties manually to get proper initial layout
 
-        self._defaultDisplayType = Default(.Customization.Library.displayType)
-        self._defaultListColumnCount = Default(.Customization.Library.listColumnCount)
-        self._defaultPosterType = Default(.Customization.Library.posterType)
+        self._defaultDisplayType = StoredValue(.Customize.Library.Format.Display.defaultDisplayType)
+        self._defaultListColumnCount = StoredValue(.Customize.Library.Format.Columns.defaultListColumnCount)
+        self._defaultPosterType = StoredValue(.Customize.Library.Format.Posters.defaultPosterType)
 
-        self._displayType = StoredValue(.User.libraryDisplayType(parentID: viewModel.parent?.id))
-        self._listColumnCount = StoredValue(.User.libraryListColumnCount(parentID: viewModel.parent?.id))
-        self._posterType = StoredValue(.User.libraryPosterType(parentID: viewModel.parent?.id))
+        self._displayType = StoredValue(.Customize.Library.Format.Display.libraryDisplayType(parentID: viewModel.parent?.id))
+        self._listColumnCount = StoredValue(.Customize.Library.Format.Columns.libraryListColumnCount(parentID: viewModel.parent?.id))
+        self._posterType = StoredValue(.Customize.Library.Format.Posters.libraryPosterType(parentID: viewModel.parent?.id))
 
         self._viewModel = StateObject(wrappedValue: viewModel)
 
@@ -446,11 +446,11 @@ struct PagingLibraryView<Element: Poster>: View {
             guard let newValue, let id = viewModel.parent?.id else { return }
 
             if Defaults[.Customization.Library.rememberSort] {
-                let newStoredFilters = StoredValues[.User.libraryFilters(parentID: id)]
+                let newStoredFilters = StoredValues[.Customize.Library.Filters.libraryFilters(parentID: id)]
                     .mutating(\.sortBy, with: newValue.sortBy)
                     .mutating(\.sortOrder, with: newValue.sortOrder)
 
-                StoredValues[.User.libraryFilters(parentID: id)] = newStoredFilters
+                StoredValues[.Customize.Library.Filters.libraryFilters(parentID: id)] = newStoredFilters
             }
         }
         .onReceive(viewModel.events) { event in

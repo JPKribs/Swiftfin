@@ -78,6 +78,14 @@ extension StoredValues.Keys {
             )
         }
 
+        static var accessPolicy: Key<UserAccessPolicy> {
+            CurrentUserKey(
+                "currentUserAccessPolicy",
+                domain: "currentUserAccessPolicy",
+                default: .none
+            )
+        }
+
         // Doesn't use `CurrentUserKey` because data may be
         // retrieved and stored without a user session
         static func data(id: String) -> Key<UserDto> {
@@ -89,87 +97,12 @@ extension StoredValues.Keys {
             )
         }
 
-        static var accessPolicy: Key<UserAccessPolicy> {
-            CurrentUserKey(
-                "currentUserAccessPolicy",
-                domain: "currentUserAccessPolicy",
-                default: .none
-            )
-        }
-
-        static func libraryDisplayType(parentID: String?) -> Key<LibraryDisplayType> {
-            CurrentUserKey(
-                parentID,
-                domain: "setting-libraryDisplayType",
-                default: Defaults[.Customization.Library.displayType]
-            )
-        }
-
-        static func libraryListColumnCount(parentID: String?) -> Key<Int> {
-            CurrentUserKey(
-                parentID,
-                domain: "setting-libraryListColumnCount",
-                default: Defaults[.Customization.Library.listColumnCount]
-            )
-        }
-
-        static func libraryPosterType(parentID: String?) -> Key<PosterDisplayType> {
-            CurrentUserKey(
-                parentID,
-                domain: "setting-libraryPosterType",
-                default: Defaults[.Customization.Library.posterType]
-            )
-        }
-
-        // TODO: for now, only used for `sortBy` and `sortOrder`. Need to come up with
-        //       rules for how stored filters work with libraries that should init
-        //       with non-default filters (atow ex: favorites)
-        static func libraryFilters(parentID: String?) -> Key<ItemFilterCollection> {
-            CurrentUserKey(
-                parentID,
-                domain: "setting-libraryFilters",
-                default: ItemFilterCollection.default
-            )
-        }
-
         static func pinHint(id: String) -> Key<String> {
             UserKey(
                 "pinHint",
                 ownerID: id,
                 domain: "pinHint",
                 default: ""
-            )
-        }
-
-        static var customDeviceProfiles: Key<[CustomDeviceProfile]> {
-            CurrentUserKey(
-                "customDeviceProfiles",
-                domain: "customDeviceProfiles",
-                default: []
-            )
-        }
-
-        static var enableItemEditing: Key<Bool> {
-            CurrentUserKey(
-                "enableItemEditing",
-                domain: "enableItemEditing",
-                default: false
-            )
-        }
-
-        static var enableItemDeletion: Key<Bool> {
-            CurrentUserKey(
-                "enableItemDeletion",
-                domain: "enableItemDeletion",
-                default: false
-            )
-        }
-
-        static var enableCollectionManagement: Key<Bool> {
-            CurrentUserKey(
-                "enableCollectionManagement",
-                domain: "enableCollectionManagement",
-                default: false
             )
         }
     }

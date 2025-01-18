@@ -15,7 +15,7 @@ struct CustomDeviceProfileSettingsView: View {
     @Default(.VideoPlayer.Playback.customDeviceProfileAction)
     private var customDeviceProfileAction
 
-    @StoredValue(.User.customDeviceProfiles)
+    @StoredValue(.Customize.Playback.customDeviceProfiles)
     private var customProfiles: [CustomDeviceProfile]
 
     @EnvironmentObject

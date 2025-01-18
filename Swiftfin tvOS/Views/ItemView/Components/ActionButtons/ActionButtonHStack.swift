@@ -25,11 +25,11 @@ extension ItemView {
 
         // MARK: - Defaults
 
-        @StoredValue(.User.enableItemDeletion)
+        @StoredValue(.Admin.enableItemDeletion)
         private var enableItemDeletion: Bool
-        @StoredValue(.User.enableItemEditing)
+        @StoredValue(.Admin.enableItemEditing)
         private var enableItemEditing: Bool
-        @StoredValue(.User.enableCollectionManagement)
+        @StoredValue(.Admin.enableCollectionManagement)
         private var enableCollectionManagement: Bool
 
         // MARK: - Dialog States

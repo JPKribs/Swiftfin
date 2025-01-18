@@ -30,11 +30,11 @@ struct ItemView: View {
     @State
     private var error: JellyfinAPIError?
 
-    @StoredValue(.User.enableItemDeletion)
+    @StoredValue(.Admin.enableItemDeletion)
     private var enableItemDeletion: Bool
-    @StoredValue(.User.enableItemEditing)
+    @StoredValue(.Admin.enableItemEditing)
     private var enableItemEditing: Bool
-    @StoredValue(.User.enableCollectionManagement)
+    @StoredValue(.Admin.enableCollectionManagement)
     private var enableCollectionManagement: Bool
 
     private var canDelete: Bool {

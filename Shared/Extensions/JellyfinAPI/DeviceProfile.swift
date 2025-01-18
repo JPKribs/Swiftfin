@@ -41,7 +41,7 @@ extension DeviceProfile {
 
         case .custom:
             let customProfileMode = Defaults[.VideoPlayer.Playback.customDeviceProfileAction]
-            let playbackDeviceProfile = StoredValues[.User.customDeviceProfiles]
+            let playbackDeviceProfile = StoredValues[.Customize.Playback.customDeviceProfiles]
 
             if customProfileMode == .add {
                 deviceProfile.directPlayProfiles = videoPlayer.directPlayProfiles

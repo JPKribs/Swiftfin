@@ -17,11 +17,11 @@ extension CustomizeViewsSettings {
         @Injected(\.currentUserSession)
         private var userSession
 
-        @StoredValue(.User.enableItemEditing)
+        @StoredValue(.Admin.enableItemEditing)
         private var enableItemEditing
-        @StoredValue(.User.enableItemDeletion)
+        @StoredValue(.Admin.enableItemDeletion)
         private var enableItemDeletion
-        @StoredValue(.User.enableCollectionManagement)
+        @StoredValue(.Admin.enableCollectionManagement)
         private var enableCollectionManagement
 
         var body: some View {

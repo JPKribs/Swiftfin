@@ -9,7 +9,7 @@
 import Defaults
 import Foundation
 
-enum ItemViewType: String, CaseIterable, Displayable, Defaults.Serializable {
+enum ItemViewType: String, CaseIterable, Codable, Displayable, Defaults.Serializable {
 
     case compactPoster
     case compactLogo

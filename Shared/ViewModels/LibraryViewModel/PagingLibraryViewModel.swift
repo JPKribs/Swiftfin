@@ -178,7 +178,7 @@ class PagingLibraryViewModel<Element: Poster>: ViewModel, Eventful, Stateful {
                 // TODO: see `StoredValues.User.libraryFilters` for TODO
                 //       on remembering other filters
 
-                let storedFilters = StoredValues[.User.libraryFilters(parentID: id)]
+                let storedFilters = StoredValues[.Customize.Library.Filters.libraryFilters(parentID: id)]
 
                 filters = filters
                     .mutating(\.sortBy, with: storedFilters.sortBy)

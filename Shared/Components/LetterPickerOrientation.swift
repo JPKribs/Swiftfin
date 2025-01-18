@@ -9,7 +9,7 @@
 import Defaults
 import SwiftUI
 
-enum LetterPickerOrientation: String, CaseIterable, Defaults.Serializable, Displayable {
+enum LetterPickerOrientation: String, Codable, CaseIterable, Defaults.Serializable, Displayable {
 
     case leading
     case trailing

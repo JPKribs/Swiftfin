@@ -16,7 +16,7 @@ extension CustomDeviceProfileSettingsView {
         @Default(.accentColor)
         private var accentColor
 
-        @StoredValue(.User.customDeviceProfiles)
+        @StoredValue(.Customize.Playback.customDeviceProfiles)
         private var customDeviceProfiles
 
         @EnvironmentObject

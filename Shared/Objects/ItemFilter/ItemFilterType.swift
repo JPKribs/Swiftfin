@@ -9,7 +9,7 @@
 import Defaults
 import Foundation
 
-enum ItemFilterType: String, CaseIterable, Defaults.Serializable {
+enum ItemFilterType: String, Codable, CaseIterable, Defaults.Serializable {
 
     case genres
     case letter
