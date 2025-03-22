@@ -23,6 +23,9 @@ extension CustomizeViewsSettings {
         @StoredValue(.User.itemViewAttributes)
         private var itemViewAttributes
 
+        @StoredValue(.User.hideSpoilers)
+        private var hideSpoilers
+
         @StoredValue(.User.enableItemEditing)
         private var enableItemEditing
         @StoredValue(.User.enableItemDeletion)
@@ -37,6 +40,9 @@ extension CustomizeViewsSettings {
                     .onSelect {
                         router.route(to: \.itemViewAttributes, $itemViewAttributes)
                     }
+
+                /// Blurs posters & text for unwatched episodes
+                Toggle(L10n.hideSpoilers, isOn: $hideSpoilers)
 
                 /// Enable Editing Items from All Visible LIbraries
                 if userSession?.user.permissions.items.canEditMetadata ?? false {

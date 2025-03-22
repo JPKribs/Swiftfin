@@ -7,7 +7,6 @@
 //
 
 import CollectionHStack
-import Defaults
 import JellyfinAPI
 import OrderedCollections
 import SwiftUI

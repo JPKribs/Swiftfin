@@ -23,6 +23,8 @@ extension SeriesEpisodeSelector {
         let header: String
         let content: String
 
+        var isPlayed: Bool?
+
         @ViewBuilder
         private var subHeaderView: some View {
             Text(subHeader)
@@ -50,6 +52,7 @@ extension SeriesEpisodeSelector {
                 .backport
                 .lineLimit(3, reservesSpace: true)
                 .font(.caption.weight(.light))
+                .hideSpoilers(isPlayed, type: .text)
         }
 
         var body: some View {
@@ -85,11 +88,13 @@ extension SeriesEpisodeSelector.EpisodeContent {
     init(
         subHeader: String,
         header: String,
-        content: String
+        content: String,
+        isPlayed: Bool? = nil
     ) {
         self.subHeader = subHeader
         self.header = header
         self.content = content
+        self.isPlayed = isPlayed
         self.onSelect = {}
     }
 

@@ -898,6 +898,9 @@
 /// Hidden
 "hidden" = "Hidden";
 
+/// Hide spoilers
+"hideSpoilers" = "Hide spoilers";
+
 /// Hide user from login screen
 "hideUserFromLoginScreen" = "Hide user from login screen";
 

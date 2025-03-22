@@ -636,6 +636,8 @@ internal enum L10n {
   internal static let halfTopAndBottom = L10n.tr("Localizable", "halfTopAndBottom", fallback: "Half Top and Bottom")
   /// Hidden
   internal static let hidden = L10n.tr("Localizable", "hidden", fallback: "Hidden")
+  /// Hide spoilers
+  internal static let hideSpoilers = L10n.tr("Localizable", "hideSpoilers", fallback: "Hide spoilers")
   /// Hide user from login screen
   internal static let hideUserFromLoginScreen = L10n.tr("Localizable", "hideUserFromLoginScreen", fallback: "Hide user from login screen")
   /// Hint

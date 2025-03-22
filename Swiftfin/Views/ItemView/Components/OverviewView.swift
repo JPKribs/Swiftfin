@@ -39,6 +39,13 @@ extension ItemView {
                         .seeMoreType(.view)
                         .font(.footnote)
                         .lineLimit(overviewLineLimit)
+                        .if(item.type == .episode) { episode in
+                            episode
+                                .hideSpoilers(
+                                    item.userData?.isPlayed,
+                                    type: .text
+                                )
+                        }
                 }
             }
         }

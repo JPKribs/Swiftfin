@@ -131,6 +131,15 @@ extension View {
         })
     }
 
+    /// Blur spoilers based on the hideSpoilers StoredValue
+    func hideSpoilers(
+        _ isPlayed: Bool?,
+        type: HideSpoilersModifier.SpoilerType,
+        revealable: Bool = true
+    ) -> some View {
+        modifier(HideSpoilersModifier(isPlayed, spoilerType: type, revealable: revealable))
+    }
+
     func scrollViewOffset(_ scrollViewOffset: Binding<CGFloat>) -> some View {
         modifier(ScrollViewOffsetModifier(scrollViewOffset: scrollViewOffset))
     }

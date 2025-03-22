@@ -149,6 +149,14 @@ extension StoredValues.Keys {
             )
         }
 
+        static var hideSpoilers: Key<Bool> {
+            CurrentUserKey(
+                "hideSpoilers",
+                domain: "hideSpoilers",
+                default: false
+            )
+        }
+
         static var enableItemEditing: Key<Bool> {
             CurrentUserKey(
                 "enableItemEditing",
