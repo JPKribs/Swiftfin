@@ -72,6 +72,7 @@ extension SeriesEpisodeSelector {
                             .failure {
                                 SystemImageContentView(systemName: episode.systemImage)
                             }
+                            .hideSpoilers(episode.userData?.isPlayed, type: .image)
 
                         overlayView
                     }
@@ -84,7 +85,8 @@ extension SeriesEpisodeSelector {
                 SeriesEpisodeSelector.EpisodeContent(
                     subHeader: episode.episodeLocator ?? .emptyDash,
                     header: episode.displayTitle,
-                    content: episodeContent
+                    content: episodeContent,
+                    isPlayed: episode.userData?.isPlayed
                 )
                 .onSelect {
                     router.route(to: \.item, episode)

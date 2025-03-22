@@ -43,7 +43,7 @@ struct HideSpoilersModifier: ViewModifier {
             if isPlayed == false && StoredValues[.User.hideSpoilers] {
                 content
                     .environment(\.redactionReasons, isBlurred ? .privacy : [])
-                    .blur(radius: spoilerType == .text && isBlurred ? 3 : 0)
+                    .blur(radius: spoilerType == .text && isBlurred ? 5 : 0)
                     .overlay {
                         if spoilerType == .image && isBlurred {
                             Rectangle()
@@ -52,16 +52,20 @@ struct HideSpoilersModifier: ViewModifier {
                         }
                     }
                     .contentShape(Rectangle())
+                    #if !tvOS
                     .onLongPressGesture(perform: revealable ? toggleBlur : {})
+                    #endif
             } else {
                 content
             }
         }
     }
 
+#if !tvOS
     private func toggleBlur() {
         withAnimation(.smooth(duration: 0.5)) {
             isBlurred.toggle()
         }
     }
+#endif
 }
