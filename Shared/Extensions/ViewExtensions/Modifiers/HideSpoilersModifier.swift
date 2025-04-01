@@ -13,8 +13,28 @@ struct HideSpoilersModifier: ViewModifier {
     // MARK: Spoiler Types
 
     enum SpoilerType {
+        case backdrop
         case image
         case text
+
+        var blur: CGFloat {
+            switch self {
+            case .backdrop:
+                return 40
+            case .image:
+                return 20
+            case .text:
+                return 5
+            }
+        }
+    }
+
+    // MARK: Initializer
+
+    init(_ isPlayed: Bool?, spoilerType: SpoilerType, revealable: Bool) {
+        self.isPlayed = isPlayed
+        self.spoilerType = spoilerType
+        self.revealable = revealable
     }
 
     // MARK: Spoiler Variables
@@ -28,13 +48,11 @@ struct HideSpoilersModifier: ViewModifier {
     @State
     private var isBlurred = true
 
-    // MARK: - Initializer
-
-    init(_ isPlayed: Bool?, spoilerType: SpoilerType, revealable: Bool) {
-        self.isPlayed = isPlayed
-        self.spoilerType = spoilerType
-        self.revealable = revealable
-    }
+    #if !tvOS
+    private let blurRatio = 0.6
+    #else
+    private let blurRatio = 1.0
+    #endif
 
     // MARK: - Body
 
@@ -43,29 +61,21 @@ struct HideSpoilersModifier: ViewModifier {
             if isPlayed == false && StoredValues[.User.hideSpoilers] {
                 content
                     .environment(\.redactionReasons, isBlurred ? .privacy : [])
-                    .blur(radius: spoilerType == .text && isBlurred ? 5 : 0)
-                    .overlay {
-                        if spoilerType == .image && isBlurred {
-                            Rectangle()
-                                .fill(.ultraThinMaterial)
-                                .allowsHitTesting(false)
-                        }
-                    }
-                    .contentShape(Rectangle())
-                    #if !tvOS
+                    .blur(radius: isBlurred ? spoilerType.blur * blurRatio : 0)
+                #if !tvOS
                     .onLongPressGesture(perform: revealable ? toggleBlur : {})
-                    #endif
+                #endif
             } else {
                 content
             }
         }
     }
 
-#if !tvOS
+    #if !tvOS
     private func toggleBlur() {
         withAnimation(.smooth(duration: 0.5)) {
             isBlurred.toggle()
         }
     }
-#endif
+    #endif
 }
