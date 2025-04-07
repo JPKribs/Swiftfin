@@ -43,6 +43,9 @@
 /// Activity
 "activity" = "Activity";
 
+/// Activity Indicator
+"activityIndicator" = "Activity Indicator";
+
 /// Actor
 "actor" = "Actor";
 
@@ -1084,11 +1087,7 @@
 /// Lock All Fields
 "lockAllFields" = "Lock All Fields";
 
-// Activity Indicator - Setting
-// Setting to enable/disable the HomeView Activity Indicator
-// Appears in CustomizeSettingView
-"activityIndicator" = "Activity Indicator";
-
+/// Locked Fields
 "lockedFields" = "Locked Fields";
 
 /// Locked users

@@ -30,7 +30,7 @@ extension CustomizeViewsSettings {
         var body: some View {
             Section(L10n.home) {
 
-                if userSession?.user.isAdministrator ?? false {
+                if userSession?.user.permissions.isAdministrator ?? false {
                     Toggle(L10n.activityIndicator, isOn: $activeSessionIndicator)
                 }
 

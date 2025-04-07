@@ -90,19 +90,13 @@ struct HomeView: View {
                 ProgressView()
             }
 
-            if activeSessionIndicator {
-                ActiveSessionIndicator {
-                    router.route(to: \.adminDashboard)
-                }
-                .foregroundStyle(.primary, .secondary, Color.accentColor)
-            }
-
             SettingsBarButton(
                 server: viewModel.userSession.server,
                 user: viewModel.userSession.user
             ) {
                 mainRouter.route(to: \.settings)
             }
+            .activeSessionBadge(activeSessionIndicator)
         }
         .sinceLastDisappear { interval in
             if interval > 60 || viewModel.notificationsReceived.contains(.itemMetadataDidChange) {
