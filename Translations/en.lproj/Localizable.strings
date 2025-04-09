@@ -115,17 +115,8 @@
 /// All Media
 "allMedia" = "All Media";
 
-/// Allow collection management
-"allowCollectionManagement" = "Allow collection management";
-
 /// Allowed
 "allowed" = "Allowed";
-
-/// Allow media item deletion
-"allowItemDeletion" = "Allow media item deletion";
-
-/// Allow media item editing
-"allowItemEditing" = "Allow media item editing";
 
 /// All Servers
 "allServers" = "All Servers";
@@ -391,6 +382,9 @@
 /// Close
 "close" = "Close";
 
+/// Collection management
+"collectionManagement" = "Collection management";
+
 /// Collections
 "collections" = "Collections";
 
@@ -625,8 +619,8 @@
 /// Are you sure you wish to delete this schedule?
 "deleteScheduleWarning" = "Are you sure you wish to delete this schedule?";
 
-/// Are you sure you want to delete the selected items?
-"deleteSelectedConfirmation" = "Are you sure you want to delete the selected items?";
+/// Are you sure you want to delete the selected item(s)?
+"deleteSelectedConfirmation" = "Are you sure you want to delete the selected item(s)?";
 
 /// Delete Selected Devices
 "deleteSelectedDevices" = "Delete Selected Devices";
@@ -1002,6 +996,12 @@
 
 /// %1$@ at %2$@
 "itemAtItem" = "%1$@ at %2$@";
+
+/// Media deletion
+"itemDeletion" = "Media deletion";
+
+/// Media management
+"itemManagement" = "Media management";
 
 /// Items
 "items" = "Items";
@@ -1923,6 +1923,9 @@
 
 /// Subtitle Font
 "subtitleFont" = "Subtitle Font";
+
+/// Subtitle management
+"subtitleManagement" = "Subtitle management";
 
 /// Subtitle Offset
 "subtitleOffset" = "Subtitle Offset";

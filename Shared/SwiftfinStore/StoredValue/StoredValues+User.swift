@@ -165,6 +165,14 @@ extension StoredValues.Keys {
             )
         }
 
+        static var enableSubtitleManagement: Key<Bool> {
+            CurrentUserKey(
+                "enableSubtitleManagement",
+                domain: "enableSubtitleManagement",
+                default: false
+            )
+        }
+
         static var enableCollectionManagement: Key<Bool> {
             CurrentUserKey(
                 "enableCollectionManagement",

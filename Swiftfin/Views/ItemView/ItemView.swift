@@ -34,6 +34,8 @@ struct ItemView: View {
     private var enableItemDeletion: Bool
     @StoredValue(.User.enableItemEditing)
     private var enableItemEditing: Bool
+    @StoredValue(.User.enableSubtitleManagement)
+    private var enableSubtitleManagement: Bool
     @StoredValue(.User.enableCollectionManagement)
     private var enableCollectionManagement: Bool
 
@@ -48,6 +50,8 @@ struct ItemView: View {
     private var canEdit: Bool {
         if viewModel.item.type == .boxSet {
             return enableCollectionManagement
+        } else if viewModel.item.type == .episode || viewModel.item.type == .movie {
+            return enableSubtitleManagement
         } else {
             return enableItemEditing
         }

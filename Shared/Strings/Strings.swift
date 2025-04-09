@@ -92,14 +92,8 @@ internal enum L10n {
   internal static let allLanguages = L10n.tr("Localizable", "allLanguages", fallback: "All languages")
   /// All Media
   internal static let allMedia = L10n.tr("Localizable", "allMedia", fallback: "All Media")
-  /// Allow collection management
-  internal static let allowCollectionManagement = L10n.tr("Localizable", "allowCollectionManagement", fallback: "Allow collection management")
   /// Allowed
   internal static let allowed = L10n.tr("Localizable", "allowed", fallback: "Allowed")
-  /// Allow media item deletion
-  internal static let allowItemDeletion = L10n.tr("Localizable", "allowItemDeletion", fallback: "Allow media item deletion")
-  /// Allow media item editing
-  internal static let allowItemEditing = L10n.tr("Localizable", "allowItemEditing", fallback: "Allow media item editing")
   /// All Servers
   internal static let allServers = L10n.tr("Localizable", "allServers", fallback: "All Servers")
   /// View and manage all registered users on the server, including their permissions and activity status.
@@ -278,6 +272,8 @@ internal enum L10n {
   internal static let clip = L10n.tr("Localizable", "clip", fallback: "Clip")
   /// Close
   internal static let close = L10n.tr("Localizable", "close", fallback: "Close")
+  /// Collection management
+  internal static let collectionManagement = L10n.tr("Localizable", "collectionManagement", fallback: "Collection management")
   /// Collections
   internal static let collections = L10n.tr("Localizable", "collections", fallback: "Collections")
   /// Color
@@ -440,8 +436,8 @@ internal enum L10n {
   internal static let deleteSchedule = L10n.tr("Localizable", "deleteSchedule", fallback: "Delete Schedule")
   /// Are you sure you wish to delete this schedule?
   internal static let deleteScheduleWarning = L10n.tr("Localizable", "deleteScheduleWarning", fallback: "Are you sure you wish to delete this schedule?")
-  /// Are you sure you want to delete the selected items?
-  internal static let deleteSelectedConfirmation = L10n.tr("Localizable", "deleteSelectedConfirmation", fallback: "Are you sure you want to delete the selected items?")
+  /// Are you sure you want to delete the selected item(s)?
+  internal static let deleteSelectedConfirmation = L10n.tr("Localizable", "deleteSelectedConfirmation", fallback: "Are you sure you want to delete the selected item(s)?")
   /// Delete Selected Devices
   internal static let deleteSelectedDevices = L10n.tr("Localizable", "deleteSelectedDevices", fallback: "Delete Selected Devices")
   /// Delete Selected Schedules
@@ -708,6 +704,10 @@ internal enum L10n {
   internal static func itemAtItem(_ p1: Any, _ p2: Any) -> String {
     return L10n.tr("Localizable", "itemAtItem", String(describing: p1), String(describing: p2), fallback: "%1$@ at %2$@")
   }
+  /// Media deletion
+  internal static let itemDeletion = L10n.tr("Localizable", "itemDeletion", fallback: "Media deletion")
+  /// Media management
+  internal static let itemManagement = L10n.tr("Localizable", "itemManagement", fallback: "Media management")
   /// Items
   internal static let items = L10n.tr("Localizable", "items", fallback: "Items")
   /// Jellyfin
@@ -1340,6 +1340,8 @@ internal enum L10n {
   internal static let subtitleColor = L10n.tr("Localizable", "subtitleColor", fallback: "Subtitle Color")
   /// Subtitle Font
   internal static let subtitleFont = L10n.tr("Localizable", "subtitleFont", fallback: "Subtitle Font")
+  /// Subtitle management
+  internal static let subtitleManagement = L10n.tr("Localizable", "subtitleManagement", fallback: "Subtitle management")
   /// Subtitle Offset
   internal static let subtitleOffset = L10n.tr("Localizable", "subtitleOffset", fallback: "Subtitle Offset")
   /// Subtitles

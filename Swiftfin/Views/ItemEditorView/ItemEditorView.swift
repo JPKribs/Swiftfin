@@ -109,6 +109,11 @@ struct ItemEditorView: View {
             ChevronButton(L10n.metadata) {
                 router.route(to: \.editMetadata, viewModel.item)
             }
+            if [.video, .movie, .episode].contains(viewModel.item.type) {
+                ChevronButton(L10n.subtitles) {
+                    router.route(to: \.editSubtitles, viewModel.item)
+                }
+            }
         }
 
         Section {

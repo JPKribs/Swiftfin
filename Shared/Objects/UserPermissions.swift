@@ -33,7 +33,7 @@ struct UserPermissions {
             self.canEditMetadata = isAdministrator
             self.canManageSubtitles = isAdministrator || policy?.enableSubtitleManagement ?? false
             self.canManageCollections = isAdministrator || policy?.enableCollectionManagement ?? false
-            self.canManageLyrics = isAdministrator || policy?.enableSubtitleManagement ?? false
+            self.canManageLyrics = isAdministrator // || policy?.enableSubtitleManagement ?? false
         }
     }
 }
