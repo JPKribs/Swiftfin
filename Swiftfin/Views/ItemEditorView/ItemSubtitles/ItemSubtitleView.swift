@@ -10,6 +10,8 @@ import JellyfinAPI
 import SwiftUI
 import UniformTypeIdentifiers
 
+// TODO: Localize
+
 struct ItemSubtitlesView: View {
 
     // MARK: - Properties
@@ -122,7 +124,7 @@ struct ItemSubtitlesView: View {
             }
 
             Button(L10n.search, systemImage: "magnifyingglass") {
-                // router.route(to: \.userAddAccessTag, viewModel)
+                router.route(to: \.searchSubtitle, viewModel)
             }
 
             if viewModel.externalSubtitles.isNotEmpty {
@@ -232,13 +234,10 @@ struct ItemSubtitlesView: View {
         Button(L10n.cancel, role: .cancel) {}
 
         Button(L10n.delete, role: .destructive) {
-            for subtitle in selectedSubtitles {
-                if let index = subtitle.index, subtitle.isExternal == true {
-                    viewModel.send(.delete(index: index))
-                }
-            }
 
+            viewModel.send(.delete(selectedSubtitles))
             selectedSubtitles.removeAll()
+            isEditing = false
             isPresentingDeleteConfirmation = false
         }
     }

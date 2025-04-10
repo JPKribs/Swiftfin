@@ -10,6 +10,8 @@ import JellyfinAPI
 import SwiftUI
 import UniformTypeIdentifiers
 
+// TODO: Localize
+
 struct ItemSubtitleUploadView: View {
 
     // MARK: - Properties
@@ -86,26 +88,23 @@ struct ItemSubtitleUploadView: View {
 
     private var contentView: some View {
         Form {
+            Section(L10n.options) {
+                LanguagePicker(title: L10n.language, selectedLanguageCode: $language)
+
+                Toggle("Forced", isOn: $isForced)
+                Toggle("Hearing Impaired", isOn: $isHearingImpaired)
+            }
+
+            Section("Path") {
+                Text(subtitleFile?.lastPathComponent ?? "No file selected")
+                    .foregroundColor(.secondary)
+            }
+
             Section {
-                Button(L10n.uploadFile, systemImage: "doc") {
+                ListRowButton(subtitleData == nil ? L10n.uploadFile : "Replace file") {
                     isPresentingFileUpload = true
                 }
-                .foregroundStyle(.primary, .secondary)
-            }
-            if let fileName = subtitleFile?.lastPathComponent {
-                Section(L10n.subtitle) {
-                    Text(fileName)
-                        .foregroundColor(.secondary)
-                }
-            }
-
-            if subtitleData != nil {
-                Section(L10n.options) {
-                    LanguagePicker(title: L10n.language, selectedLanguageCode: $language)
-
-                    Toggle("Forced", isOn: $isForced)
-                    Toggle("Hearing Impaired", isOn: $isHearingImpaired)
-                }
+                .foregroundStyle(Color.accentColor.overlayColor, Color.accentColor)
             }
         }
     }

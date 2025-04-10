@@ -37,6 +37,8 @@ final class ItemEditorCoordinator: ObservableObject, NavigationCoordinatable {
     var editSubtitles = makeItemSubtitles
     @Route(.modal)
     var uploadSubtitle = makeUploadItemSubtitles
+    @Route(.modal)
+    var searchSubtitle = makeSearchItemSubtitles
 
     // MARK: - Route to Genres
 
@@ -101,6 +103,12 @@ final class ItemEditorCoordinator: ObservableObject, NavigationCoordinatable {
     func makeUploadItemSubtitles(viewModel: ItemSubtitlesViewModel) -> NavigationViewCoordinator<BasicNavigationViewCoordinator> {
         NavigationViewCoordinator {
             ItemSubtitleUploadView(viewModel: viewModel)
+        }
+    }
+
+    func makeSearchItemSubtitles(viewModel: ItemSubtitlesViewModel) -> NavigationViewCoordinator<BasicNavigationViewCoordinator> {
+        NavigationViewCoordinator {
+            ItemSubtitleSearchView(viewModel: viewModel)
         }
     }
 

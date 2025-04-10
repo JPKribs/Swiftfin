@@ -24,23 +24,24 @@ final class ItemSubtitlesViewModel: ViewModel, Stateful, Eventful {
 
     enum Action: Equatable {
         case search(language: String, isPerfectMatch: Bool? = nil)
-        case set(subtitleID: String)
+        case set(Set<String>)
         case upload(UploadSubtitleDto)
-        case delete(index: Int)
+        case delete(Set<MediaStream>)
     }
 
     // MARK: - Background State
 
     enum BackgroundState: Hashable {
         case updating
+        case searching
     }
 
     // MARK: - State
 
     enum State: Hashable {
         case initial
+        case content
         case error(JellyfinAPIError)
-        case searching
     }
 
     @Published
@@ -69,8 +70,6 @@ final class ItemSubtitlesViewModel: ViewModel, Stateful, Eventful {
     var events: AnyPublisher<Event, Never> {
         eventSubject
             .eraseToAnyPublisher()
-        // Causes issues with the Deleted Event unless this is removed
-        // .receive(on: RunLoop.main)
     }
 
     // MARK: - Initializer
@@ -82,7 +81,7 @@ final class ItemSubtitlesViewModel: ViewModel, Stateful, Eventful {
 
         super.init()
 
-        // Extract subtitle streams from all media sources
+        /// Extract subtitle streams from all media sources
         for mediaSource in item.mediaSources ?? [] {
             if let streams = mediaSource.subtitleStreams {
                 self.internalSubtitles.append(contentsOf: streams.filter { $0.isExternal == false })
@@ -90,7 +89,7 @@ final class ItemSubtitlesViewModel: ViewModel, Stateful, Eventful {
             }
         }
 
-        // Setup debounced search
+        /// Setup debounced search
         searchQuery
             .debounce(for: 0.5, scheduler: RunLoop.main)
             .sink { [weak self] searchParams in
@@ -106,17 +105,21 @@ final class ItemSubtitlesViewModel: ViewModel, Stateful, Eventful {
 
     func respond(to action: Action) -> State {
         switch action {
-        case let .delete(index):
+        case let .delete(mediaStreams):
             subtitleTask?.cancel()
 
             subtitleTask = Task { [weak self] in
                 guard let self = self else { return }
                 do {
-                    try await self.deleteSubtitle(index: index)
+                    await MainActor.run {
+                        _ = self.backgroundStates.insert(.updating)
+                    }
+
+                    try await self.deleteSubtitles(mediaStreams: mediaStreams)
                     try await self.refreshItem()
 
                     await MainActor.run {
-                        self.state = .initial
+                        self.backgroundStates.remove(.updating)
                         self.eventSubject.send(.deleted)
                     }
                 } catch {
@@ -137,15 +140,15 @@ final class ItemSubtitlesViewModel: ViewModel, Stateful, Eventful {
             subtitleTask = Task { [weak self] in
                 guard let self = self else { return }
                 do {
+                    await MainActor.run {
+                        _ = self.backgroundStates.insert(.updating)
+                    }
+
                     try await self.uploadSubtitle(subtitle: subtitle)
-
-                    /// Wait a tenth second to ensure that the upload completes
-                    try await Task.sleep(nanoseconds: 100_000_000)
-
                     try await self.refreshItem()
 
                     await MainActor.run {
-                        self.state = .initial
+                        self.backgroundStates.remove(.updating)
                         self.eventSubject.send(.uploaded)
                     }
                 } catch {
@@ -168,20 +171,24 @@ final class ItemSubtitlesViewModel: ViewModel, Stateful, Eventful {
                 return .initial
             } else {
                 searchQuery.send((language: language, isPerfectMatch: isPerfectMatch))
-                return .searching
+                return .initial
             }
 
-        case let .set(subtitleID):
+        case let .set(subtitles):
             subtitleTask?.cancel()
 
             subtitleTask = Task { [weak self] in
                 guard let self = self else { return }
                 do {
-                    try await self.setSubtitle(subtitleID: subtitleID)
+                    await MainActor.run {
+                        _ = self.backgroundStates.insert(.updating)
+                    }
+
+                    try await self.setSubtitles(subtitles: subtitles)
                     try await self.refreshItem()
 
                     await MainActor.run {
-                        self.state = .initial
+                        self.backgroundStates.remove(.updating)
                         self.eventSubject.send(.uploaded)
                     }
                 } catch {
@@ -205,6 +212,9 @@ final class ItemSubtitlesViewModel: ViewModel, Stateful, Eventful {
             guard let self = self else { return }
 
             do {
+                await MainActor.run {
+                    _ = self.backgroundStates.insert(.searching)
+                }
                 let results = try await self.searchSubtitles(
                     language: language,
                     isPerfectMatch: isPerfectMatch
@@ -214,7 +224,8 @@ final class ItemSubtitlesViewModel: ViewModel, Stateful, Eventful {
 
                 await MainActor.run {
                     self.searchResults = results
-                    self.state = .initial
+                    self.backgroundStates.remove(.searching)
+                    self.state = .content
                 }
             } catch {
                 guard !Task.isCancelled else { return }
@@ -230,16 +241,28 @@ final class ItemSubtitlesViewModel: ViewModel, Stateful, Eventful {
 
     // MARK: - Delete Subtitle
 
-    private func deleteSubtitle(index: Int) async throws {
+    private func deleteSubtitles(mediaStreams: Set<MediaStream>) async throws {
         guard let itemID = item.id else {
             throw JellyfinAPIError(L10n.unknownError)
         }
 
-        let request = Paths.deleteSubtitle(itemID: itemID, index: index)
-        _ = try await userSession.client.send(request)
+        /// Extract non-nil indexes from mediaStreams
+        let indexes = mediaStreams.compactMap(\.index)
 
-        await MainActor.run {
-            self.externalSubtitles.removeAll(where: { $0.index == index })
+        /// Sort indexes in descending order to avoid index shifting problems
+        let sortedIndexes = indexes.sorted(by: >)
+
+        /// Track successfully deleted indexes
+        var deletedIndexes = Set<Int>()
+
+        for index in sortedIndexes {
+            let request = Paths.deleteSubtitle(itemID: itemID, index: index)
+            do {
+                _ = try await userSession.client.send(request)
+                deletedIndexes.insert(index)
+            } catch {
+                throw JellyfinAPIError("Failed to delete subtitle at index \(index): \(error)")
+            }
         }
     }
 
@@ -262,13 +285,21 @@ final class ItemSubtitlesViewModel: ViewModel, Stateful, Eventful {
 
     // MARK: - Set Remote Subtitles
 
-    private func setSubtitle(subtitleID: String) async throws {
+    private func setSubtitles(subtitles: Set<String>) async throws {
         guard let itemID = item.id else {
             throw JellyfinAPIError(L10n.unknownError)
         }
 
-        let request = Paths.downloadRemoteSubtitles(itemID: itemID, subtitleID: subtitleID)
-        _ = try await userSession.client.send(request)
+        try await withThrowingTaskGroup(of: Void.self) { group in
+            for subtitleID in subtitles {
+                group.addTask {
+                    let request = Paths.downloadRemoteSubtitles(itemID: itemID, subtitleID: subtitleID)
+                    _ = try await self.userSession.client.send(request)
+                }
+            }
+
+            try await group.waitForAll()
+        }
     }
 
     // MARK: - Subtitle Upload Logic
@@ -291,6 +322,9 @@ final class ItemSubtitlesViewModel: ViewModel, Stateful, Eventful {
             _ = backgroundStates.insert(.updating)
         }
 
+        /// Wait a second to ensure that the upload completes
+        try await Task.sleep(nanoseconds: 1_000_000_000)
+
         let request = Paths.getItem(
             itemID: itemID,
             userID: userSession.user.id
@@ -303,7 +337,8 @@ final class ItemSubtitlesViewModel: ViewModel, Stateful, Eventful {
             self.internalSubtitles = []
             self.externalSubtitles = []
 
-            // Extract subtitle streams from all media sources
+            /// Important: Subtitle track indexes change sporadically
+            /// Extract subtitle streams from all media sources
             for mediaSource in item.mediaSources ?? [] {
                 if let streams = mediaSource.subtitleStreams {
                     self.internalSubtitles.append(contentsOf: streams.filter { $0.isExternal == false })
