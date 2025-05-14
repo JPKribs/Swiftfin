@@ -97,6 +97,7 @@ struct SwiftfinApp: App {
         WindowGroup {
             versionedView
                 .ignoresSafeArea()
+                .toastContainer()
                 .onNotification(.applicationDidEnterBackground) {
                     Defaults[.backgroundTimeStamp] = Date.now
                 }

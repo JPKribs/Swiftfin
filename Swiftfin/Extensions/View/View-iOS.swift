@@ -35,6 +35,10 @@ extension View {
         modifier(NavigationBarDrawerModifier(drawer: drawer))
     }
 
+    func toastContainer() -> some View {
+        modifier(ToastContainerModifier())
+    }
+
     @ViewBuilder
     func navigationBarFilterDrawer(
         viewModel: FilterViewModel,
