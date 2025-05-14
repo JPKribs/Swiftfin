@@ -10,7 +10,7 @@ import Factory
 import Foundation
 import SwiftUI
 
-struct ToastView: View {
+struct ToastNotificationView: View {
 
     // MARK: - Toast Details
 
@@ -52,7 +52,7 @@ struct ToastView: View {
         VStack(alignment: .leading, spacing: 0) {
             VStack(alignment: .leading, spacing: 4) {
                 HStack {
-                    Image(systemName: toast.type.iconName)
+                    Image(systemName: toast.type.systemImage)
                         .foregroundStyle(toast.type.color)
 
                     Text(toast.title)

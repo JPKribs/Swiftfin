@@ -9,13 +9,13 @@
 import Foundation
 import SwiftUI
 
-enum ToastType: String, Codable {
+enum ToastType: String, Displayable, SystemImageable, Codable, CaseIterable {
     case info
     case success
     case warning
     case error
 
-    var iconName: String {
+    var systemImage: String {
         switch self {
         case .info:
             return "info.circle"
@@ -38,6 +38,19 @@ enum ToastType: String, Codable {
             return .yellow
         case .error:
             return .red
+        }
+    }
+
+    var displayTitle: String {
+        switch self {
+        case .info:
+            return "Information"
+        case .success:
+            return L10n.success
+        case .warning:
+            return "Warning"
+        case .error:
+            return L10n.error
         }
     }
 }

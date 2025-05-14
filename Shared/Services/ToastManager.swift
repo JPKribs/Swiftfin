@@ -80,59 +80,31 @@ class ToastManager: ObservableObject {
         logger.trace("All toasts marked as read")
     }
 
-    /// Dismiss a specific toast
+    /// Dismiss a specific toast (now permanently removes it)
     func dismiss(_ toastId: UUID) {
         if let index = messages.firstIndex(where: { $0.id == toastId }) {
-            messages[index].isDismissed = true
+            messages.remove(at: index)
             saveMessages()
+
+            logger.trace("Toast removed: \(toastId)")
         }
 
         // Cancel the auto-dismiss timer if it exists
         cancelToastDismissal(for: toastId)
     }
 
-    /// Dismiss all toasts
+    /// Dismiss all toasts (now permanently removes all)
     func dismissAll() {
-        var updatedMessages = messages
-        for index in updatedMessages.indices {
-            updatedMessages[index].isDismissed = true
-        }
-        messages = updatedMessages
-        saveMessages()
-
-        // Cancel all auto-dismiss timers
+        // Cancel all auto-dismiss timers first
         for (id, _) in toastWorkItems {
             cancelToastDismissal(for: id)
         }
 
-        logger.trace("All toasts dismissed")
-    }
-
-    /// Dismiss read toasts
-    func dismissReadMessages() {
-        var updatedMessages = messages
-        for index in updatedMessages.indices where updatedMessages[index].isRead {
-            updatedMessages[index].isDismissed = true
-
-            // Cancel the auto-dismiss timer for read messages
-            if let id = updatedMessages[index].id as UUID? {
-                cancelToastDismissal(for: id)
-            }
-        }
-        messages = updatedMessages
+        // Clear all messages
+        messages.removeAll()
         saveMessages()
 
-        logger.trace("Read toasts dismissed")
-    }
-
-    /// Get active notifications (not dismissed)
-    func getActiveMessages() -> [Toast] {
-        messages.filter { !$0.isDismissed }
-    }
-
-    /// Get unread count
-    func getUnreadCount() -> Int {
-        messages.filter { !$0.isRead && !$0.isDismissed }.count
+        logger.trace("All toasts removed")
     }
 
     // MARK: Toast Management
@@ -147,9 +119,8 @@ class ToastManager: ObservableObject {
                 if let index = self?.messages.firstIndex(where: { $0.id == toast.id }) {
                     self?.objectWillChange.send()
                     self?.messages[index].isRead = true
+                    self?.saveMessages()
                 }
-
-                self?.objectWillChange.send()
             }
         }
 

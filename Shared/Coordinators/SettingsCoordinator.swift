@@ -21,6 +21,8 @@ final class SettingsCoordinator: NavigationCoordinatable {
     @Route(.push)
     var log = makeLog
     @Route(.push)
+    var notifications = makeNotifications
+    @Route(.push)
     var nativePlayerSettings = makeNativePlayerSettings
     @Route(.push)
     var playbackQualitySettings = makePlaybackQualitySettings
@@ -180,6 +182,11 @@ final class SettingsCoordinator: NavigationCoordinatable {
     @ViewBuilder
     func makeAdminDashboard() -> some View {
         AdminDashboardCoordinator().view()
+    }
+
+    @ViewBuilder
+    func makeNotifications() -> some View {
+        ToastView()
     }
 
     #if DEBUG

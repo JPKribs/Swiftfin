@@ -15,7 +15,6 @@ struct Toast: Identifiable, Equatable, Codable {
     let type: ToastType
     let timestamp: Date
     var isRead: Bool = false
-    var isDismissed: Bool = false
     var duration: Double = 5.0
 
     func hash(into hasher: inout Hasher) {
