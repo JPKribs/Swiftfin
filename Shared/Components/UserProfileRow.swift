@@ -14,11 +14,17 @@ extension SettingsView {
 
     struct UserProfileRow: View {
 
+        @Injected(\.toastManager)
+        private var toastManager
         @Injected(\.currentUserSession)
         private var userSession: UserSession!
 
         private let user: UserDto
         private let action: (() -> Void)?
+
+        private var notifications: Bool {
+            toastManager.messages.isNotEmpty
+        }
 
         var body: some View {
             Button {
@@ -45,6 +51,13 @@ extension SettingsView {
                         .foregroundStyle(.primary)
 
                     Spacer()
+
+                    if notifications {
+                        Image(systemName: "bell.fill")
+                            .backport
+                            .fontWeight(.semibold)
+                            .foregroundColor(Color.accentColor)
+                    }
 
                     if action != nil {
                         Image(systemName: "chevron.right")

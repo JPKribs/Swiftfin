@@ -10,7 +10,7 @@ import Factory
 import Foundation
 import SwiftUI
 
-struct ToastView: View {
+struct ToastMessage: View {
 
     // MARK: - Toast Details
 
@@ -50,41 +50,8 @@ struct ToastView: View {
 
     private var contentView: some View {
         VStack(alignment: .leading, spacing: 0) {
-            VStack(alignment: .leading, spacing: 4) {
-                HStack {
-                    Image(systemName: toast.type.systemImage)
-                        .foregroundStyle(toast.type.color)
-
-                    Text(toast.title)
-                        .font(.headline)
-                        .fontWeight(.semibold)
-                        .foregroundStyle(.primary)
-
-                    Spacer()
-
-                    Button(action: onDismiss) {
-                        Image(systemName: "xmark")
-                            .foregroundColor(.secondary)
-                    }
-                    .accessibilityLabel(L10n.dismiss)
-                }
-
-                Text(toast.body)
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-                    .multilineTextAlignment(.leading)
-            }
-            .padding()
-
-            ZStack(alignment: .leading) {
-                Rectangle()
-                    .fill(Color.accentColor.opacity(0.3))
-                    .frame(height: 3)
-
-                Rectangle()
-                    .fill(Color.accentColor)
-                    .frame(width: UIScreen.main.bounds.width * progress, height: 3)
-            }
+            messageContentView
+            messageProgressView
         }
         .background(Color.secondarySystemBackground)
         .cornerRadius(10)
@@ -94,16 +61,64 @@ struct ToastView: View {
         .onTapGesture(perform: onDismiss)
     }
 
+    // MARK: - Message Header + Body
+
+    private var messageContentView: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                Image(systemName: toast.type.systemImage)
+                    .foregroundStyle(toast.type.color)
+
+                Text(toast.title)
+                    .font(.headline)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(.primary)
+
+                Spacer()
+
+                Button(action: onDismiss) {
+                    Image(systemName: "xmark")
+                        .foregroundColor(.secondary)
+                }
+                .accessibilityLabel(L10n.dismiss)
+            }
+
+            Text(toast.body)
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.leading)
+        }
+        .padding()
+    }
+
+    // MARK: - Progress View
+
+    private var messageProgressView: some View {
+        ZStack(alignment: .leading) {
+            Rectangle()
+                .fill(Color.accentColor.opacity(0.3))
+                .frame(height: 3)
+
+            Rectangle()
+                .fill(Color.accentColor)
+                .scaleEffect(x: progress, y: 1, anchor: .leading)
+                .frame(height: 3)
+        }
+    }
+}
+
+extension ToastMessage {
+
     // MARK: - Start the Lifespan Timer
 
     private func startTimer() {
         progress = 1.0
 
-        let interval = toast.duration / 60.0
+        let interval = toast.duration / 200.0
 
         timer = Timer.scheduledTimer(withTimeInterval: interval, repeats: true) { _ in
             withAnimation(.linear(duration: interval)) {
-                progress = max(0, progress - 0.01666667)
+                progress = max(0, progress - 0.005)
             }
         }
     }

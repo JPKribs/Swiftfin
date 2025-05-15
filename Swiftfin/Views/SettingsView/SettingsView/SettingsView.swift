@@ -14,9 +14,6 @@ import SwiftUI
 
 struct SettingsView: View {
 
-    @Injected(\.toastManager)
-    private var toastManager
-
     @Default(.userAccentColor)
     private var accentColor
     @Default(.userAppearance)
@@ -44,13 +41,6 @@ struct SettingsView: View {
                     subtitle: viewModel.userSession.server.name
                 ) {
                     router.route(to: \.serverConnection, viewModel.userSession.server)
-                }
-
-                ChevronButton(
-                    "Notifications",
-                    subtitle: "\(toastManager.messages.count)"
-                ) {
-                    router.route(to: \.notifications)
                 }
 
                 if viewModel.userSession.user.permissions.isAdministrator {

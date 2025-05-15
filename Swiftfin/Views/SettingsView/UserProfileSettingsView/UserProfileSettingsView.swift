@@ -13,6 +13,9 @@ import SwiftUI
 
 struct UserProfileSettingsView: View {
 
+    @Injected(\.toastManager)
+    private var toastManager
+
     @EnvironmentObject
     private var router: SettingsCoordinator.Router
 
@@ -41,6 +44,13 @@ struct UserProfileSettingsView: View {
                 router.route(to: \.photoPicker, profileImageViewModel)
             } onDelete: {
                 profileImageViewModel.send(.delete)
+            }
+
+            ChevronButton(
+                "Notifications",
+                subtitle: "\(toastManager.messages.count)"
+            ) {
+                router.route(to: \.notifications, toastManager)
             }
 
             Section {

@@ -19,8 +19,8 @@ struct NotificationsView: View {
 
     // MARK: - Toast Manager
 
-    @Injected(\.toastManager)
-    private var toastManager
+    @ObservedObject
+    var toastManager: ToastManager
 
     // MARK: - View State
 

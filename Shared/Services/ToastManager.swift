@@ -17,50 +17,49 @@ extension Container {
     var toastManager: Factory<ToastManager> { self { ToastManager() }.shared }
 }
 
-// MARK: Toast Manager
-
 class ToastManager: ObservableObject {
+
+    // MARK: - Logger
 
     @Injected(\.logService)
     private var logger
 
-    // Published properties
+    // MARK: - Toast Messages
+
     @Published
     private(set) var messages: [Toast] = []
 
-    // Private properties
+    // MARK: - Work Items
+
     private var cancellables = Set<AnyCancellable>()
     private var toastWorkItems: [UUID: DispatchWorkItem] = [:]
 
-    // Storage keys
+    // MARK: - Storage Key
+
     private let messageStorageKey = "stored_messages"
 
+    // MARK: - Initialize
+
     fileprivate init() {
-        // Load stored messages
         loadMessages()
 
         logger.trace("ToastManager initialized")
     }
 
-    // MARK: Public API
+    // MARK: Send a New Toast
 
-    /// Send a new toast
     func send(title: String, body: String, type: ToastType) {
         let toast = Toast(title: title, body: body, type: type, timestamp: Date())
 
-        // Add to stored messages
         messages.append(toast)
-
-        // Save to persistent storage
         saveMessages()
-
-        // Schedule auto-dismissal for this toast
         scheduleToastDismissal(for: toast)
 
         logger.trace("Toast sent: \(title)")
     }
 
-    /// Mark a toast as read
+    // MARK: - Mark Toast as Read
+
     func markAsRead(_ toastId: UUID) {
         if let index = messages.firstIndex(where: { $0.id == toastId }) {
             messages[index].isRead = true
@@ -68,19 +67,8 @@ class ToastManager: ObservableObject {
         }
     }
 
-    /// Mark all toasts as read
-    func markAllAsRead() {
-        var updatedMessages = messages
-        for index in updatedMessages.indices {
-            updatedMessages[index].isRead = true
-        }
-        messages = updatedMessages
-        saveMessages()
+    // MARK: - Delete Toast
 
-        logger.trace("All toasts marked as read")
-    }
-
-    /// Dismiss a specific toast (now permanently removes it)
     func dismiss(_ toastId: UUID) {
         if let index = messages.firstIndex(where: { $0.id == toastId }) {
             messages.remove(at: index)
@@ -89,18 +77,16 @@ class ToastManager: ObservableObject {
             logger.trace("Toast removed: \(toastId)")
         }
 
-        // Cancel the auto-dismiss timer if it exists
         cancelToastDismissal(for: toastId)
     }
 
-    /// Dismiss all toasts (now permanently removes all)
+    // MARK: - Delete All Toasts
+
     func dismissAll() {
-        // Cancel all auto-dismiss timers first
         for (id, _) in toastWorkItems {
             cancelToastDismissal(for: id)
         }
 
-        // Clear all messages
         messages.removeAll()
         saveMessages()
 
@@ -127,6 +113,8 @@ class ToastManager: ObservableObject {
         toastWorkItems[toast.id] = task
         DispatchQueue.main.asyncAfter(deadline: .now() + toast.duration, execute: task)
     }
+
+    // MARK: - Cancel Deletion
 
     private func cancelToastDismissal(for toastId: UUID) {
         if let workItem = toastWorkItems[toastId] {

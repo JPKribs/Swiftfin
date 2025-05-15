@@ -12,41 +12,37 @@ import SwiftUI
 
 struct ToastContainerModifier: ViewModifier {
 
-    // MARK: - Toast Manager
-
-    @Injected(\.toastManager)
-    private var toastManager
-
     // MARK: - Observable Toast Manager
 
     @ObservedObject
-    private var observableManager: ToastManager
+    private var toastManager: ToastManager
 
     init() {
-        self.observableManager = Container.shared.toastManager()
+        self.toastManager = Container.shared.toastManager()
     }
 
     // MARK: - Body
 
     func body(content: Content) -> some View {
-        GeometryReader { geometry in
-            ZStack(alignment: .bottom) {
-                content
+        content
+            .overlay(
+                toastOverlay,
+                alignment: .bottom
+            )
+    }
 
-                VStack(spacing: 8) {
-                    ForEach(observableManager.messages.filter { !$0.isRead }) { toast in
-                        ToastView(toast: toast) {
-                            withAnimation(.easeInOut(duration: 0.3)) {
-                                toastManager.markAsRead(toast.id)
-                                toastManager.dismiss(toast.id)
-                            }
-                        }
-                        .transition(.move(edge: .bottom).combined(with: .opacity))
+    // MARK: - Toast Overlay
+
+    private var toastOverlay: some View {
+        VStack(spacing: 8) {
+            ForEach(toastManager.messages.filter { !$0.isRead }) { toast in
+                ToastMessage(toast: toast) {
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        toastManager.markAsRead(toast.id)
+                        toastManager.dismiss(toast.id)
                     }
                 }
-                .frame(maxWidth: geometry.size.width)
             }
         }
-        .animation(.easeInOut, value: observableManager.messages.count)
     }
 }
