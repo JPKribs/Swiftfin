@@ -124,7 +124,11 @@ struct NotificationsView: View {
         } else {
             ForEach(filteredToasts) { toast in
                 NotificationRow(toast: toast) {
-                    selectedToasts.insert(toast.id)
+                    if selectedToasts.contains(toast.id) {
+                        selectedToasts.remove(toast.id)
+                    } else {
+                        selectedToasts.insert(toast.id)
+                    }
                 } onDelete: {
                     selectedToasts.insert(toast.id)
                     isPresentingDeleteConfirmation = true
