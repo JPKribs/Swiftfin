@@ -10,7 +10,7 @@ import Factory
 import Foundation
 import SwiftUI
 
-struct ToastView: View {
+struct NotificationsView: View {
 
     // MARK: - Environment
 
@@ -123,7 +123,7 @@ struct ToastView: View {
                 .listRowInsets(.zero)
         } else {
             ForEach(filteredToasts) { toast in
-                ToastRow(toast: toast) {
+                NotificationRow(toast: toast) {
                     selectedToasts.insert(toast.id)
                 } onDelete: {
                     selectedToasts.insert(toast.id)

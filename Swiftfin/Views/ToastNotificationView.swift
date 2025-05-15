@@ -10,7 +10,7 @@ import Factory
 import Foundation
 import SwiftUI
 
-struct ToastNotificationView: View {
+struct ToastView: View {
 
     // MARK: - Toast Details
 

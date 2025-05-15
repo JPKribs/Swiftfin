@@ -186,7 +186,7 @@ final class SettingsCoordinator: NavigationCoordinatable {
 
     @ViewBuilder
     func makeNotifications() -> some View {
-        ToastView()
+        NotificationsView()
     }
 
     #if DEBUG

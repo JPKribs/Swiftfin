@@ -35,7 +35,7 @@ struct ToastContainerModifier: ViewModifier {
 
                 VStack(spacing: 8) {
                     ForEach(observableManager.messages.filter { !$0.isRead }) { toast in
-                        ToastNotificationView(toast: toast) {
+                        ToastView(toast: toast) {
                             withAnimation(.easeInOut(duration: 0.3)) {
                                 toastManager.markAsRead(toast.id)
                                 toastManager.dismiss(toast.id)
