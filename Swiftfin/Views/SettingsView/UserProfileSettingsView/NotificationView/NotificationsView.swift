@@ -62,7 +62,7 @@ struct NotificationsView: View {
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(isEditing)
         .navigationBarMenuButton(
-            isHidden: isEditing && toastManager.messages.isNotEmpty
+            isHidden: isEditing || toastManager.messages.isEmpty
         ) {
             Section(L10n.management) {
                 Button(L10n.edit, systemImage: "pencil") {
