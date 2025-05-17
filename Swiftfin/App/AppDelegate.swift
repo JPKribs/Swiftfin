@@ -9,6 +9,7 @@
 import AVFAudio
 import CoreStore
 import Defaults
+import Factory
 import Logging
 import Pulse
 import PulseLogHandler
@@ -16,6 +17,8 @@ import SwiftUI
 import UIKit
 
 class AppDelegate: NSObject, UIApplicationDelegate {
+
+    private var toastPresentationController: ToastPresentationController?
 
     func application(
         _ application: UIApplication,
@@ -28,6 +31,9 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         } catch {
             print("setting category AVAudioSessionCategoryPlayback failed")
         }
+
+        let toastManager = Container.shared.toastManager()
+        self.toastPresentationController = ToastPresentationController(toastManager: toastManager)
 
         return true
     }
