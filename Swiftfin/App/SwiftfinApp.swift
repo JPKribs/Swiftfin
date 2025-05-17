@@ -17,64 +17,22 @@ import Pulse
 import PulseLogHandler
 import SwiftUI
 
-// MARK: - ToastManager Expectation
+// MARK: - Passthrough Toast Support
 
-// IMPORTANT: Your existing ToastManager class (which should be an ObservableObject)
-// needs a property like this:
-//
-// @Published var hasVisibleMessages: Bool = false
-//
-// This property should be updated to `true` when `messages.filter { !$0.isRead }` is not empty,
-// and `false` when it is empty. The ToastPresentationController relies on this.
-// For example, in your ToastManager:
-/*
- class ToastManager: ObservableObject {
-     @Published var messages: [ToastMessageDataModel] = [] { // Assuming ToastMessageDataModel is your data struct
-         didSet {
-             self.hasVisibleMessages = !messages.filter { !$0.isRead }.isEmpty
-         }
-     }
-     @Published var hasVisibleMessages: Bool = false // This will be updated by the messages setter
+final class PassthroughWindow: UIWindow {
+    override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
+        let hitView = super.hitTest(point, with: event)
+        return hitView is ToastContainerHostingView ? hitView : nil
+    }
+}
 
-     // ... your existing methods like addToast, markAsRead, dismiss ...
-     // Ensure these methods correctly update the messages array, which in turn updates hasVisibleMessages.
-     func addToast(message: String /* , other params */ ) {
-         let newToast = ToastMessageDataModel(message: message, /* ... */ )
-         messages.append(newToast)
-     }
-
-     func markAsRead(_ id: UUID) {
-         if let index = messages.firstIndex(where: { $0.id == id && !$0.isRead }) {
-             // messages[index].isRead = true // Or however you handle it
-             // Potentially remove or update state that affects 'hasVisibleMessages'
-             // For simplicity, often dismissed after read.
-         }
-         // Crucially, update messages or hasVisibleMessages
-         self.hasVisibleMessages = !messages.filter { !$0.isRead }.isEmpty
-     }
-
-     func dismiss(_ id: UUID) {
-         messages.removeAll { $0.id == id }
-         // messages didSet will update hasVisibleMessages
-     }
- }
-
- // Assuming ToastMessageDataModel is your actual data structure for a toast
- struct ToastMessageDataModel: Identifiable {
-     let id = UUID()
-     var message: String
-     // var style: ToastStyle
-     // var duration: TimeInterval
-     var isRead: Bool = false
- }
- */
+final class ToastContainerHostingView: UIView {}
 
 // MARK: - Toast Presentation Controller
 
-// This controller manages a separate UIWindow for displaying toasts above all other content.
 class ToastPresentationController {
     private var toastWindow: UIWindow?
-    private let toastManager: ToastManager // Your existing ToastManager
+    private let toastManager: ToastManager
     private var cancellables = Set<AnyCancellable>()
 
     init(toastManager: ToastManager) {
@@ -93,9 +51,8 @@ class ToastPresentationController {
     }
 
     private func showToastWindow() {
-        guard toastWindow == nil else { return } // Show only if not already visible
+        guard toastWindow == nil else { return }
 
-        // Find an active scene to attach the window to.
         guard let windowScene = UIApplication.shared.connectedScenes
             .first(where: { $0.activationState == .foregroundActive || $0.activationState == .foregroundInactive }) as? UIWindowScene
         else {
@@ -103,27 +60,38 @@ class ToastPresentationController {
             return
         }
 
-        let newWindow = UIWindow(windowScene: windowScene)
-        newWindow.windowLevel = .alert // Ensures it's above most other content, including standard alerts and sheets.
-        newWindow.backgroundColor = .clear // Important for transparency
+        let passthroughWindow = PassthroughWindow(windowScene: windowScene)
+        passthroughWindow.windowLevel = .alert
+        passthroughWindow.backgroundColor = .clear
 
-        // Use your existing ToastContainerView.
-        // The .edgesIgnoringSafeArea(.all) on the HostingController's root view can help
-        // if the ToastContainerView needs to manage its own safe area insets fully.
-        let toastHostingController = UIHostingController(
-            rootView: EmptyView()
-                .toastContainer()
+        let toastController = UIHostingController(
+            rootView: EmptyView().toastContainer()
         )
-        toastHostingController.view.backgroundColor = .clear
+        toastController.view.backgroundColor = .clear
 
-        newWindow.rootViewController = toastHostingController
-        newWindow.makeKeyAndVisible()
-        self.toastWindow = newWindow
+        let containerView = ToastContainerHostingView()
+        containerView.backgroundColor = .clear
+        containerView.frame = passthroughWindow.bounds
+        containerView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+
+        toastController.view.frame = containerView.bounds
+        toastController.view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+
+        containerView.addSubview(toastController.view)
+
+        let rootViewController = UIViewController()
+        rootViewController.view = containerView
+        rootViewController.view.backgroundColor = .clear
+
+        passthroughWindow.rootViewController = rootViewController
+        passthroughWindow.makeKeyAndVisible()
+
+        self.toastWindow = passthroughWindow
     }
 
     private func hideToastWindow() {
         toastWindow?.isHidden = true
-        toastWindow = nil // Release the window so it can be deallocated.
+        toastWindow = nil
     }
 }
 
