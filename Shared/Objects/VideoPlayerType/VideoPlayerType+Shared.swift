@@ -14,7 +14,7 @@ extension VideoPlayerType {
     // MARK: codec profiles
 
     @ArrayBuilder<CodecProfile>
-    var codecProfiles: [CodecProfile] {
+    static var _sharedCodecProfiles: [CodecProfile] {
         CodecProfile(
             codec: VideoCodec.h264.rawValue,
             type: .video,
