@@ -25,6 +25,15 @@ enum VideoPlayerType: String, CaseIterable, Defaults.Serializable, Displayable {
         }
     }
 
+    var codecProfiles: [CodecProfile] {
+        switch self {
+        case .native:
+            Self._sharedCodecProfiles
+        case .swiftfin:
+            Self._sharedCodecProfiles.appending(Self._swiftfinCodecProfiles)
+        }
+    }
+
     var directPlayProfiles: [DirectPlayProfile] {
         switch self {
         case .native:
