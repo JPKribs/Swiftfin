@@ -87,6 +87,36 @@ extension VideoPlayerType {
         }
     }
 
+    // MARK: codec profiles
+
+    @ArrayBuilder<CodecProfile>
+    static var _swiftfinCodecProfiles: [CodecProfile] {
+        CodecProfile(
+            codec: AudioCodec.truehd.rawValue,
+            type: .audio,
+            applyConditions: {
+                ProfileCondition(
+                    condition: .notEquals,
+                    isRequired: true,
+                    property: .audioProfile,
+                    value: AudioCodec.truehd.rawValue
+                )
+            }
+        )
+        CodecProfile(
+            codec: AudioCodec.eac3.rawValue,
+            type: .audio,
+            applyConditions: {
+                ProfileCondition(
+                    condition: .notEquals,
+                    isRequired: true,
+                    property: .audioProfile,
+                    value: AudioCodec.truehd.rawValue
+                )
+            }
+        )
+    }
+
     // MARK: subtitle
 
     @ArrayBuilder<SubtitleProfile>
