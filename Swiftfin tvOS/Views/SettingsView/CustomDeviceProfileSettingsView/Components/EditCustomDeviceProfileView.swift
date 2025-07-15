@@ -88,21 +88,9 @@ extension CustomDeviceProfileSettingsView {
                         .frame(maxWidth: 400)
                 }
                 .contentView {
-                    Section {
+                    Section(L10n.customProfile) {
                         Toggle(L10n.useAsTranscodingProfile, isOn: $profile.value.useAsTranscodingProfile)
                             .padding(.vertical)
-                    } header: {
-                        HStack {
-                            Text(L10n.customProfile)
-                            Spacer()
-                            Button(L10n.save) {
-                                if createProfile {
-                                    customDeviceProfiles.append(profile.value)
-                                }
-                                router.dismiss()
-                            }
-                            .disabled(!isValid)
-                        }
                     }
 
                     codecSection(
@@ -133,13 +121,20 @@ extension CustomDeviceProfileSettingsView {
                         Label(L10n.replaceDeviceProfileWarning, systemImage: "exclamationmark.circle.fill")
                     }
                 }
+                .topBarTrailing {
+                    Button(L10n.save) {
+                        if createProfile {
+                            customDeviceProfiles.append(profile.value)
+                        }
+                        router.dismiss()
+                    }
+                }
                 .navigationTitle(L10n.customProfile)
                 .alert(L10n.profileNotSaved, isPresented: $isPresentingNotSaved) {
                     Button(L10n.close, role: .destructive) {
                         router.dismiss()
                     }
                 }
-                .interactiveDismissDisabled(true)
         }
     }
 }

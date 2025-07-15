@@ -63,7 +63,7 @@ struct CustomDeviceProfileSettingsView: View {
                     }
                 }
 
-                Section {
+                Section(L10n.profiles) {
                     if customProfiles.isEmpty {
                         Button(L10n.add) {
                             router.route(to: .createCustomDeviceProfile)
@@ -85,15 +85,12 @@ struct CustomDeviceProfileSettingsView: View {
                         }
                         .onDelete(perform: removeProfile)
                     }
-                } header: {
-                    HStack {
-                        Text(L10n.profiles)
-                        Spacer()
-                        if customProfiles.isNotEmpty {
-                            Button(L10n.add) {
-                                router.route(to: .createCustomDeviceProfile)
-                            }
-                        }
+                }
+            }
+            .topBarTrailing {
+                if customProfiles.isNotEmpty {
+                    Button(L10n.add) {
+                        router.route(to: .createCustomDeviceProfile)
                     }
                 }
             }

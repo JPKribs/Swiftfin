@@ -27,8 +27,9 @@ struct AppLoadingView: View {
             }
         }
         .topBarTrailing {
-            Button(L10n.advanced, systemImage: "gearshape.fill") {}
+            Button(L10n.advanced, systemImage: "gearshape") {}
                 .foregroundStyle(.secondary)
+                .labelStyle(.iconOnly)
                 .disabled(true)
                 .opacity(didFailMigration ? 0 : 1)
         }
