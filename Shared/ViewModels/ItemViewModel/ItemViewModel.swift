@@ -95,7 +95,12 @@ class ItemViewModel: ViewModel, Stateful {
         Notifications[.itemShouldRefreshMetadata]
             .publisher
             .sink { [weak self] itemID in
-                guard itemID == self?.item.id || itemID == self?.item.seriesID else { return }
+                guard itemID == self?.item.id ||
+                    itemID == self?.item.seriesID ||
+                    itemID == self?.playButtonItem?.id ||
+                    itemID == self?.playButtonItem?.seasonID ||
+                    itemID == self?.playButtonItem?.seriesID
+                else { return }
 
                 Task {
                     await self?.send(.backgroundRefresh)

@@ -31,7 +31,7 @@ final class SeriesItemViewModel: ItemViewModel {
 
         switch action {
         case .backgroundRefresh, .refresh:
-            _ = super.respond(to: action)
+            let parentState = super.respond(to: action)
 
             seriesItemTask?.cancel()
 
@@ -58,21 +58,11 @@ final class SeriesItemViewModel: ItemViewModel {
 
                     if let episodeItem = try await [nextUp, resume].compacted().first {
                         await MainActor.run {
-
                             self.playButtonItem = episodeItem
-
-                            if let playButtonSeason = self.seasons.first(where: { $0.season.id == episodeItem.seasonID }) {
-                                playButtonSeason.send(.refresh)
-                            }
                         }
                     } else if let firstAvailable = try await firstAvailable {
                         await MainActor.run {
-
                             self.playButtonItem = firstAvailable
-
-                            if let playButtonSeason = self.seasons.first(where: { $0.season.id == firstAvailable.seasonID }) {
-                                playButtonSeason.send(.refresh)
-                            }
                         }
                     }
                 }
