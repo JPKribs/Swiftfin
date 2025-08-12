@@ -95,7 +95,7 @@ class ItemViewModel: ViewModel, Stateful {
         Notifications[.itemShouldRefreshMetadata]
             .publisher
             .sink { [weak self] itemID in
-                guard itemID == self?.item.id else { return }
+                guard itemID == self?.item.id || itemID == self?.item.seriesID else { return }
 
                 Task {
                     await self?.send(.backgroundRefresh)
@@ -346,12 +346,12 @@ class ItemViewModel: ViewModel, Stateful {
 
         if isPlayed {
             request = Paths.markPlayedItem(
-                itemID: item.id!,
+                itemID: itemID,
                 userID: userSession.user.id
             )
         } else {
             request = Paths.markUnplayedItem(
-                itemID: item.id!,
+                itemID: itemID,
                 userID: userSession.user.id
             )
         }
@@ -368,12 +368,12 @@ class ItemViewModel: ViewModel, Stateful {
 
         if isFavorite {
             request = Paths.markFavoriteItem(
-                itemID: item.id!,
+                itemID: itemID,
                 userID: userSession.user.id
             )
         } else {
             request = Paths.unmarkFavoriteItem(
-                itemID: item.id!,
+                itemID: itemID,
                 userID: userSession.user.id
             )
         }

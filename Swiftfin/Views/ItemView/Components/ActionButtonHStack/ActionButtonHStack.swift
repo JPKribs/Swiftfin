@@ -54,34 +54,22 @@ extension ItemView {
 
                 if viewModel.item.canBePlayed {
 
-                    // MARK: - Toggle Played
-
-                    let isCheckmarkSelected = viewModel.item.userData?.isPlayed == true
-
-                    Button(L10n.played, systemImage: "checkmark") {
-                        viewModel.send(.toggleIsPlayed)
-                    }
-                    .buttonStyle(.tintedMaterial(tint: .jellyfinPurple, foregroundColor: .white))
-                    .isSelected(isCheckmarkSelected)
-                    .frame(maxWidth: .infinity)
-                    .if(!equalSpacing) { view in
-                        view.aspectRatio(1, contentMode: .fit)
-                    }
+                    PlayedButton(viewModel: viewModel)
+                        .buttonStyle(.tintedMaterial(tint: .jellyfinPurple, foregroundColor: .white))
+                        .frame(maxWidth: .infinity)
+                        .if(!equalSpacing) { view in
+                            view.aspectRatio(1, contentMode: .fit)
+                        }
                 }
 
                 // MARK: - Toggle Favorite
 
-                let isHeartSelected = viewModel.item.userData?.isFavorite == true
-
-                Button(L10n.favorite, systemImage: isHeartSelected ? "heart.fill" : "heart") {
-                    viewModel.send(.toggleIsFavorite)
-                }
-                .buttonStyle(.tintedMaterial(tint: .red, foregroundColor: .white))
-                .isSelected(isHeartSelected)
-                .frame(maxWidth: .infinity)
-                .if(!equalSpacing) { view in
-                    view.aspectRatio(1, contentMode: .fit)
-                }
+                FavoriteButton(viewModel: viewModel)
+                    .buttonStyle(.tintedMaterial(tint: .red, foregroundColor: .white))
+                    .frame(maxWidth: .infinity)
+                    .if(!equalSpacing) { view in
+                        view.aspectRatio(1, contentMode: .fit)
+                    }
 
                 // MARK: - Select a Version
 
