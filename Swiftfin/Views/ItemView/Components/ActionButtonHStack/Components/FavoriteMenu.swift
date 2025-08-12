@@ -45,15 +45,14 @@ extension ItemView {
 
             Menu(L10n.favorite, systemImage: isSelected ? "heart.fill" : "heart") {
 
-                // MARK: - Toggle Full Series
+                // MARK: - Toggle Episode
 
                 Button(
-                    L10n.series,
-                    systemImage: viewModel.item.userData?
-                        .isFavorite == true ? "heart.fill" : "heart"
+                    L10n.episode,
+                    systemImage: isSelected ? "heart.fill" : "heart"
                 ) {
                     Task {
-                        try await viewModel.item.toggleIsFavorite()
+                        try await viewModel.playButtonItem?.toggleIsFavorite()
                     }
                 }
 
@@ -74,14 +73,15 @@ extension ItemView {
                     }
                 }
 
-                // MARK: - Toggle Episode
+                // MARK: - Toggle Full Series
 
                 Button(
-                    L10n.episode,
-                    systemImage: isSelected ? "heart.fill" : "heart"
+                    L10n.series,
+                    systemImage: viewModel.item.userData?
+                        .isFavorite == true ? "heart.fill" : "heart"
                 ) {
                     Task {
-                        try await viewModel.playButtonItem?.toggleIsFavorite()
+                        try await viewModel.item.toggleIsFavorite()
                     }
                 }
             }

@@ -43,15 +43,14 @@ extension ItemView {
 
             Menu(L10n.played, systemImage: "checkmark") {
 
-                // MARK: - Toggle Full Series
+                // MARK: - Toggle Episode
 
                 Button(
-                    L10n.series,
-                    systemImage: viewModel.item.userData?
-                        .isPlayed == true ? "checkmark.circle.fill" : "checkmark.circle"
+                    L10n.episode,
+                    systemImage: isSelected ? "checkmark.circle.fill" : "checkmark.circle"
                 ) {
                     Task {
-                        try await viewModel.item.toggleIsPlayed()
+                        try await viewModel.playButtonItem?.toggleIsPlayed()
                     }
                 }
 
@@ -72,14 +71,15 @@ extension ItemView {
                     }
                 }
 
-                // MARK: - Toggle Episode
+                // MARK: - Toggle Full Series
 
                 Button(
-                    L10n.episode,
-                    systemImage: isSelected ? "checkmark.circle.fill" : "checkmark.circle"
+                    L10n.series,
+                    systemImage: viewModel.item.userData?
+                        .isPlayed == true ? "checkmark.circle.fill" : "checkmark.circle"
                 ) {
                     Task {
-                        try await viewModel.playButtonItem?.toggleIsPlayed()
+                        try await viewModel.item.toggleIsPlayed()
                     }
                 }
             }
