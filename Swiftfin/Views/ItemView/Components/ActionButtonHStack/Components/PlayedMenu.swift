@@ -31,7 +31,7 @@ extension ItemView {
         @ViewBuilder
         private var itemButton: some View {
             Button(L10n.played, systemImage: "checkmark") {
-                viewModel.send(.toggleIsPlayed)
+                viewModel.send(.setIsPlayed(viewModel.item.id))
             }
             .isSelected(viewModel.item.userData?.isPlayed == true)
         }
@@ -49,9 +49,7 @@ extension ItemView {
                     L10n.episode,
                     systemImage: isSelected ? "checkmark.circle.fill" : "checkmark.circle"
                 ) {
-                    Task {
-                        try await viewModel.playButtonItem?.toggleIsPlayed()
-                    }
+                    viewModel.send(.setIsPlayed(viewModel.playButtonItem?.id))
                 }
 
                 // MARK: - Toggle Full Season
@@ -62,13 +60,13 @@ extension ItemView {
                         .userData?
                         .isPlayed == true ? "checkmark.circle.fill" : "checkmark.circle"
                 ) {
-                    Task {
-                        try await seriesViewModel.seasons.first(
+                    viewModel.send(.setIsPlayed(
+                        seriesViewModel.seasons.first(
                             where: {
                                 $0.id == seriesViewModel.playButtonItem?.seasonID
                             }
-                        )?.season.toggleIsPlayed()
-                    }
+                        )?.season.id
+                    ))
                 }
 
                 // MARK: - Toggle Full Series
@@ -78,9 +76,7 @@ extension ItemView {
                     systemImage: viewModel.item.userData?
                         .isPlayed == true ? "checkmark.circle.fill" : "checkmark.circle"
                 ) {
-                    Task {
-                        try await viewModel.item.toggleIsPlayed()
-                    }
+                    viewModel.send(.setIsPlayed())
                 }
             }
             .isSelected(isSelected)

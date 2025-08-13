@@ -33,7 +33,7 @@ extension ItemView {
             let isSelected: Bool = viewModel.item.userData?.isFavorite == true
 
             Button(L10n.favorite, systemImage: isSelected ? "heart.fill" : "heart") {
-                viewModel.send(.toggleIsFavorite)
+                viewModel.send(.setIsFavorite())
             }
             .isSelected(isSelected)
         }
@@ -51,9 +51,7 @@ extension ItemView {
                     L10n.episode,
                     systemImage: isSelected ? "heart.fill" : "heart"
                 ) {
-                    Task {
-                        try await viewModel.playButtonItem?.toggleIsFavorite()
-                    }
+                    viewModel.send(.setIsFavorite(viewModel.playButtonItem?.id))
                 }
 
                 // MARK: - Toggle Full Season
@@ -64,13 +62,13 @@ extension ItemView {
                         .userData?
                         .isFavorite == true ? "heart.fill" : "heart"
                 ) {
-                    Task {
-                        try await seriesViewModel.seasons.first(
+                    viewModel.send(.setIsFavorite(
+                        seriesViewModel.seasons.first(
                             where: {
                                 $0.id == seriesViewModel.playButtonItem?.seasonID
                             }
-                        )?.season.toggleIsFavorite()
-                    }
+                        )?.season.id
+                    ))
                 }
 
                 // MARK: - Toggle Full Series
@@ -80,9 +78,7 @@ extension ItemView {
                     systemImage: viewModel.item.userData?
                         .isFavorite == true ? "heart.fill" : "heart"
                 ) {
-                    Task {
-                        try await viewModel.item.toggleIsFavorite()
-                    }
+                    viewModel.send(.setIsFavorite())
                 }
             }
             .isSelected(isSelected)

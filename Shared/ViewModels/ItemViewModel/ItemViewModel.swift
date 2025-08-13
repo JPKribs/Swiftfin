@@ -25,8 +25,8 @@ class ItemViewModel: ViewModel, Stateful {
         case error(JellyfinAPIError)
         case refresh
         case replace(BaseItemDto)
-        case toggleIsFavorite
-        case toggleIsPlayed
+        case setIsFavorite(_ itemID: String? = nil, isFavorite: Bool? = nil)
+        case setIsPlayed(_ itemID: String? = nil, isPlayed: Bool? = nil)
         case selectMediaSource(MediaSourceInfo)
     }
 
@@ -233,20 +233,24 @@ class ItemViewModel: ViewModel, Stateful {
             .store(in: &cancellables)
 
             return state
-        case .toggleIsFavorite:
+        case let .setIsFavorite(itemID, setFavorite):
 
             toggleIsFavoriteTask?.cancel()
 
             toggleIsFavoriteTask = Task {
 
                 let beforeIsFavorite = item.userData?.isFavorite ?? false
+                let isFavorite: Bool = setFavorite ?? !beforeIsFavorite
 
-                await MainActor.run {
-                    item.userData?.isFavorite?.toggle()
-                }
+                guard let itemID = itemID ?? item.id else { return }
 
                 do {
-                    try await setIsFavorite(!beforeIsFavorite)
+                    try await setIsFavorite(itemID: itemID, isFavorite: isFavorite)
+
+                    await MainActor.run {
+                        item.userData?.isFavorite = isFavorite
+                    }
+
                 } catch {
                     await MainActor.run {
                         item.userData?.isFavorite = beforeIsFavorite
@@ -257,23 +261,27 @@ class ItemViewModel: ViewModel, Stateful {
             .asAnyCancellable()
 
             return state
-        case .toggleIsPlayed:
+        case let .setIsPlayed(itemID, setPlayed):
 
             toggleIsPlayedTask?.cancel()
 
             toggleIsPlayedTask = Task {
 
                 let beforeIsPlayed = item.userData?.isPlayed ?? false
+                let isPlayed: Bool = setPlayed ?? !beforeIsPlayed
 
-                await MainActor.run {
-                    item.userData?.isPlayed?.toggle()
-                }
+                guard let itemID = itemID ?? item.id else { return }
 
                 do {
-                    try await setIsPlayed(!beforeIsPlayed)
+                    try await setIsPlayed(itemID: itemID, isPlayed: isPlayed)
+
+                    await MainActor.run {
+                        item.userData?.isPlayed = setPlayed
+                    }
+
                 } catch {
                     await MainActor.run {
-                        item.userData?.isPlayed = beforeIsPlayed
+                        item.userData?.isFavorite = beforeIsPlayed
                         // emit event that toggle unsuccessful
                     }
                 }
@@ -343,9 +351,7 @@ class ItemViewModel: ViewModel, Stateful {
         return response?.value ?? []
     }
 
-    private func setIsPlayed(_ isPlayed: Bool) async throws {
-
-        guard let itemID = item.id else { return }
+    private func setIsPlayed(itemID: String, isPlayed: Bool) async throws {
 
         let request: Request<UserItemDataDto>
 
@@ -365,9 +371,7 @@ class ItemViewModel: ViewModel, Stateful {
         Notifications[.itemShouldRefreshMetadata].post(itemID)
     }
 
-    private func setIsFavorite(_ isFavorite: Bool) async throws {
-
-        guard let itemID = item.id else { return }
+    private func setIsFavorite(itemID: String, isFavorite: Bool) async throws {
 
         let request: Request<UserItemDataDto>
 
