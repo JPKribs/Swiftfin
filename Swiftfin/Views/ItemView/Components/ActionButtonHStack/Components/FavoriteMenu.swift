@@ -19,8 +19,8 @@ extension ItemView {
         // MARK: - Body
 
         var body: some View {
-            if let seriesViewModel = viewModel as? SeriesItemViewModel {
-                itemMenu(seriesViewModel: seriesViewModel)
+            if viewModel is SeriesItemViewModel {
+                itemMenu
             } else {
                 itemButton
             }
@@ -39,7 +39,7 @@ extension ItemView {
         }
 
         @ViewBuilder
-        private func itemMenu(seriesViewModel: SeriesItemViewModel) -> some View {
+        private var itemMenu: some View {
 
             let isSelected: Bool = viewModel.playButtonItem?.userData?.isFavorite == true
 
@@ -52,23 +52,6 @@ extension ItemView {
                     systemImage: isSelected ? "heart.fill" : "heart"
                 ) {
                     viewModel.send(.setIsFavorite(viewModel.playButtonItem?.id))
-                }
-
-                // MARK: - Toggle Full Season
-
-                Button(
-                    L10n.season,
-                    systemImage: seriesViewModel.seasons.first(where: { $0.id == seriesViewModel.playButtonItem?.seasonID })?.season
-                        .userData?
-                        .isFavorite == true ? "heart.fill" : "heart"
-                ) {
-                    viewModel.send(.setIsFavorite(
-                        seriesViewModel.seasons.first(
-                            where: {
-                                $0.id == seriesViewModel.playButtonItem?.seasonID
-                            }
-                        )?.season.id
-                    ))
                 }
 
                 // MARK: - Toggle Full Series
