@@ -32,7 +32,7 @@ extension ItemView {
 
         let localTrailers: [BaseItemDto]
         let externalTrailers: [MediaURL]
-        let logger = Logger.swiftfin()
+        private let logger = Logger.swiftfin()
 
         private var showLocalTrailers: Bool {
             enabledTrailers.contains(.local) && localTrailers.isNotEmpty
@@ -111,10 +111,8 @@ extension ItemView {
         // MARK: - Play: Local Trailer
 
         private func playLocalTrailer(_ trailer: BaseItemDto) {
-            if let selectedMediaSource = trailer.mediaSources?.first {
-                router.route(
-                    to: .videoPlayer(manager: OnlineVideoPlayerManager(item: trailer, mediaSource: selectedMediaSource))
-                )
+            if let mediaSource = trailer.mediaSources?.first {
+                router.route(to: .videoPlayer(item: trailer, mediaSource: mediaSource))
             } else {
                 logger.log(level: .error, "No media sources found")
                 error = JellyfinAPIError(L10n.unknownError)

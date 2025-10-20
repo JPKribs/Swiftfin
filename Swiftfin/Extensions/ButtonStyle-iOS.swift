@@ -9,6 +9,12 @@
 import Defaults
 import SwiftUI
 
+/// - Important: On iOS, this is a `BorderlessButtonStyle` instead.
+/// This is only used to allow platform shared views.
+extension PrimitiveButtonStyle where Self == BorderlessButtonStyle {
+    static var card: BorderlessButtonStyle { .init() }
+}
+
 extension ButtonStyle where Self == ToolbarPillButtonStyle {
 
     static var toolbarPill: ToolbarPillButtonStyle {
@@ -43,6 +49,7 @@ struct ToolbarPillButtonStyle: ButtonStyle {
 
 extension ButtonStyle where Self == TintedMaterialButtonStyle {
 
+    // TODO: just be `Material` backed instead of `TintedMaterial`
     static var material: TintedMaterialButtonStyle {
         TintedMaterialButtonStyle(tint: Color.clear, foregroundColor: Color.primary)
     }

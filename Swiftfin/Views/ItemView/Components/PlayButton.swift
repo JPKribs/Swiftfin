@@ -98,23 +98,35 @@ extension ItemView {
         // MARK: - Play Content
 
         private func play(fromBeginning: Bool = false) {
-            guard var playButtonItem = viewModel.playButtonItem,
+            guard let playButtonItem = viewModel.playButtonItem,
                   let selectedMediaSource = viewModel.selectedMediaSource
             else {
                 logger.error("Play selected with no item or media source")
                 return
             }
 
-            if fromBeginning {
-                playButtonItem.userData?.playbackPositionTicks = 0
+            let queue: (any MediaPlayerQueue)? = {
+                if playButtonItem.type == .episode {
+                    return EpisodeMediaPlayerQueue(episode: playButtonItem)
+                }
+                return nil
+            }()
+
+            let provider = MediaPlayerItemProvider(item: playButtonItem) { item in
+                try await MediaPlayerItem.build(
+                    for: item,
+                    mediaSource: selectedMediaSource
+                ) {
+                    if fromBeginning {
+                        $0.userData?.playbackPositionTicks = 0
+                    }
+                }
             }
 
             router.route(
                 to: .videoPlayer(
-                    manager: OnlineVideoPlayerManager(
-                        item: playButtonItem,
-                        mediaSource: selectedMediaSource
-                    )
+                    provider: provider,
+                    queue: queue
                 )
             )
         }
