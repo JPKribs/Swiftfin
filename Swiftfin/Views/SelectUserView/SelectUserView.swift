@@ -35,6 +35,8 @@ struct SelectUserView: View {
     private var serverSelection
     @Default(.selectUserDisplayType)
     private var userListDisplayType
+    @Default(.accentColor)
+    private var accentColor
 
     // MARK: - State & Environment Objects
 
@@ -429,15 +431,17 @@ struct SelectUserView: View {
     @ViewBuilder
     private var connectToServerView: some View {
         VStack(spacing: 10) {
-            L10n.connectToJellyfinServerStart.text
+            Text(L10n.connectToJellyfinServerStart)
                 .frame(minWidth: 50, maxWidth: 240)
                 .multilineTextAlignment(.center)
 
-            PrimaryButton(title: L10n.connect)
-                .onSelect {
-                    router.route(to: .connectToServer)
-                }
-                .frame(maxWidth: 300)
+            ListRowButton(L10n.connect) {
+                router.route(to: .connectToServer)
+            }
+            .frame(maxWidth: 300)
+            .frame(maxHeight: 50)
+            .clipShape(RoundedRectangle(cornerRadius: 10))
+            .foregroundStyle(accentColor.overlayColor, accentColor)
         }
     }
 
