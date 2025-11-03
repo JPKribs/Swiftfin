@@ -32,11 +32,9 @@ struct RootView: View {
                 RootItem.selectUser.content
             }
 
-            #if os(iOS)
             if rootCoordinator.root.id == RootItem.serverCheck.id {
                 RootItem.serverCheck.content
             }
-            #endif
         }
         .animation(.linear(duration: 0.1), value: rootCoordinator.root.id)
         .environmentObject(rootCoordinator)

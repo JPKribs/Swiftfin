@@ -17,6 +17,12 @@ struct ListRowButton: View {
     private let role: ButtonRole?
     private let action: () -> Void
 
+    #if os(tvOS)
+    private let maxHeight: CGFloat = 75
+    #else
+    private let maxHeight: CGFloat = 50
+    #endif
+
     init(_ title: String, role: ButtonRole? = nil, action: @escaping () -> Void) {
         self.title = title
         self.role = role
@@ -25,6 +31,7 @@ struct ListRowButton: View {
 
     var body: some View {
         Button(title, role: role, action: action)
+            .frame(maxHeight: maxHeight)
             .buttonStyle(ListRowButtonStyle())
             .listRowInsets(.zero)
     }
@@ -53,12 +60,13 @@ private struct ListRowButtonStyle: ButtonStyle {
 
     func makeBody(configuration: Configuration) -> some View {
         ZStack {
-            Rectangle()
+            RoundedRectangle(cornerRadius: 10)
                 .fill(secondaryStyle(configuration: configuration))
 
             configuration.label
                 .foregroundStyle(primaryStyle(configuration: configuration))
         }
+        .hoverEffect(.lift)
         .opacity(configuration.isPressed ? 0.75 : 1)
         .font(.body.weight(.bold))
     }

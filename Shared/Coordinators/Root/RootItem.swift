@@ -38,11 +38,9 @@ struct RootItem: Identifiable {
         }
     }
 
-    #if os(iOS)
     static let serverCheck = RootItem(id: "serverCheck") {
         NavigationInjectionView(coordinator: .init()) {
             ServerCheckView()
         }
     }
-    #endif
 }

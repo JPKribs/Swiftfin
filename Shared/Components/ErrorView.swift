@@ -19,35 +19,42 @@ struct ErrorView<ErrorType: Error>: View {
     @Default(.accentColor)
     private var accentColor
 
-    @EnvironmentObject
-    private var rootCoordinator: RootCoordinator
-
     @Router
     private var router
 
     private let error: ErrorType
     private var onRetry: (() -> Void)?
 
+    #if os(tvOS)
+    private let spacing: CGFloat = 40
+    private let fontSize: CGFloat = 150
+    private let maxWidth: CGFloat = 700
+    #else
+    private let spacing: CGFloat = 20
+    private let fontSize: CGFloat = 72
+    private let maxWidth: CGFloat = 300
+    #endif
+
     var body: some View {
-        VStack(spacing: 20) {
+        VStack(spacing: spacing) {
             Image(systemName: "xmark.circle.fill")
-                .font(.system(size: 72))
+                .font(.system(size: fontSize))
                 .foregroundColor(Color.red)
 
             Text(error.localizedDescription)
-                .frame(minWidth: 50, maxWidth: 240)
+                .frame(maxWidth: maxWidth)
                 .multilineTextAlignment(.center)
 
             if let onRetry {
                 ListRowButton(L10n.retry) {
                     onRetry()
                 }
-                .frame(maxWidth: 300)
-                .frame(height: 50)
+                .frame(maxWidth: maxWidth)
                 .foregroundStyle(accentColor.overlayColor, accentColor)
-                .clipShape(RoundedRectangle(cornerRadius: 10))
             }
-            if error.localizedDescription.contains("401") || error.localizedDescription.contains("403")// TODO: Is there a way to purely get the code
+
+            if error.localizedDescription.contains("401")
+                || error.localizedDescription.contains("403") // TODO: Is there a way to purely get the code
             {
                 ListRowButton(L10n.switchUser, role: .destructive) {
                     UIDevice.impact(.medium)
@@ -58,18 +65,13 @@ struct ErrorView<ErrorType: Error>: View {
 
                     router.dismiss()
                 }
-                .frame(maxWidth: 300)
-                .frame(maxHeight: 50)
-                .clipShape(RoundedRectangle(cornerRadius: 10))
+                .frame(maxWidth: maxWidth)
 
-                Text("Error is often indicative that the session expired. Please sign into another user or replace your access token to continue.")
-                    .frame(minWidth: 50, maxWidth: 240)
-                    .multilineTextAlignment(.center)
-            }
-        }
-        .onNotification(.didSignIn) {
-            if let onRetry {
-                onRetry()
+                Text(
+                    "Error is often indicative that the session expired. Please sign into another user or replace your access token to continue."
+                )
+                .frame(maxWidth: maxWidth)
+                .multilineTextAlignment(.center)
             }
         }
     }

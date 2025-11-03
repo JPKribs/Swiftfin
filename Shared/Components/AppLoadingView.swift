@@ -18,19 +18,15 @@ struct AppLoadingView: View {
         ZStack {
             Color.clear
 
-            if !didFailMigration {
+            if didFailMigration {
+                ErrorView(error: JellyfinAPIError("An internal error occurred while updating Swiftfin."))
+                    .onRetry {
+                        // TODO: Logic to fix migration failure
+                        // TODO: For now, recommend reinstall?
+                    }
+            } else {
                 ProgressView()
             }
-
-            if didFailMigration {
-                ErrorView(error: JellyfinAPIError("An internal error occurred."))
-            }
-        }
-        .topBarTrailing {
-            Button(L10n.advanced, systemImage: "gearshape.fill") {}
-                .foregroundStyle(.secondary)
-                .disabled(true)
-                .opacity(didFailMigration ? 0 : 1)
         }
         .onNotification(.didFailMigration) { _ in
             didFailMigration = true
