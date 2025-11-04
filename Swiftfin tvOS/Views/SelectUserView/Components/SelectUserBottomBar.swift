@@ -94,34 +94,24 @@ extension SelectUserView {
 //            }
         }
 
-        // MARK: - Delete User Button
-
-        @ViewBuilder
-        private var deleteUsersButton: some View {
-            ListRowButton(
-                L10n.delete,
-                role: .destructive,
-                action: onDelete
-            )
-            .frame(width: 400, height: 75)
-            .disabled(!areUsersSelected)
-        }
-
         // MARK: - Content View
 
         @ViewBuilder
         private var contentView: some View {
             HStack(alignment: .top, spacing: 20) {
                 if isEditing {
-                    deleteUsersButton
+                    Button(role: .destructive, action: onDelete) {
+                        Text(L10n.delete)
+                            .font(.body.weight(.semibold))
+                            .frame(width: 250)
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                    }
 
-                    Button {
-                        toggleAllUsersSelected()
-                    } label: {
+                    Button(action: toggleAllUsersSelected) {
                         Text(areUsersSelected ? L10n.removeAll : L10n.selectAll)
                             .foregroundStyle(Color.primary)
                             .font(.body.weight(.semibold))
-                            .frame(width: 200, height: 50)
+                            .frame(width: 250)
                             .clipShape(RoundedRectangle(cornerRadius: 10))
                     }
 
@@ -131,7 +121,7 @@ extension SelectUserView {
                         Text(L10n.cancel)
                             .foregroundStyle(Color.primary)
                             .font(.body.weight(.semibold))
-                            .frame(width: 200, height: 50)
+                            .frame(width: 250)
                             .clipShape(RoundedRectangle(cornerRadius: 10))
                     }
                 } else {
@@ -152,6 +142,7 @@ extension SelectUserView {
                     advancedMenu
                 }
             }
+            .frame(height: 50)
         }
 
         // MARK: - Body

@@ -12,18 +12,12 @@ import SwiftUI
 //       match style like in an `alert`
 struct ListRowButton: View {
 
-    // MARK: - Environment
-
     @Environment(\.isEnabled)
     private var isEnabled
-
-    // MARK: - Button Variables
 
     let title: String
     let role: ButtonRole?
     let action: () -> Void
-
-    // MARK: - Initializer
 
     init(_ title: String, role: ButtonRole? = nil, action: @escaping () -> Void) {
         self.title = title
@@ -31,40 +25,45 @@ struct ListRowButton: View {
         self.action = action
     }
 
-    // MARK: - Body
-
     var body: some View {
-        Button(action: action) {
-            ZStack {
-                RoundedRectangle(cornerRadius: 10)
-                    .fill(secondaryStyle)
-
-                Text(title)
-                    .foregroundStyle(primaryStyle)
-                    .font(.body.weight(.bold))
-            }
-        }
-        .listRowInsets(.zero)
-        .frame(maxHeight: 75)
+        Button(title, role: role, action: action)
+            .buttonStyle(ListRowButtonStyle())
+            .listRowInsets(.zero)
+            .frame(maxHeight: 75)
     }
+}
 
-    // MARK: - Primary Style
+private struct ListRowButtonStyle: ButtonStyle {
 
-    private var primaryStyle: some ShapeStyle {
-        if role == .destructive || role == .cancel {
+    @Environment(\.isEnabled)
+    private var isEnabled
+
+    private func primaryStyle(configuration: Configuration) -> some ShapeStyle {
+        if configuration.role == .destructive || configuration.role == .cancel {
             return AnyShapeStyle(Color.red)
         } else {
             return AnyShapeStyle(HierarchicalShapeStyle.primary)
         }
     }
 
-    // MARK: - Secondary Style
-
-    private var secondaryStyle: some ShapeStyle {
-        if role == .destructive || role == .cancel {
+    private func secondaryStyle(configuration: Configuration) -> some ShapeStyle {
+        if configuration.role == .destructive || configuration.role == .cancel {
             return AnyShapeStyle(Color.red.opacity(0.2))
         } else {
-            return AnyShapeStyle(HierarchicalShapeStyle.secondary)
+            return isEnabled ? AnyShapeStyle(HierarchicalShapeStyle.secondary) : AnyShapeStyle(Color.gray)
         }
+    }
+
+    func makeBody(configuration: Configuration) -> some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 10)
+                .fill(secondaryStyle(configuration: configuration))
+
+            configuration.label
+                .foregroundStyle(primaryStyle(configuration: configuration))
+        }
+        .hoverEffect(.lift)
+        .opacity(configuration.isPressed ? 0.75 : 1)
+        .font(.body.weight(.bold))
     }
 }
