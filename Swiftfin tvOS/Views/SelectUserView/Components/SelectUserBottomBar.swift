@@ -77,21 +77,6 @@ extension SelectUserView {
                     .labelStyle(.iconOnly)
                     .frame(width: 50, height: 50)
             }
-
-            // TODO: Do we want to support a grid view and list view like iOS?
-//            if !viewModel.servers.isEmpty {
-//                Picker(selection: $userListDisplayType) {
-//                    ForEach(LibraryDisplayType.allCases, id: \.hashValue) {
-//                        Label($0.displayTitle, systemImage: $0.systemImage)
-//                            .tag($0)
-//                    }
-//                } label: {
-//                    Text(L10n.layout)
-//                    Text(userListDisplayType.displayTitle)
-//                    Image(systemName: userListDisplayType.systemImage)
-//                }
-//                .pickerStyle(.menu)
-//            }
         }
 
         // MARK: - Content View
@@ -106,6 +91,7 @@ extension SelectUserView {
                             .frame(width: 250)
                             .clipShape(RoundedRectangle(cornerRadius: 10))
                     }
+                    .disabled(!areUsersSelected)
 
                     Button(action: toggleAllUsersSelected) {
                         Text(areUsersSelected ? L10n.removeAll : L10n.selectAll)

@@ -28,7 +28,7 @@ struct ErrorView<ErrorType: Error>: View {
     #if os(tvOS)
     private let spacing: CGFloat = 40
     private let fontSize: CGFloat = 150
-    private let maxWidth: CGFloat = 700
+    private let maxWidth: CGFloat = 600
     #else
     private let spacing: CGFloat = 20
     private let fontSize: CGFloat = 72

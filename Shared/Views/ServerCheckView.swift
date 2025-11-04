@@ -47,5 +47,16 @@ struct ServerCheckView: View {
                 rootCoordinator.root(.mainTab)
             }
         }
+        #if os(iOS)
+        .topBarTrailing {
+
+            SettingsBarButton(
+                server: viewModel.userSession.server,
+                user: viewModel.userSession.user
+            ) {
+                router.route(to: .settings)
+            }
+        }
+        #endif
     }
 }
