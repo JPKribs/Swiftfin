@@ -45,7 +45,7 @@ struct MediaView: View {
                     )
                     router.route(to: .library(viewModel: viewModel), in: namespace)
                 case .downloads:
-                    router.route(to: .downloadList)
+                    router.route(to: .library(viewModel: DownloadLibraryViewModel()), in: namespace)
                 case .favorites:
                     // TODO: favorites should have its own view instead of a library
                     let viewModel = ItemLibraryViewModel(

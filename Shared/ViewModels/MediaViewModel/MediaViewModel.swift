@@ -46,6 +46,7 @@ final class MediaViewModel: ViewModel {
 
                 return .collectionFolder(userView)
             }
+            .prepending(.downloads)
             .prepending(.favorites, if: Defaults[.Customization.Library.showFavorites])
 
         mediaItems.elements = media

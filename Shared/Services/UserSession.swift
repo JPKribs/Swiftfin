@@ -17,6 +17,7 @@ final class UserSession {
     let client: JellyfinClient
     let server: ServerState
     let user: UserState
+    let session: URLSession
 
     init(
         server: ServerState,
@@ -25,16 +26,19 @@ final class UserSession {
         self.server = server
         self.user = user
 
+        let sessionConfiguration = URLSessionConfiguration.swiftfin
+
         let client = JellyfinClient(
             configuration: .swiftfinConfiguration(
                 url: server.currentURL,
                 accessToken: user.accessToken
             ),
-            sessionConfiguration: .swiftfin,
+            sessionConfiguration: sessionConfiguration,
             sessionDelegate: URLSessionProxyDelegate(logger: NetworkLogger.swiftfin())
         )
 
         self.client = client
+        self.session = URLSession(configuration: sessionConfiguration)
     }
 }
 

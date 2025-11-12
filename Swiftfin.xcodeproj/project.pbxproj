@@ -233,7 +233,6 @@
 				ViewModels/AdminDashboard/ServerTasksViewModel.swift,
 				ViewModels/AdminDashboard/ServerUserAdminViewModel.swift,
 				ViewModels/AdminDashboard/ServerUsersViewModel.swift,
-				ViewModels/DownloadListViewModel.swift,
 				ViewModels/ItemAdministration/IdentifyItemViewModel.swift,
 				ViewModels/ItemAdministration/ItemEditorViewModel/GenreEditorViewModel.swift,
 				ViewModels/ItemAdministration/ItemEditorViewModel/ItemEditorViewModel.swift,
@@ -685,6 +684,7 @@
 				"zh-Hant",
 				mn,
 				km,
+				lv,
 			);
 			mainGroup = 5377CBE8263B596A003A4E83;
 			packageReferences = (

@@ -358,6 +358,7 @@ class ItemViewModel: ViewModel, Stateful {
 
     private func setIsPlayed(_ isPlayed: Bool) async throws {
 
+        BaseItem
         guard let itemID = item.id else { return }
 
         let request: Request<UserItemDataDto>

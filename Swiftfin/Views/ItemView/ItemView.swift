@@ -7,6 +7,7 @@
 //
 
 import Defaults
+import Factory
 import JellyfinAPI
 import SwiftUI
 
@@ -30,6 +31,9 @@ struct ItemView: View {
     @StateObject
     private var deleteViewModel: DeleteItemViewModel
 
+    @Injected(\.downloadManager)
+    private var downloadManager
+
     @State
     private var isPresentingConfirmationDialog = false
     @State
@@ -37,7 +41,29 @@ struct ItemView: View {
     @State
     private var error: JellyfinAPIError?
 
-    // MARK: - Can Delete Item
+    // MARK: - Download Tracking
+
+    @State
+    private var downloadTask: DownloadTask?
+    @State
+    private var downloadError: DownloadError?
+    @State
+    private var isPresentingDownloadError = false
+
+    private var activeDownload: DownloadTask? {
+        downloadManager.task(for: viewModel.item)
+    }
+
+    private var completedDownload: DownloadItemDto? {
+        guard let itemID = viewModel.item.id else { return nil }
+        return downloadManager.downloads.first(where: { $0.id == itemID })
+    }
+
+    private var hasAnyDownload: Bool {
+        activeDownload != nil || completedDownload != nil
+    }
+
+    // MARK: - Can Delete/Edit
 
     private var canDelete: Bool {
         viewModel.userSession.user.permissions.items.canDelete(item: viewModel.item)
@@ -132,6 +158,25 @@ struct ItemView: View {
         .eraseToAnyView()
     }
 
+    // MARK: - Download UI
+
+    @ViewBuilder
+    private var downloadButton: some View {
+        if let task = activeDownload {
+            DownloadButtonView(task: task, downloadManager: downloadManager)
+        } else if let dto = completedDownload {
+            CompletedDownloadButtonView(dto: dto, downloadManager: downloadManager)
+        } else {
+            Button {
+                startDownload()
+            } label: {
+                Label(L10n.downloads, systemImage: "arrow.down.circle")
+            }
+        }
+    }
+
+    // MARK: - Body
+
     var body: some View {
         ZStack {
             switch viewModel.state {
@@ -148,6 +193,11 @@ struct ItemView: View {
         .navigationBarTitleDisplayMode(.inline)
         .onFirstAppear {
             viewModel.send(.refresh)
+        }
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                downloadButton
+            }
         }
         .navigationBarMenuButton(
             isLoading: viewModel.backgroundStates.contains(.refresh),
@@ -193,6 +243,160 @@ struct ItemView: View {
         ) { _ in
         } message: { error in
             Text(error.localizedDescription)
+        }
+        .alert(
+            "Download Error",
+            isPresented: $isPresentingDownloadError,
+            presenting: downloadError
+        ) { _ in
+        } message: { error in
+            Text(error.displayTitle)
+        }
+    }
+
+    // MARK: - Download Actions
+
+    private func startDownload() {
+        Task {
+            let task: DownloadTask = .init(viewModel.item)
+
+            do {
+                try await downloadManager.download(task: task)
+            } catch let error as DownloadError {
+                await MainActor.run {
+                    downloadError = error
+                    isPresentingDownloadError = true
+                }
+            } catch {
+                await MainActor.run {
+                    downloadError = .unknown(error.localizedDescription)
+                    isPresentingDownloadError = true
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Download Button View
+
+private struct DownloadButtonView: View {
+
+    @ObservedObject
+    var task: DownloadTask
+
+    let downloadManager: DownloadManager
+
+    var body: some View {
+        Menu {
+            switch task.state {
+            case .queued:
+                Text("Queued...")
+                    .foregroundColor(.secondary)
+
+            case let .downloading(progress):
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Downloading: \(Int(progress * 100))%")
+                    ProgressView(value: progress)
+                }
+
+                Button(L10n.pause, systemImage: "pause.circle") {
+                    downloadManager.pause(task: task)
+                }
+
+                Button(L10n.cancel, systemImage: "xmark.circle", role: .destructive) {
+                    downloadManager.cancel(task: task)
+                }
+
+            case .paused:
+                Text("Paused")
+                    .foregroundColor(.secondary)
+
+                Button("", systemImage: "play.circle") {
+                    downloadManager.resume(task: task)
+                }
+
+                Button(L10n.cancel, systemImage: "xmark.circle", role: .destructive) {
+                    downloadManager.cancel(task: task)
+                }
+
+            case .complete:
+                // This shouldn't happen as completed tasks are handled by CompletedDownloadButtonView
+                // But keeping for safety during transition
+                Text(L10n.taskCompleted)
+                    .foregroundColor(.green)
+
+            case let .error(error):
+                Text("Error: \(error.displayTitle)")
+                    .foregroundColor(.red)
+
+                Button(L10n.retry, systemImage: "arrow.clockwise") {
+                    task.start()
+                }
+
+                Button(L10n.cancel, systemImage: "xmark.circle", role: .destructive) {
+                    downloadManager.cancel(task: task)
+                }
+            }
+        } label: {
+            downloadIcon
+        }
+    }
+
+    @ViewBuilder
+    private var downloadIcon: some View {
+        switch task.state {
+        case .queued:
+            Label("Queued", systemImage: "arrow.down.circle.dotted")
+
+        case let .downloading(progress):
+            ZStack {
+                Circle()
+                    .stroke(Color.gray.opacity(0.3), lineWidth: 2)
+                    .frame(width: 20, height: 20)
+
+                Circle()
+                    .trim(from: 0, to: progress)
+                    .stroke(Color.blue, lineWidth: 2)
+                    .frame(width: 20, height: 20)
+                    .rotationEffect(.degrees(-90))
+
+                Image(systemName: "arrow.down")
+                    .font(.system(size: 10))
+            }
+
+        case .paused:
+            Label("Paused", systemImage: "pause.circle.fill")
+                .foregroundColor(.orange)
+
+        case .complete:
+            Label("Downloaded", systemImage: "checkmark.circle.fill")
+                .foregroundColor(.green)
+
+        case .error:
+            Label("Error", systemImage: "exclamationmark.circle.fill")
+                .foregroundColor(.red)
+        }
+    }
+}
+
+// MARK: - Completed Download Button View
+
+private struct CompletedDownloadButtonView: View {
+
+    let dto: DownloadItemDto
+    let downloadManager: DownloadManager
+
+    var body: some View {
+        Menu {
+            Text(L10n.taskCompleted)
+                .foregroundColor(.green)
+
+            Button(L10n.delete, systemImage: "trash", role: .destructive) {
+                downloadManager.delete(dto: dto)
+            }
+        } label: {
+            Label("Downloaded", systemImage: "checkmark.circle.fill")
+                .foregroundColor(.green)
         }
     }
 }
