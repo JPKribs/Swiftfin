@@ -723,8 +723,7 @@ struct ActionButtonContext {
     let isFavorite: Bool
 
     var hasMultipleVersions: Bool {
-        true
-        // mediaSources.count > 1
+        mediaSources.count > 1
     }
 
     var hasTrailers: Bool {
