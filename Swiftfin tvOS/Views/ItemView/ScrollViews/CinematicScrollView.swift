@@ -202,6 +202,7 @@ extension ItemView {
                             focusTag: "actionButtons"
                         )
                         .focused($focusedLayer, equals: .actionButtons)
+                        .frame(alignment: .bottom)
                     }
                     .frame(width: 450)
                     .padding(.leading, 150)

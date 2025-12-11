@@ -13,18 +13,18 @@ import SwiftUI
 
 extension ItemView {
 
-    // MARK: - Refresh Action
+    // MARK: - Layout Mode
 
-    enum RefreshAction {
-        case findMissing
-        case replaceMetadata
-        case replaceImages
-        case replaceAll
+    enum ActionButtonLayoutMode {
+        case vertical
+        case horizontal
     }
 
     // MARK: - Action Button Stack
 
     struct ActionButtonStack: View {
+
+        // MARK: - Properties
 
         @Default(.accentColor)
         private var accentColor
@@ -53,68 +53,75 @@ extension ItemView {
         @State
         private var availableWidth: CGFloat = 0
 
-        #if os(tvOS)
-        @EnvironmentObject
-        private var focusGuide: FocusGuide
-
-        @FocusState
-        private var focusedButtonIndex: Int?
-
-        @State
-        private var lastFocusedIndex: Int = 0
-        #endif
-
+        private let layoutMode: ActionButtonLayoutMode
         private let buttonHeight: CGFloat
         private let horizontalSpacing: CGFloat
         private let verticalSpacing: CGFloat
-        private let layoutMode: ActionButtonLayoutMode
-        private let primaryButtonConstraints: ButtonSizeConstraints
-        private let secondaryButtonConstraints: ButtonSizeConstraints
-        private let focusTag: String
+        private let primaryButtonWidth: CGFloat?
         private let buttonOrder: [ActionButtonType]
-
-        private var overflowButtonWidth: CGFloat {
-            buttonHeight * 0.6
-        }
 
         private let logger = Logger.swiftfin()
 
-        // MARK: - Permissions
+        // MARK: - Initializer
 
-        private var canDelete: Bool {
-            viewModel.userSession.user.permissions.items.canDelete(item: viewModel.item)
+        init(
+            viewModel: ItemViewModel,
+            layoutMode: ActionButtonLayoutMode = .vertical,
+            buttonHeight: CGFloat = UIDevice.isTV ? 100 : 50,
+            horizontalSpacing: CGFloat = UIDevice.isTV ? 30 : 10,
+            verticalSpacing: CGFloat = UIDevice.isTV ? 25 : 10,
+            primaryButtonWidth: CGFloat? = nil,
+            buttonOrder: [ActionButtonType] = ActionButtonType.allCases
+        ) {
+            self.viewModel = viewModel
+            self._deleteViewModel = StateObject(wrappedValue: .init(item: viewModel.item))
+            self._refreshViewModel = StateObject(wrappedValue: .init(item: viewModel.item))
+            self.layoutMode = layoutMode
+            self.buttonHeight = buttonHeight
+            self.horizontalSpacing = horizontalSpacing
+            self.verticalSpacing = verticalSpacing
+            self.primaryButtonWidth = primaryButtonWidth
+            self.buttonOrder = buttonOrder
         }
 
-        private var canEdit: Bool {
-            viewModel.userSession.user.permissions.items.canEditMetadata(item: viewModel.item)
+        // MARK: - Context
+
+        private var context: ActionButtonContext {
+            ActionButtonContext(
+                item: viewModel.item,
+                mediaSources: viewModel.playButtonItem?.mediaSources ?? [],
+                selectedMediaSource: viewModel.selectedMediaSource,
+                localTrailers: viewModel.localTrailers,
+                externalTrailers: viewModel.item.remoteTrailers ?? [],
+                enabledTrailerTypes: enabledTrailers,
+                canDelete: viewModel.userSession.user.permissions.items.canDelete(item: viewModel.item),
+                canEdit: viewModel.userSession.user.permissions.items.canEditMetadata(item: viewModel.item),
+                canRefresh: viewModel.userSession.user.permissions.items.canEditMetadata(item: viewModel.item),
+                canManageSubtitles: viewModel.userSession.user.permissions.items.canManageSubtitles(item: viewModel.item),
+                isPlayed: viewModel.item.userData?.isPlayed == true,
+                isFavorite: viewModel.item.userData?.isFavorite == true
+            )
         }
 
-        private var canRefresh: Bool {
-            viewModel.userSession.user.permissions.items.canEditMetadata(item: viewModel.item)
+        // MARK: - Visible Buttons
+
+        private var visibleButtons: [ActionButtonType] {
+            buttonOrder.filter { $0.isAvailable(in: context) }
         }
 
-        private var canManageSubtitles: Bool {
-            viewModel.userSession.user.permissions.items.canManageSubtitles(item: viewModel.item)
+        private var hasPlayButton: Bool {
+            ActionButtonType.play.isAvailable(in: context)
         }
 
-        // MARK: - Computed
-
-        private var mediaSources: [MediaSourceInfo] {
-            viewModel.playButtonItem?.mediaSources ?? []
+        private var primaryButton: ActionButtonType? {
+            hasPlayButton ? .play : visibleButtons.first
         }
 
-        private var localTrailers: [BaseItemDto] {
-            viewModel.localTrailers
+        private var secondaryButtons: [ActionButtonType] {
+            visibleButtons.filter { $0 != primaryButton }
         }
 
-        private var externalTrailers: [MediaURL] {
-            viewModel.item.remoteTrailers ?? []
-        }
-
-        private var hasTrailers: Bool {
-            (enabledTrailers.contains(.local) && localTrailers.isNotEmpty) ||
-                (enabledTrailers.contains(.external) && externalTrailers.isNotEmpty)
-        }
+        // MARK: - Play Button Title
 
         private var playButtonTitle: String {
             if let seriesViewModel = viewModel as? SeriesItemViewModel,
@@ -125,83 +132,18 @@ extension ItemView {
             return viewModel.playButtonItem?.playButtonLabel ?? L10n.play
         }
 
-        // MARK: - Visible Buttons
-
-        private var visibleButtons: [ActionButtonType] {
-            buttonOrder
-                .filter { ActionButtonType.supportedCases.contains($0) }
-                .filter { isAvailable($0) }
-        }
-
-        // MARK: - Availability
-
-        private func isAvailable(_ type: ActionButtonType) -> Bool {
-            switch type {
-            case .play:
-                viewModel.item.presentPlayButton
-            case .played:
-                viewModel.item.canBePlayed
-            case .favorite:
-                true
-            case .versions:
-                mediaSources.count > 1
-            case .trailers:
-                hasTrailers
-            case .subtitles:
-                canManageSubtitles
-            case .refresh:
-                canRefresh
-            case .edit:
-                canEdit
-            case .delete:
-                canDelete
-            }
-        }
-
-        // MARK: - Initializer
-
-        init(
-            viewModel: ItemViewModel,
-            layoutMode: ActionButtonLayoutMode = .horizontal,
-            buttonHeight: CGFloat = UIDevice.isTV ? 100 : 50,
-            horizontalSpacing: CGFloat = UIDevice.isTV ? 30 : 10,
-            verticalSpacing: CGFloat = UIDevice.isTV ? 25 : 10,
-            primaryButtonConstraints: ButtonSizeConstraints = .default,
-            secondaryButtonConstraints: ButtonSizeConstraints = .default,
-            focusTag: String = "actionButtons",
-            buttonOrder: [ActionButtonType] = ActionButtonType.defaultOrder
-        ) {
-            self.viewModel = viewModel
-            self._deleteViewModel = StateObject(wrappedValue: .init(item: viewModel.item))
-            self._refreshViewModel = StateObject(wrappedValue: .init(item: viewModel.item))
-            self.layoutMode = layoutMode
-            self.buttonHeight = buttonHeight
-            self.horizontalSpacing = horizontalSpacing
-            self.verticalSpacing = verticalSpacing
-            self.primaryButtonConstraints = primaryButtonConstraints
-            self.secondaryButtonConstraints = secondaryButtonConstraints
-            self.focusTag = focusTag
-            self.buttonOrder = buttonOrder
-        }
-
         // MARK: - Body
 
         var body: some View {
-            ActionButtonLayout(
-                mode: layoutMode,
-                buttonHeight: buttonHeight,
-                horizontalSpacing: horizontalSpacing,
-                verticalSpacing: verticalSpacing,
-                primaryButtonConstraints: primaryButtonConstraints,
-                secondaryButtonConstraints: secondaryButtonConstraints
-            ) {
-                ForEach(Array(visibleButtons.enumerated()), id: \.element.id) { index, type in
-                    button(for: type, at: index)
+            Group {
+                switch layoutMode {
+                case .vertical:
+                    verticalLayout
+                case .horizontal:
+                    horizontalLayout
                 }
-
-                overflowMenu(availableWidth: availableWidth)
-                    .isOverflowMenu()
             }
+            .frame(height: calculateHeight())
             .background {
                 GeometryReader { geometry in
                     Color.clear
@@ -211,86 +153,239 @@ extension ItemView {
                         }
                 }
             }
-            .font(.title3)
-            .fontWeight(.semibold)
-            #if os(tvOS)
-                .focusGuide(
-                    focusGuide,
-                    tag: focusTag,
-                    onContentFocus: { focusedButtonIndex = lastFocusedIndex }
-                )
-                .onChange(of: focusedButtonIndex) { _, newIndex in
-                    if let index = newIndex {
-                        lastFocusedIndex = index
-                    }
+            .confirmationDialog(
+                L10n.deleteItemConfirmationMessage,
+                isPresented: $showConfirmationDialog,
+                titleVisibility: .visible
+            ) {
+                Button(L10n.confirm, role: .destructive) {
+                    deleteViewModel.send(.delete)
                 }
-            #endif
-                .confirmationDialog(
-                        L10n.deleteItemConfirmationMessage,
-                        isPresented: $showConfirmationDialog,
-                        titleVisibility: .visible
-                    ) {
-                        Button(L10n.confirm, role: .destructive) {
-                            deleteViewModel.send(.delete)
-                        }
-                        Button(L10n.cancel, role: .cancel) {}
-                    }
-                    .onReceive(deleteViewModel.events) { event in
-                        switch event {
-                        case let .error(eventError):
-                            error = eventError
-                        case .deleted:
-                            router.dismiss()
-                        }
-                    }
-                    .errorMessage($error)
+                Button(L10n.cancel, role: .cancel) {}
+            }
+            .onReceive(deleteViewModel.events) { event in
+                switch event {
+                case let .error(eventError):
+                    error = eventError
+                case .deleted:
+                    router.dismiss()
+                }
+            }
+            .errorMessage($error)
         }
 
-        // MARK: - Button Builder
-
-        @ViewBuilder
-        private func button(for type: ActionButtonType, at index: Int) -> some View {
-            switch type {
-            case .play:
-                playButton(at: index)
-
-            case .played:
-                playedButton(at: index)
-
-            case .favorite:
-                favoriteButton(at: index)
-
-            case .versions:
-                versionsMenu(at: index)
-
-            case .trailers:
-                trailersButton(at: index)
-
-            case .subtitles:
-                subtitlesButton(at: index)
-
-            case .refresh:
-                refreshMenu(at: index)
-
-            case .edit:
-                editButton(at: index)
-
-            case .delete:
-                deleteButton(at: index)
+        private func calculateHeight() -> CGFloat {
+            switch layoutMode {
+            case .horizontal:
+                buttonHeight
+            case .vertical:
+                hasPlayButton ? buttonHeight * 2 + verticalSpacing : buttonHeight
             }
         }
 
-        // MARK: - Play Button
+        // MARK: - Vertical Layout
 
         @ViewBuilder
-        private func playButton(at index: Int) -> some View {
+        private var verticalLayout: some View {
+            if hasPlayButton {
+                verticalLayoutWithPlayButton
+            } else {
+                verticalLayoutWithoutPlayButton
+            }
+        }
+
+        @ViewBuilder
+        private var verticalLayoutWithPlayButton: some View {
+            let (visible, overflow) = calculateOverflow(from: secondaryButtons, for: availableWidth)
+            let promoted = calculatePromotedButtons(visible: visible, overflow: overflow, for: availableWidth)
+
+            let bottomButtons = visible.filter { !promoted.contains($0) }
+            let bottomRowCount = bottomButtons.count + (overflow.isEmpty ? 0 : 1)
+
+            let secondaryButtonWidth: CGFloat = bottomRowCount > 0
+                ? (availableWidth - CGFloat(bottomRowCount - 1) * horizontalSpacing) / CGFloat(bottomRowCount)
+                : buttonHeight
+
+            VStack(spacing: verticalSpacing) {
+                HStack(spacing: horizontalSpacing) {
+                    playButtonView
+                        .frame(height: buttonHeight)
+                        .frame(maxWidth: .infinity)
+
+                    ForEach(promoted) { type in
+                        buttonView(for: type)
+                            .frame(width: secondaryButtonWidth, height: buttonHeight)
+                    }
+                }
+
+                if bottomRowCount > 0 {
+                    HStack(spacing: horizontalSpacing) {
+                        ForEach(bottomButtons) { type in
+                            buttonView(for: type)
+                                .frame(width: secondaryButtonWidth, height: buttonHeight)
+                        }
+
+                        if !overflow.isEmpty {
+                            overflowMenu(types: overflow)
+                                .frame(width: secondaryButtonWidth, height: buttonHeight)
+                        }
+                    }
+                }
+            }
+        }
+
+        @ViewBuilder
+        private var verticalLayoutWithoutPlayButton: some View {
+            let (visible, overflow) = calculateOverflow(from: visibleButtons, for: availableWidth)
+
+            HStack(spacing: horizontalSpacing) {
+                ForEach(visible) { type in
+                    buttonView(for: type)
+                        .frame(minWidth: buttonHeight, maxHeight: buttonHeight)
+                        .frame(maxWidth: .infinity)
+                }
+
+                if !overflow.isEmpty {
+                    overflowMenu(types: overflow)
+                        .frame(minWidth: buttonHeight, maxHeight: buttonHeight)
+                        .frame(maxWidth: .infinity)
+                }
+            }
+        }
+
+        // MARK: - Horizontal Layout
+
+        @ViewBuilder
+        private var horizontalLayout: some View {
+            if hasPlayButton {
+                horizontalLayoutWithPlayButton
+            } else {
+                horizontalLayoutWithoutPlayButton
+            }
+        }
+
+        @ViewBuilder
+        private var horizontalLayoutWithPlayButton: some View {
+            let (visible, overflow) = calculateOverflow(from: secondaryButtons, for: availableWidth)
+
+            HStack(spacing: horizontalSpacing) {
+                playButtonView
+                    .frame(width: primaryButtonWidth, height: buttonHeight)
+
+                Spacer()
+
+                ForEach(visible) { type in
+                    buttonView(for: type)
+                        .frame(width: buttonHeight, height: buttonHeight)
+                }
+
+                if !overflow.isEmpty {
+                    overflowMenu(types: overflow)
+                        .frame(width: buttonHeight, height: buttonHeight)
+                }
+            }
+        }
+
+        @ViewBuilder
+        private var horizontalLayoutWithoutPlayButton: some View {
+            let remainingButtons = Array(secondaryButtons)
+            let (visible, overflow) = calculateOverflow(from: remainingButtons, for: availableWidth)
+
+            HStack(spacing: horizontalSpacing) {
+                if let promoted = primaryButton {
+                    promotedButtonView(for: promoted)
+                        .frame(width: primaryButtonWidth, height: buttonHeight)
+                }
+
+                Spacer()
+
+                ForEach(visible) { type in
+                    buttonView(for: type)
+                        .frame(width: buttonHeight, height: buttonHeight)
+                }
+
+                if !overflow.isEmpty {
+                    overflowMenu(types: overflow)
+                        .frame(width: buttonHeight, height: buttonHeight)
+                }
+            }
+        }
+
+        // MARK: - Overflow Calculation
+
+        private func calculateOverflow(
+            from buttons: [ActionButtonType],
+            for width: CGFloat
+        ) -> (visible: [ActionButtonType], overflow: [ActionButtonType]) {
+            guard !buttons.isEmpty else { return ([], []) }
+
+            let availableForSecondary: CGFloat
+            switch layoutMode {
+            case .vertical:
+                availableForSecondary = width
+            case .horizontal:
+                if hasPlayButton {
+                    let playWidth = primaryButtonWidth ?? (width * 0.4)
+                    availableForSecondary = width - playWidth - horizontalSpacing
+                } else {
+                    availableForSecondary = width
+                }
+            }
+
+            var visibleCount = 0
+            for count in (1 ... buttons.count).reversed() {
+                let needsOverflow = count < buttons.count
+                let overflowWidth = needsOverflow ? (buttonHeight + horizontalSpacing) : 0
+                let buttonsWidth = buttonHeight * CGFloat(count) + horizontalSpacing * CGFloat(count - 1)
+
+                if buttonsWidth + overflowWidth <= availableForSecondary {
+                    visibleCount = count
+                    break
+                }
+            }
+
+            let visible = Array(buttons.prefix(visibleCount))
+            let overflow = Array(buttons.dropFirst(visibleCount))
+            return (visible, overflow)
+        }
+
+        private func calculatePromotedButtons(
+            visible: [ActionButtonType],
+            overflow: [ActionButtonType],
+            for width: CGFloat
+        ) -> [ActionButtonType] {
+            guard !overflow.isEmpty else { return [] }
+
+            let minPlayButtonRatio: CGFloat = 2.0 / 3.0
+            let availableForPromoted = width * (1 - minPlayButtonRatio) - horizontalSpacing
+            let maxPromotedCount = min(2, Int(availableForPromoted / (buttonHeight + horizontalSpacing)))
+
+            guard maxPromotedCount > 0 else { return [] }
+
+            var promoted: [ActionButtonType] = []
+
+            if visible.contains(.versions) && promoted.count < maxPromotedCount {
+                promoted.append(.versions)
+            }
+            if visible.contains(.trailers) && promoted.count < maxPromotedCount {
+                promoted.append(.trailers)
+            }
+
+            return promoted
+        }
+
+        // MARK: - Button Views
+
+        @ViewBuilder
+        private var playButtonView: some View {
+            let ctx = context
             Button {
-                play()
+                handleAction(.play())
             } label: {
-                HStack(spacing: 20) {
+                HStack(spacing: UIDevice.isPhone ? 10 : 20) {
                     Image(systemName: "play.fill")
 
-                    if mediaSources.count >= 1, let sourceTitle = viewModel.selectedMediaSource?.displayTitle {
+                    if ctx.hasMultipleVersions, let sourceTitle = viewModel.selectedMediaSource?.displayTitle {
                         VStack(alignment: .leading) {
                             Text(playButtonTitle)
                                 .font(.caption)
@@ -311,7 +406,7 @@ extension ItemView {
                     }
                 }
                 .frame(maxWidth: .infinity)
-                .padding(.horizontal, 20)
+                .padding(.horizontal, UIDevice.isPhone ? 10 : 20)
             }
             .buttonStyle(
                 .tintedMaterial(
@@ -321,516 +416,196 @@ extension ItemView {
             )
             .isSelected(true)
             .enabled(viewModel.selectedMediaSource != nil)
-            .labelStyle(.titleAndIcon)
-            #if os(tvOS)
-                .focused($focusedButtonIndex, equals: index)
-            #endif
         }
 
-        // MARK: - Played Button
-
         @ViewBuilder
-        private func playedButton(at index: Int) -> some View {
-            let isPlayed = viewModel.item.userData?.isPlayed == true
+        private func promotedButtonView(for type: ActionButtonType) -> some View {
+            let ctx = context
+            let isSelected = type.isSelected(in: ctx)
 
-            Button {
-                viewModel.send(.toggleIsPlayed)
-            } label: {
-                Label(L10n.played, systemImage: "checkmark")
-            }
-            .buttonStyle(
-                .tintedMaterial(
-                    tint: .jellyfinPurple,
-                    foregroundColor: UIDevice.isTV ? .primary : .white
-                )
-            )
-            .isSelected(isPlayed)
-            .labelStyle(.iconOnly)
-            #if os(tvOS)
-                .focused($focusedButtonIndex, equals: index)
-            #endif
-        }
-
-        // MARK: - Favorite Button
-
-        @ViewBuilder
-        private func favoriteButton(at index: Int) -> some View {
-            let isFavorite = viewModel.item.userData?.isFavorite == true
-
-            Button {
-                viewModel.send(.toggleIsFavorite)
-            } label: {
-                Label(L10n.favorite, systemImage: isFavorite ? "heart.fill" : "heart")
-            }
-            .buttonStyle(
-                .tintedMaterial(
-                    tint: UIDevice.isTV ? .pink : .red,
-                    foregroundColor: UIDevice.isTV ? .primary : .white
-                )
-            )
-            .isSelected(isFavorite)
-            .labelStyle(.iconOnly)
-            #if os(tvOS)
-                .focused($focusedButtonIndex, equals: index)
-            #endif
-        }
-
-        // MARK: - Versions Menu
-
-        @ViewBuilder
-        private func versionsMenu(at index: Int) -> some View {
-            let selected = viewModel.selectedMediaSource
-
-            Menu {
-                ForEach(mediaSources, id: \.id) { source in
-                    Button {
-                        viewModel.send(.selectMediaSource(source))
+            if type.isMenu && !(type == .trailers && ctx.trailerCount == 1) {
+                if type.showTitle {
+                    Menu {
+                        type.menuContent(in: ctx, onAction: handleAction)
                     } label: {
-                        if source.id == selected?.id {
-                            Label(source.displayTitle, systemImage: "checkmark")
-                        } else {
-                            Text(source.displayTitle)
-                        }
+                        Label(type.displayTitle, systemImage: type.systemImage(isSelected: isSelected))
                     }
+                    .buttonStyle(
+                        .tintedMaterial(
+                            tint: type.tint,
+                            foregroundColor: type.foregroundColor
+                        )
+                    )
+                    .isSelected(isSelected)
+                    .labelStyle(.titleAndIcon)
+                } else {
+                    Menu {
+                        type.menuContent(in: ctx, onAction: handleAction)
+                    } label: {
+                        Label(type.displayTitle, systemImage: type.systemImage(isSelected: isSelected))
+                    }
+                    .buttonStyle(
+                        .tintedMaterial(
+                            tint: type.tint,
+                            foregroundColor: type.foregroundColor
+                        )
+                    )
+                    .isSelected(isSelected)
+                    .labelStyle(.iconOnly)
                 }
-            } label: {
-                Label(L10n.version, systemImage: "list.dash")
+            } else {
+                if type.showTitle {
+                    Button {
+                        if let action = type.primaryAction(in: ctx) {
+                            handleAction(action)
+                        }
+                    } label: {
+                        Label(type.displayTitle, systemImage: type.systemImage(isSelected: isSelected))
+                    }
+                    .buttonStyle(
+                        .tintedMaterial(
+                            tint: type.tint,
+                            foregroundColor: type.foregroundColor
+                        )
+                    )
+                    .isSelected(isSelected)
+                    .labelStyle(.titleAndIcon)
+                } else {
+                    Button {
+                        if let action = type.primaryAction(in: ctx) {
+                            handleAction(action)
+                        }
+                    } label: {
+                        Label(type.displayTitle, systemImage: type.systemImage(isSelected: isSelected))
+                    }
+                    .buttonStyle(
+                        .tintedMaterial(
+                            tint: type.tint,
+                            foregroundColor: type.foregroundColor
+                        )
+                    )
+                    .isSelected(isSelected)
+                    .labelStyle(.iconOnly)
+                }
             }
-            .buttonStyle(.material)
-            .labelStyle(.iconOnly)
-            #if os(tvOS)
-                .focused($focusedButtonIndex, equals: index)
-            #endif
         }
 
-        // MARK: - Trailers Button
+        @ViewBuilder
+        private func buttonView(for type: ActionButtonType) -> some View {
+            let ctx = context
+            let isSelected = type.isSelected(in: ctx)
+
+            if type.isMenu {
+                menuButtonView(for: type, isSelected: isSelected)
+            } else {
+                standardButtonView(for: type, isSelected: isSelected)
+            }
+        }
 
         @ViewBuilder
-        private func trailersButton(at index: Int) -> some View {
-            let showLocal = enabledTrailers.contains(.local) && localTrailers.isNotEmpty
-            let showExternal = enabledTrailers.contains(.external) && externalTrailers.isNotEmpty
-            let totalCount = (showLocal ? localTrailers.count : 0) + (showExternal ? externalTrailers.count : 0)
-
-            if totalCount == 1 {
-                Button {
-                    if showLocal, let trailer = localTrailers.first {
-                        playLocalTrailer(trailer)
-                    } else if showExternal, let trailer = externalTrailers.first {
-                        playExternalTrailer(trailer)
-                    }
-                } label: {
-                    Label(L10n.trailer, systemImage: "movieclapper")
+        private func standardButtonView(for type: ActionButtonType, isSelected: Bool) -> some View {
+            Button {
+                if let action = type.primaryAction(in: context) {
+                    handleAction(action)
                 }
-                .buttonStyle(.material)
-                .labelStyle(.iconOnly)
-                #if os(tvOS)
-                    .focused($focusedButtonIndex, equals: index)
-                #endif
+            } label: {
+                Label(type.displayTitle, systemImage: type.systemImage(isSelected: isSelected))
+            }
+            .buttonStyle(
+                .tintedMaterial(
+                    tint: type.tint,
+                    foregroundColor: type.foregroundColor
+                )
+            )
+            .isSelected(isSelected)
+            .labelStyle(.iconOnly)
+        }
+
+        @ViewBuilder
+        private func menuButtonView(for type: ActionButtonType, isSelected: Bool) -> some View {
+            let ctx = context
+
+            if type == .trailers && ctx.trailerCount == 1 {
+                standardButtonView(for: type, isSelected: isSelected)
             } else {
                 Menu {
-                    if showLocal {
-                        Section(L10n.local) {
-                            ForEach(localTrailers) { trailer in
-                                Button {
-                                    playLocalTrailer(trailer)
-                                } label: {
-                                    Label(trailer.displayTitle, systemImage: "play.fill")
-                                }
-                            }
-                        }
-                    }
-
-                    if showExternal {
-                        Section(L10n.external) {
-                            ForEach(externalTrailers, id: \.self) { trailer in
-                                Button {
-                                    playExternalTrailer(trailer)
-                                } label: {
-                                    Label(trailer.name ?? L10n.trailer, systemImage: "arrow.up.forward")
-                                }
-                            }
-                        }
-                    }
+                    type.menuContent(in: ctx, onAction: handleAction)
                 } label: {
-                    Label(L10n.trailer, systemImage: "movieclapper")
+                    Label(type.displayTitle, systemImage: type.systemImage(isSelected: isSelected))
                 }
                 .buttonStyle(.material)
                 .labelStyle(.iconOnly)
-                #if os(tvOS)
-                    .focused($focusedButtonIndex, equals: index)
-                #endif
             }
-        }
-
-        // MARK: - Subtitles Button
-
-        @ViewBuilder
-        private func subtitlesButton(at index: Int) -> some View {
-            Button {
-                router.route(to: .searchSubtitle(viewModel: .init(item: viewModel.item)))
-            } label: {
-                Label(L10n.subtitles, systemImage: "captions.bubble")
-            }
-            .buttonStyle(.material)
-            .labelStyle(.iconOnly)
-            #if os(tvOS)
-                .focused($focusedButtonIndex, equals: index)
-            #endif
-        }
-
-        // MARK: - Refresh Menu
-
-        @ViewBuilder
-        private func refreshMenu(at index: Int) -> some View {
-            Menu {
-                Section(L10n.metadata) {
-                    Button(L10n.findMissing, systemImage: "magnifyingglass") {
-                        handleRefresh(.findMissing)
-                    }
-                    Button(L10n.replaceMetadata, systemImage: "arrow.clockwise") {
-                        handleRefresh(.replaceMetadata)
-                    }
-                    Button(L10n.replaceImages, systemImage: "photo") {
-                        handleRefresh(.replaceImages)
-                    }
-                    Button(L10n.replaceAll, systemImage: "staroflife") {
-                        handleRefresh(.replaceAll)
-                    }
-                }
-            } label: {
-                Label(L10n.refreshMetadata, systemImage: "arrow.clockwise")
-            }
-            .buttonStyle(.material)
-            .labelStyle(.iconOnly)
-            #if os(tvOS)
-                .focused($focusedButtonIndex, equals: index)
-            #endif
-        }
-
-        // MARK: - Edit Button
-
-        @ViewBuilder
-        private func editButton(at index: Int) -> some View {
-            Button {
-                router.route(to: .itemEditor(viewModel: viewModel))
-            } label: {
-                Label(L10n.edit, systemImage: "pencil")
-            }
-            .buttonStyle(.material)
-            .labelStyle(.iconOnly)
-            #if os(tvOS)
-                .focused($focusedButtonIndex, equals: index)
-            #endif
-        }
-
-        // MARK: - Delete Button
-
-        @ViewBuilder
-        private func deleteButton(at index: Int) -> some View {
-            Button(role: .destructive) {
-                showConfirmationDialog = true
-            } label: {
-                Label(L10n.delete, systemImage: "trash")
-            }
-            .buttonStyle(.material)
-            .labelStyle(.iconOnly)
-            #if os(tvOS)
-                .focused($focusedButtonIndex, equals: index)
-            #endif
         }
 
         // MARK: - Overflow Menu
 
         @ViewBuilder
-        private func overflowMenu(availableWidth: CGFloat) -> some View {
-            let overflow = overflowIndices(availableWidth: availableWidth)
-            let overflowTypes = overflow.compactMap { index -> ActionButtonType? in
-                guard index > 0 && index < visibleButtons.count else { return nil }
-                return visibleButtons[index]
-            }
+        private func overflowMenu(types: [ActionButtonType]) -> some View {
+            let ctx = context
 
-            if overflowTypes.isEmpty {
-                EmptyView()
-            } else {
-                Menu {
-                    ForEach(overflowTypes) { type in
-                        overflowMenuItem(for: type)
-                    }
-                } label: {
-                    Label(L10n.options, systemImage: "ellipsis")
-                        .rotationEffect(.degrees(90))
+            Menu {
+                ForEach(types) { type in
+                    overflowMenuItem(for: type, in: ctx)
                 }
-                .buttonStyle(.material)
-                .labelStyle(.iconOnly)
-                #if os(tvOS)
-                    .focused($focusedButtonIndex, equals: visibleButtons.count)
-                #endif
+            } label: {
+                Label(L10n.options, systemImage: "ellipsis")
             }
+            .buttonStyle(.material)
+            .labelStyle(.iconOnly)
         }
-
-        // MARK: - Overflow Menu Item
 
         @ViewBuilder
-        private func overflowMenuItem(for type: ActionButtonType) -> some View {
-            switch type {
-            case .play:
-                Button {
-                    play()
-                } label: {
-                    Label(playButtonTitle, systemImage: "play.fill")
-                }
+        private func overflowMenuItem(for type: ActionButtonType, in ctx: ActionButtonContext) -> some View {
+            let isSelected = type.isSelected(in: ctx)
 
-            case .played:
-                Button {
-                    viewModel.send(.toggleIsPlayed)
-                } label: {
-                    Label(L10n.played, systemImage: "checkmark")
-                }
-
-            case .favorite:
-                let isFavorite = viewModel.item.userData?.isFavorite == true
-                Button {
-                    viewModel.send(.toggleIsFavorite)
-                } label: {
-                    Label(L10n.favorite, systemImage: isFavorite ? "heart.fill" : "heart")
-                }
-
-            case .versions:
-                let selected = viewModel.selectedMediaSource
+            if type.isMenu && !(type == .trailers && ctx.trailerCount == 1) {
                 Menu {
-                    ForEach(mediaSources, id: \.id) { source in
-                        Button {
-                            viewModel.send(.selectMediaSource(source))
-                        } label: {
-                            if source.id == selected?.id {
-                                Label(source.displayTitle, systemImage: "checkmark")
-                            } else {
-                                Text(source.displayTitle)
-                            }
-                        }
-                    }
+                    type.menuContent(in: ctx, onAction: handleAction)
                 } label: {
-                    Label(L10n.version, systemImage: "list.dash")
+                    Label(type.displayTitle, systemImage: type.systemImage(isSelected: isSelected))
                 }
-
-            case .trailers:
-                let showLocal = enabledTrailers.contains(.local) && localTrailers.isNotEmpty
-                let showExternal = enabledTrailers.contains(.external) && externalTrailers.isNotEmpty
-                let totalCount = (showLocal ? localTrailers.count : 0) + (showExternal ? externalTrailers.count : 0)
-
-                if totalCount == 1 {
-                    Button {
-                        if showLocal, let trailer = localTrailers.first {
-                            playLocalTrailer(trailer)
-                        } else if showExternal, let trailer = externalTrailers.first {
-                            playExternalTrailer(trailer)
-                        }
-                    } label: {
-                        Label(L10n.trailer, systemImage: "movieclapper")
-                    }
-                } else {
-                    Menu {
-                        if showLocal {
-                            Section(L10n.local) {
-                                ForEach(localTrailers) { trailer in
-                                    Button {
-                                        playLocalTrailer(trailer)
-                                    } label: {
-                                        Label(trailer.displayTitle, systemImage: "play.fill")
-                                    }
-                                }
-                            }
-                        }
-
-                        if showExternal {
-                            Section(L10n.external) {
-                                ForEach(externalTrailers, id: \.self) { trailer in
-                                    Button {
-                                        playExternalTrailer(trailer)
-                                    } label: {
-                                        Label(trailer.name ?? L10n.trailer, systemImage: "arrow.up.forward")
-                                    }
-                                }
-                            }
-                        }
-                    } label: {
-                        Label(L10n.trailer, systemImage: "movieclapper")
-                    }
-                }
-
-            case .subtitles:
+            } else {
                 Button {
-                    router.route(to: .searchSubtitle(viewModel: .init(item: viewModel.item)))
-                } label: {
-                    Label(L10n.subtitles, systemImage: "captions.bubble")
-                }
-
-            case .refresh:
-                Menu {
-                    Section(L10n.metadata) {
-                        Button(L10n.findMissing, systemImage: "magnifyingglass") {
-                            handleRefresh(.findMissing)
-                        }
-                        Button(L10n.replaceMetadata, systemImage: "arrow.clockwise") {
-                            handleRefresh(.replaceMetadata)
-                        }
-                        Button(L10n.replaceImages, systemImage: "photo") {
-                            handleRefresh(.replaceImages)
-                        }
-                        Button(L10n.replaceAll, systemImage: "staroflife") {
-                            handleRefresh(.replaceAll)
-                        }
+                    if let action = type.primaryAction(in: ctx) {
+                        handleAction(action)
                     }
                 } label: {
-                    Label(L10n.refreshMetadata, systemImage: "arrow.clockwise")
+                    Label(type.displayTitle, systemImage: type.systemImage(isSelected: isSelected))
                 }
+            }
+        }
 
+        // MARK: - Action Handler
+
+        private func handleAction(_ action: ActionButtonAction) {
+            switch action {
+            case let .play(fromBeginning):
+                play(fromBeginning: fromBeginning)
+            case .togglePlayed:
+                viewModel.send(.toggleIsPlayed)
+            case .toggleFavorite:
+                viewModel.send(.toggleIsFavorite)
+            case let .selectMediaSource(source):
+                viewModel.send(.selectMediaSource(source))
+            case let .playLocalTrailer(trailer):
+                playLocalTrailer(trailer)
+            case let .playExternalTrailer(trailer):
+                playExternalTrailer(trailer)
+            case .searchSubtitles:
+                router.route(to: .searchSubtitle(viewModel: .init(item: viewModel.item)))
+            case let .refresh(refreshAction):
+                handleRefresh(refreshAction)
+            #if os(iOS)
             case .edit:
-                Button {
-                    router.route(to: .itemEditor(viewModel: viewModel))
-                } label: {
-                    Label(L10n.edit, systemImage: "pencil")
-                }
-
+                router.route(to: .itemEditor(viewModel: viewModel))
+            #endif
             case .delete:
-                Button(role: .destructive) {
-                    showConfirmationDialog = true
-                } label: {
-                    Label(L10n.delete, systemImage: "trash")
-                }
+                showConfirmationDialog = true
             }
         }
 
-        // MARK: - Overflow Calculation
-
-        private func overflowIndices(availableWidth: CGFloat) -> [Int] {
-            let secondaryCount = visibleButtons.count - 1
-            guard secondaryCount > 0 else { return [] }
-
-            switch layoutMode {
-            case .horizontal:
-                return calculateHorizontalOverflow(
-                    availableWidth: availableWidth,
-                    secondaryCount: secondaryCount
-                )
-            case .vertical:
-                return []
-            case .inline:
-                return calculateInlineOverflow(
-                    availableWidth: availableWidth,
-                    secondaryCount: secondaryCount
-                )
-            }
-        }
-
-        private func calculateHorizontalOverflow(
-            availableWidth: CGFloat,
-            secondaryCount: Int
-        ) -> [Int] {
-            let minButtonWidth = secondaryButtonConstraints.minWidth ?? buttonHeight
-
-            let row2FitsAll = canFitButtons(
-                count: secondaryCount,
-                availableWidth: availableWidth,
-                minButtonWidth: minButtonWidth,
-                reserveOverflow: false
-            )
-
-            if row2FitsAll {
-                return []
-            }
-
-            let row2Fitting = calculateRow2Fitting(
-                availableWidth: availableWidth,
-                minButtonWidth: minButtonWidth,
-                count: secondaryCount,
-                reserveOverflow: true
-            )
-
-            if row2Fitting < secondaryCount {
-                return Array((row2Fitting + 1) ... secondaryCount)
-            }
-
-            return []
-        }
-
-        private func canFitButtons(
-            count: Int,
-            availableWidth: CGFloat,
-            minButtonWidth: CGFloat,
-            reserveOverflow: Bool
-        ) -> Bool {
-            guard count > 0 else { return true }
-
-            let overflowReserved = reserveOverflow ? (overflowButtonWidth + horizontalSpacing) : 0
-            let availableForButtons = availableWidth - overflowReserved
-            let neededWidth = minButtonWidth * CGFloat(count) +
-                horizontalSpacing * CGFloat(max(0, count - 1))
-
-            return neededWidth <= availableForButtons
-        }
-
-        private func calculateRow2Fitting(
-            availableWidth: CGFloat,
-            minButtonWidth: CGFloat,
-            count: Int,
-            reserveOverflow: Bool
-        ) -> Int {
-            guard count > 0 else { return 0 }
-
-            let overflowReserved = reserveOverflow ? (overflowButtonWidth + horizontalSpacing) : 0
-            let availableForButtons = availableWidth - overflowReserved
-
-            for tryCount in (1 ... count).reversed() {
-                let neededWidth = minButtonWidth * CGFloat(tryCount) +
-                    horizontalSpacing * CGFloat(max(0, tryCount - 1))
-
-                if neededWidth <= availableForButtons {
-                    return tryCount
-                }
-            }
-
-            return 0
-        }
-
-        private func calculateInlineOverflow(
-            availableWidth: CGFloat,
-            secondaryCount: Int
-        ) -> [Int] {
-            let primaryMinWidth = primaryButtonConstraints.minWidth ?? 0
-            let secondaryTargetWidth = secondaryButtonConstraints.resolve(
-                availableWidth: availableWidth,
-                fallback: buttonHeight
-            )
-
-            let availableForSecondary = availableWidth - primaryMinWidth - horizontalSpacing
-            var fittingCount = 0
-
-            for count in (0 ... secondaryCount).reversed() {
-                let needsOverflow = count < secondaryCount
-                let overflowReserved = needsOverflow ? (overflowButtonWidth + horizontalSpacing) : 0
-                let availableForButtons = availableForSecondary - overflowReserved
-
-                if count == 0 {
-                    break
-                }
-
-                let neededWidth = secondaryTargetWidth * CGFloat(count) +
-                    CGFloat(count - 1) * horizontalSpacing
-
-                if neededWidth <= availableForButtons {
-                    fittingCount = count
-                    break
-                }
-            }
-
-            if fittingCount < secondaryCount {
-                return Array((fittingCount + 1) ... secondaryCount)
-            }
-            return []
-        }
-
-        // MARK: - Play Action
+        // MARK: - Play Actions
 
         private func play(fromBeginning: Bool = false) {
             guard let playButtonItem = viewModel.playButtonItem,
@@ -862,8 +637,6 @@ extension ItemView {
             #endif
         }
 
-        // MARK: - Play Local Trailer
-
         private func playLocalTrailer(_ trailer: BaseItemDto) {
             if let mediaSource = trailer.mediaSources?.first {
                 #if os(tvOS)
@@ -879,8 +652,6 @@ extension ItemView {
                 error = ErrorMessage(L10n.unknownError)
             }
         }
-
-        // MARK: - Play External Trailer
 
         private func playExternalTrailer(_ trailer: MediaURL) {
             guard let urlString = trailer.url,
@@ -898,7 +669,7 @@ extension ItemView {
             }
         }
 
-        // MARK: - Handle Refresh
+        // MARK: - Refresh Handler
 
         private func handleRefresh(_ action: RefreshAction) {
             switch action {
@@ -932,5 +703,47 @@ extension ItemView {
                 )
             }
         }
+    }
+}
+
+// MARK: - ButtonContext
+
+struct ActionButtonContext {
+    let item: BaseItemDto
+    let mediaSources: [MediaSourceInfo]
+    let selectedMediaSource: MediaSourceInfo?
+    let localTrailers: [BaseItemDto]
+    let externalTrailers: [MediaURL]
+    let enabledTrailerTypes: TrailerSelection
+    let canDelete: Bool
+    let canEdit: Bool
+    let canRefresh: Bool
+    let canManageSubtitles: Bool
+    let isPlayed: Bool
+    let isFavorite: Bool
+
+    var hasMultipleVersions: Bool {
+        true
+        // mediaSources.count > 1
+    }
+
+    var hasTrailers: Bool {
+        let hasLocal = enabledTrailerTypes.contains(.local) && localTrailers.isNotEmpty
+        let hasExternal = enabledTrailerTypes.contains(.external) && externalTrailers.isNotEmpty
+        return hasLocal || hasExternal
+    }
+
+    var trailerCount: Int {
+        let localCount = enabledTrailerTypes.contains(.local) ? localTrailers.count : 0
+        let externalCount = enabledTrailerTypes.contains(.external) ? externalTrailers.count : 0
+        return localCount + externalCount
+    }
+
+    var showLocalTrailers: Bool {
+        enabledTrailerTypes.contains(.local) && localTrailers.isNotEmpty
+    }
+
+    var showExternalTrailers: Bool {
+        enabledTrailerTypes.contains(.external) && externalTrailers.isNotEmpty
     }
 }

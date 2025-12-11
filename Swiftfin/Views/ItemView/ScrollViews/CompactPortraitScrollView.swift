@@ -181,10 +181,9 @@ extension ItemView.CompactPosterScrollView {
 
                 ItemView.ActionButtonStack(
                     viewModel: viewModel,
-                    layoutMode: .inline(alignment: .leading),
+                    layoutMode: .horizontal,
                     buttonHeight: 45,
-                    primaryButtonConstraints: .fixed(130),
-                    secondaryButtonConstraints: .fixed(45)
+                    primaryButtonWidth: 130
                 )
             }
         }

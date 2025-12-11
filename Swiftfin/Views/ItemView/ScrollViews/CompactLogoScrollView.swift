@@ -123,7 +123,6 @@ extension ItemView.CompactLogoScrollView {
 
                 ItemView.ActionButtonStack(viewModel: viewModel)
                     .foregroundStyle(.white)
-                    .frame(maxWidth: 300)
             }
         }
     }
