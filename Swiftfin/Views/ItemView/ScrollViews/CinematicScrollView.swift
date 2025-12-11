@@ -133,17 +133,9 @@ extension ItemView.CinematicScrollView {
                     .foregroundColor(Color(UIColor.lightGray))
                     .padding(.horizontal)
 
-                    Group {
-                        if viewModel.item.presentPlayButton {
-                            ItemView.PlayButton(viewModel: viewModel)
-                                .frame(height: 50)
-                        }
-
-                        ItemView.ActionButtonHStack(viewModel: viewModel)
-                            .foregroundStyle(.white)
-                            .frame(height: 50)
-                    }
-                    .frame(maxWidth: 300)
+                    ItemView.ActionButtonStack(viewModel: viewModel)
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: 300)
                 }
                 .frame(maxWidth: .infinity)
 

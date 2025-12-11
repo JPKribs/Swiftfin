@@ -179,19 +179,13 @@ extension ItemView.CompactPosterScrollView {
                         .padding(.bottom)
                 }
 
-                HStack(alignment: .center) {
-
-                    if viewModel.item.presentPlayButton {
-                        ItemView.PlayButton(viewModel: viewModel)
-                            .frame(width: 130)
-                    }
-
-                    Spacer()
-
-                    ItemView.ActionButtonHStack(viewModel: viewModel, equalSpacing: false)
-                        .foregroundStyle(.white)
-                }
-                .frame(height: 45)
+                ItemView.ActionButtonStack(
+                    viewModel: viewModel,
+                    layoutMode: .inline(alignment: .leading),
+                    buttonHeight: 45,
+                    primaryButtonConstraints: .fixed(130),
+                    secondaryButtonConstraints: .fixed(45)
+                )
             }
         }
     }

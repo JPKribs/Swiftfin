@@ -180,14 +180,10 @@ extension ItemView.iPadOSCinematicScrollView {
                                 .posterStyle(.portrait, contentMode: .fit)
                                 .frame(width: 200)
                                 .accessibilityIgnoresInvertColors()
-                        } else if viewModel.item.presentPlayButton {
-                            ItemView.PlayButton(viewModel: viewModel)
-                                .frame(height: 50)
                         }
 
-                        ItemView.ActionButtonHStack(viewModel: viewModel)
+                        ItemView.ActionButtonStack(viewModel: viewModel)
                             .foregroundStyle(.white)
-                            .frame(height: 50)
                     }
                     .frame(width: 250)
                 }

@@ -77,13 +77,7 @@ extension ItemView {
                         alignment: .center
                     )
 
-                    if viewModel.item.presentPlayButton {
-                        ItemView.PlayButton(viewModel: viewModel)
-                            .frame(height: 50)
-                    }
-
-                    ItemView.ActionButtonHStack(viewModel: viewModel)
-                        .frame(height: 50)
+                    ItemView.ActionButtonStack(viewModel: viewModel)
                 }
                 .frame(maxWidth: 300)
             }

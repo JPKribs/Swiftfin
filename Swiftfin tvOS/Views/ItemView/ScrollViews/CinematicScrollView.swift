@@ -112,7 +112,6 @@ extension ItemView {
 
         enum CinematicHeaderFocusLayer: Hashable {
             case top
-            case playButton
             case actionButtons
         }
 
@@ -196,14 +195,13 @@ extension ItemView {
                                 .posterStyle(.portrait, contentMode: .fill)
                                 .cornerRadius(10)
                                 .accessibilityIgnoresInvertColors()
-                        } else if viewModel.item.presentPlayButton {
-                            ItemView.PlayButton(viewModel: viewModel)
-                                .focused($focusedLayer, equals: .playButton)
-                                .frame(height: 100)
                         }
-                        ItemView.ActionButtonHStack(viewModel: viewModel)
-                            .focused($focusedLayer, equals: .actionButtons)
-                            .frame(height: 100)
+
+                        ItemView.ActionButtonStack(
+                            viewModel: viewModel,
+                            focusTag: "actionButtons"
+                        )
+                        .focused($focusedLayer, equals: .actionButtons)
                     }
                     .frame(width: 450)
                     .padding(.leading, 150)
@@ -212,11 +210,7 @@ extension ItemView {
             .padding(.horizontal, 50)
             .onChange(of: focusedLayer) { _, layer in
                 if layer == .top {
-                    if viewModel.item.presentPlayButton {
-                        focusedLayer = .playButton
-                    } else {
-                        focusedLayer = .actionButtons
-                    }
+                    focusedLayer = .actionButtons
                 }
             }
         }
