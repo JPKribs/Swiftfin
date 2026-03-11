@@ -41,8 +41,8 @@ final class ChannelLibraryViewModel: PagingLibraryViewModel<ChannelProgram> {
         let maxStartDate: Date
 
         if isToday {
-            // Show from 1 hour ago through end of today
-            minEndDate = calendar.date(byAdding: .hour, value: -1, to: .now) ?? .now
+            // Show from 30 minutes ago through end of today
+            minEndDate = calendar.date(byAdding: .minute, value: -30, to: .now) ?? .now
             let tomorrow = calendar.date(byAdding: .day, value: 1, to: .now) ?? .now
             maxStartDate = calendar.startOfDay(for: tomorrow)
         } else {

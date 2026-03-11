@@ -35,7 +35,7 @@ extension GuideView {
                             .font(.caption2)
                             .fontWeight(.medium)
                             .monospacedDigit()
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(Color.secondary)
                             .padding(.top, 2)
 
                         Rectangle()

@@ -17,9 +17,6 @@ extension GuideView {
         @Default(.accentColor)
         private var accentColor
 
-        @FocusState
-        private var isFocused: Bool
-
         private let program: BaseItemDto
         private let width: CGFloat
         private let rowHeight: CGFloat
@@ -32,14 +29,78 @@ extension GuideView {
             self.action = action
         }
 
-        // MARK: - Layout Constants
-
-        private var imageHeight: CGFloat {
-            rowHeight - (imagePadding * 2)
+        private var titleFont: Font {
+            UIDevice.isTV ? .callout : .caption
         }
 
-        private var imagePadding: CGFloat {
+        private var timeFont: Font {
+            UIDevice.isTV ? .footnote : .caption2
+        }
+
+        private var cornerRadius: CGFloat {
+            UIDevice.isTV ? 10 : 8
+        }
+
+        private var showText: Bool {
+            width >= GuideTimeScale.pointsPerHour / 4
+        }
+
+        private var contentPadding: CGFloat {
             UIDevice.isTV ? 12 : 8
+        }
+
+        var body: some View {
+            Button(action: action) {
+                ZStack {
+                    if program.isAiring {
+                        accentColor.opacity(0.5)
+                    } else {
+                        Color.gray.opacity(0.3)
+                    }
+
+                    if showText {
+                        VStack(alignment: .leading, spacing: UIDevice.isTV ? 4 : 2) {
+                            Text(program.displayTitle)
+                                .font(titleFont)
+                                .fontWeight(program.isAiring ? .bold : .regular)
+                                .lineLimit(1)
+
+                            HStack(spacing: 2) {
+                                if let startDate = program.startDate {
+                                    Text(startDate, style: .time)
+                                }
+                                Text("-")
+                                if let endDate = program.endDate {
+                                    Text(endDate, style: .time)
+                                }
+                            }
+                            .font(timeFont)
+                            .foregroundStyle(Color.secondary)
+                            .lineLimit(1)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, contentPadding)
+                    }
+                }
+                .frame(width: width, height: rowHeight, alignment: .leading)
+                .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
+            }
+            .buttonStyle(.card)
+        }
+    }
+
+    struct GroupedProgramCell: View {
+
+        @Default(.accentColor)
+        private var accentColor
+
+        let programs: [BaseItemDto]
+        let width: CGFloat
+        let rowHeight: CGFloat
+        let onProgramSelected: (BaseItemDto) -> Void
+
+        private var cornerRadius: CGFloat {
+            UIDevice.isTV ? 10 : 8
         }
 
         private var titleFont: Font {
@@ -50,106 +111,69 @@ extension GuideView {
             UIDevice.isTV ? .footnote : .caption2
         }
 
-        private var dividerWidth: CGFloat {
-            UIDevice.isTV ? 2 : 1
+        private var sortedPrograms: [BaseItemDto] {
+            programs.sorted { a, b in
+                if a.isAiring != b.isAiring {
+                    return a.isAiring
+                }
+                return (a.startDate ?? .distantPast) < (b.startDate ?? .distantPast)
+            }
         }
 
-        private var showImage: Bool {
-            width >= GuideTimeScale.pointsPerHour / 3
+        private var hasAiringProgram: Bool {
+            programs.contains { $0.isAiring }
         }
 
-        private var showText: Bool {
-            width >= GuideTimeScale.pointsPerHour / 4
-        }
+        private let maxVisibleNames = 3
 
-        // MARK: - Body
+        private var contentPadding: CGFloat {
+            UIDevice.isTV ? 12 : 8
+        }
 
         var body: some View {
-            Button(action: action) {
+            Menu {
+                ForEach(sortedPrograms, id: \.id) { program in
+                    Button {
+                        onProgramSelected(program)
+                    } label: {
+                        Text(program.displayTitle)
 
+                        if let startDate = program.startDate,
+                           let endDate = program.endDate
+                        {
+                            Text("\(startDate, style: .time) – \(endDate, style: .time)")
+                        }
+                    }
+                }
+            } label: {
                 ZStack {
-
-                    if program.isAiring {
+                    if hasAiringProgram {
                         accentColor.opacity(0.5)
                     } else {
                         Color.gray.opacity(0.3)
                     }
 
-                    HStack(spacing: imagePadding) {
-
-                        if showImage {
-                            PosterImage(
-                                item: program,
-                                type: program.preferredPosterDisplayType,
-                                contentMode: .fit
-                            )
-                            .frame(height: imageHeight)
-                            .cornerRadius(UIDevice.isTV ? 6 : 8)
-                            .posterShadow()
-                            .padding(imagePadding)
-                            #if os(tvOS)
-                                .hoverEffectDisabled()
-                            #endif
+                    VStack(alignment: .leading, spacing: UIDevice.isTV ? 3 : 1) {
+                        ForEach(Array(sortedPrograms.prefix(maxVisibleNames).enumerated()), id: \.offset) { _, program in
+                            Text(program.displayTitle)
+                                .font(titleFont)
+                                .fontWeight(program.isAiring ? .bold : .regular)
+                                .lineLimit(1)
                         }
 
-                        AlternateLayoutView {
-                            Color.clear
-                                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-                        } content: {
-                            if showText {
-                                VStack(alignment: .leading, spacing: UIDevice.isTV ? 4 : 2) {
-                                    Text(program.displayTitle)
-                                        .font(titleFont)
-                                        .fontWeight(program.isAiring ? .bold : .regular)
-                                        .lineLimit(1)
-
-                                    HStack(spacing: 2) {
-                                        if let startDate = program.startDate {
-                                            Text(startDate, style: .time)
-                                        }
-
-                                        Text("-")
-
-                                        if let endDate = program.endDate {
-                                            Text(endDate, style: .time)
-                                        }
-                                    }
-                                    .font(timeFont)
-                                    .foregroundStyle(.secondary)
-                                    .lineLimit(1)
-                                }
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                            }
+                        if programs.count > maxVisibleNames {
+                            Text("…")
+                                .font(titleFont)
+                                .foregroundStyle(Color.secondary)
                         }
                     }
-
-                    HStack(spacing: 0) {
-                        Spacer(minLength: 0)
-                        Rectangle()
-                            .fill(Color.primary.opacity(0.2))
-                            .frame(width: dividerWidth)
-                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, contentPadding)
                 }
-                .frame(
-                    width: width,
-                    height: rowHeight,
-                    alignment: .leading
-                )
-                .overlay {
-                    if isFocused {
-                        Rectangle()
-                            .strokeBorder(Color.primary, lineWidth: 4)
-                    }
-                }
-                .clipped()
+                .frame(width: width, height: rowHeight)
+                .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
             }
-            .focusedValue(\.focusedPoster, AnyPoster(program))
-            #if os(iOS)
-                .buttonStyle(.plain)
-            #elseif os(tvOS)
-                .buttonStyle(.borderless)
-                .focused($isFocused)
-            #endif
+            .buttonStyle(.card)
         }
     }
 }

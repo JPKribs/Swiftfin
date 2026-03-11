@@ -23,19 +23,17 @@ extension GuideView {
         private let program: BaseItemDto
         private let onPlay: () -> Void
 
-        private var playButtonFocused: FocusState<Bool>.Binding
+        var playButtonFocused: FocusState<Bool>.Binding
 
-        init(program: BaseItemDto, onPlay: @escaping () -> Void, playButtonFocused: FocusState<Bool>.Binding) {
+        init(program: BaseItemDto, playButtonFocused: FocusState<Bool>.Binding, onPlay: @escaping () -> Void) {
             self.program = program
-            self.onPlay = onPlay
             self.playButtonFocused = playButtonFocused
+            self.onPlay = onPlay
         }
 
         private var isCompact: Bool {
             horizontalSizeClass == .compact
         }
-
-        // MARK: - Shared Components
 
         @ViewBuilder
         private var timeInfo: some View {
@@ -56,7 +54,7 @@ extension GuideView {
                     Text("LIVE")
                         .font(.caption2)
                         .fontWeight(.bold)
-                        .foregroundStyle(.white)
+                        .foregroundStyle(Color.white)
                         .padding(.horizontal, 6)
                         .padding(.vertical, 2)
                         .background(.red, in: RoundedRectangle(cornerRadius: 4))
@@ -71,7 +69,7 @@ extension GuideView {
                 if let channelName = program.channelName {
                     Text(channelName)
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color.secondary)
                 }
 
                 Marquee(program.displayTitle)
@@ -82,14 +80,14 @@ extension GuideView {
                 if let tagline = program.taglines?.first {
                     Text(tagline)
                         .font(.caption.weight(.semibold))
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color.secondary)
                         .lineLimit(1)
                 }
 
                 if let overview = program.overview, overview.isNotEmpty {
                     Text(overview)
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color.secondary)
                         .lineLimit(3)
                 }
             }
@@ -116,8 +114,6 @@ extension GuideView {
             .focused(playButtonFocused)
         }
 
-        // MARK: - Compact View
-
         private let compactPosterWidth: CGFloat = 130
         private let compactButtonHeight: CGFloat = 40
         private let compactSpacing: CGFloat = 6
@@ -125,7 +121,6 @@ extension GuideView {
         @ViewBuilder
         private var compactView: some View {
             AlternateLayoutView(alignment: .topLeading) {
-                // Hidden layout: measures poster + button height
                 VStack(spacing: compactSpacing) {
                     Color.clear
                         .posterAspectRatio(program.preferredPosterDisplayType, contentMode: .fit)
@@ -157,8 +152,6 @@ extension GuideView {
                 .padding(EdgeInsets.edgePadding)
             }
         }
-
-        // MARK: - Regular View
 
         private var regularPosterWidth: CGFloat {
             UIDevice.isTV ? 250 : 180
@@ -208,8 +201,6 @@ extension GuideView {
                 .padding(EdgeInsets.edgePadding)
             }
         }
-
-        // MARK: - Body
 
         var body: some View {
             if isCompact {

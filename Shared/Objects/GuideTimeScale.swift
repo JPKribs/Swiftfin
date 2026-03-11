@@ -12,8 +12,6 @@ import SwiftUI
 /// Layout constants and time-to-pixel conversion for the EPG guide grid.
 enum GuideTimeScale {
 
-    // MARK: - Platform Constants
-
     static let pointsPerHour: CGFloat = {
         #if os(tvOS)
         return 600
@@ -79,10 +77,27 @@ enum GuideTimeScale {
     /// Keeps very short programs visible without distorting the time scale.
     static let minimumCellWidth: CGFloat = pointsPerHour / 60
 
+    /// Horizontal gap between adjacent program cells within a row.
+    static let cellGap: CGFloat = {
+        #if os(tvOS)
+        return 16
+        #else
+        if UIDevice.isPad {
+            return 3
+        } else {
+            return 2
+        }
+        #endif
+    }()
+
+    /// Duration threshold (in seconds) below which adjacent programs
+    /// are grouped into a single Menu cell.
+    static let groupingThreshold: TimeInterval = 15 * 60
+
     /// Vertical spacing between channel rows in the guide grid.
     static let rowSpacing: CGFloat = {
         #if os(tvOS)
-        return 12
+        return 20
         #else
         if UIDevice.isPad {
             return 6
@@ -92,12 +107,10 @@ enum GuideTimeScale {
         #endif
     }()
 
-    // MARK: - Time Window
-
-    /// The start of the guide time window (1 hour ago).
+    /// The start of the guide time window (30 minutes ago).
     /// Matches `ChannelLibraryViewModel`'s fetch window.
     static func timeWindowStart(relativeTo now: Date = .now) -> Date {
-        Calendar.current.date(byAdding: .hour, value: -1, to: now) ?? now
+        Calendar.current.date(byAdding: .minute, value: -30, to: now) ?? now
     }
 
     /// The end of the guide time window (midnight / start of next day).
@@ -107,8 +120,6 @@ enum GuideTimeScale {
         let tomorrow = calendar.date(byAdding: .day, value: 1, to: now) ?? now
         return calendar.startOfDay(for: tomorrow)
     }
-
-    // MARK: - Conversion Helpers
 
     /// The x-position in points for a given date, relative to the time window start.
     static func xPosition(for date: Date, relativeTo start: Date) -> CGFloat {

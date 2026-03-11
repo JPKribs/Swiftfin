@@ -41,8 +41,6 @@ extension GuideView {
             return formatter.string(from: date)
         }
 
-        // MARK: - Layout
-
         private var pillPaddingH: CGFloat {
             UIDevice.isTV ? 24 : 14
         }
@@ -55,32 +53,39 @@ extension GuideView {
             UIDevice.isTV ? 12 : 10
         }
 
-        // MARK: - Body
-
         var body: some View {
-            HStack(spacing: UIDevice.isTV ? 24 : 8) {
-                ForEach(days, id: \.self) { date in
-                    Button {
-                        selectedDate = date
-                        onDateSelected(date)
-                    } label: {
-                        Text(label(for: date))
-                            .font(.callout)
-                            .padding(.horizontal, pillPaddingH)
-                            .padding(.vertical, pillPaddingV)
+            AlternateLayoutView(alignment: .topLeading) {
+                Text(L10n.today)
+                    .font(.callout)
+                    .padding(.horizontal, pillPaddingH)
+                    .padding(.vertical, pillPaddingV)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .edgePadding(.vertical)
+            } content: {
+                HStack(spacing: UIDevice.isTV ? 24 : 8) {
+                    ForEach(days, id: \.self) { date in
+                        Button {
+                            selectedDate = date
+                            onDateSelected(date)
+                        } label: {
+                            Text(label(for: date))
+                                .font(.callout)
+                                .padding(.horizontal, pillPaddingH)
+                                .padding(.vertical, pillPaddingV)
+                        }
+                        .buttonStyle(.tintedMaterial(
+                            tint: accentColor,
+                            foregroundColor: accentColor.overlayColor
+                        ))
+                        .isSelected(calendar.isDate(date, inSameDayAs: selectedDate))
                     }
-                    .buttonStyle(.tintedMaterial(
-                        tint: accentColor,
-                        foregroundColor: accentColor.overlayColor
-                    ))
-                    .isSelected(calendar.isDate(date, inSameDayAs: selectedDate))
                 }
+                .scrollIfLargerThanContainer(axes: .horizontal)
+                .edgePadding()
+                #if os(tvOS)
+                    .scrollClipDisabled()
+                #endif
             }
-            .scrollIfLargerThanContainer(axes: .horizontal)
-            .edgePadding()
-            #if os(tvOS)
-                .scrollClipDisabled()
-            #endif
         }
     }
 }
