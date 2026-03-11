@@ -134,13 +134,6 @@ struct GuideView: PlatformView {
 
     // MARK: - Day Picker
 
-    @ViewBuilder
-    private var dayPicker: some View {
-        DayPicker(selectedDate: $selectedDate) { date in
-            selectDay(date)
-        }
-    }
-
     // MARK: - tvOS Content Layout (Detail 33% + Grid 67%)
 
     @ViewBuilder
@@ -157,8 +150,10 @@ struct GuideView: PlatformView {
 
                 Divider()
 
-                dayPicker
-                    .padding(.vertical, 12)
+                DayPicker(selectedDate: $selectedDate) { date in
+                    selectDay(date)
+                }
+                .padding(.vertical, 12)
 
                 guideGrid
                     .frame(height: gridHeight)
@@ -179,8 +174,11 @@ struct GuideView: PlatformView {
                 Divider()
             }
 
-            dayPicker
-                .padding(.vertical, 8)
+            DayPicker(selectedDate: $selectedDate) { date in
+                selectDay(date)
+            }
+            .frame(height: 40)
+            .padding(.vertical, 8)
 
             guideGrid
         }

@@ -78,7 +78,9 @@ extension GuideView {
             }
             .scrollIfLargerThanContainer(axes: .horizontal)
             .edgePadding()
-            .scrollClipDisabled()
+            #if os(tvOS)
+                .scrollClipDisabled()
+            #endif
         }
     }
 }
