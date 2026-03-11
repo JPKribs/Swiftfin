@@ -12,6 +12,10 @@ import JellyfinAPI
 
 final class ChannelLibraryViewModel: PagingLibraryViewModel<ChannelProgram> {
 
+    /// The date whose programming should be displayed.
+    /// Changing this and calling `.refresh` will fetch programs for the new day.
+    var selectedDate: Date = .now
+
     override func get(page: Int) async throws -> [ChannelProgram] {
 
         var parameters = Paths.GetLiveTvChannelsParameters()
@@ -31,9 +35,22 @@ final class ChannelLibraryViewModel: PagingLibraryViewModel<ChannelProgram> {
     private func getPrograms(for channels: [BaseItemDto]) async throws -> [ChannelProgram] {
 
         let calendar = Calendar.current
-        let minEndDate = calendar.date(byAdding: .hour, value: -1, to: .now) ?? .now
-        let tomorrow = calendar.date(byAdding: .day, value: 1, to: .now) ?? .now
-        let maxStartDate = calendar.startOfDay(for: tomorrow)
+        let isToday = calendar.isDateInToday(selectedDate)
+
+        let minEndDate: Date
+        let maxStartDate: Date
+
+        if isToday {
+            // Show from 1 hour ago through end of today
+            minEndDate = calendar.date(byAdding: .hour, value: -1, to: .now) ?? .now
+            let tomorrow = calendar.date(byAdding: .day, value: 1, to: .now) ?? .now
+            maxStartDate = calendar.startOfDay(for: tomorrow)
+        } else {
+            // Show the full selected day
+            minEndDate = calendar.startOfDay(for: selectedDate)
+            let nextDay = calendar.date(byAdding: .day, value: 1, to: selectedDate) ?? selectedDate
+            maxStartDate = calendar.startOfDay(for: nextDay)
+        }
 
         var parameters = Paths.GetLiveTvProgramsParameters()
         parameters.channelIDs = channels.compactMap(\.id)

@@ -119,7 +119,7 @@ extension GuideView {
         // MARK: - Compact View
 
         private let compactPosterWidth: CGFloat = 130
-        private let compactButtonHeight: CGFloat = 30
+        private let compactButtonHeight: CGFloat = 40
         private let compactSpacing: CGFloat = 6
 
         @ViewBuilder
@@ -173,7 +173,6 @@ extension GuideView {
         @ViewBuilder
         private var regularView: some View {
             AlternateLayoutView(alignment: .topLeading) {
-                // Hidden layout: measures poster + button height
                 VStack(spacing: regularSpacing) {
                     Color.clear
                         .posterAspectRatio(program.preferredPosterDisplayType, contentMode: .fit)

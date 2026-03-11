@@ -22,18 +22,20 @@ extension GuideView {
 
         private let program: BaseItemDto
         private let width: CGFloat
+        private let rowHeight: CGFloat
         private let action: () -> Void
 
-        init(program: BaseItemDto, width: CGFloat, action: @escaping () -> Void) {
+        init(program: BaseItemDto, width: CGFloat, rowHeight: CGFloat, action: @escaping () -> Void) {
             self.program = program
             self.width = width
+            self.rowHeight = rowHeight
             self.action = action
         }
 
         // MARK: - Layout Constants
 
         private var imageHeight: CGFloat {
-            UIDevice.isTV ? 60 : GuideTimeScale.rowHeight - 16
+            rowHeight - (imagePadding * 2)
         }
 
         private var imagePadding: CGFloat {
@@ -130,7 +132,7 @@ extension GuideView {
                 }
                 .frame(
                     width: width,
-                    height: GuideTimeScale.rowHeight,
+                    height: rowHeight,
                     alignment: .leading
                 )
                 .overlay {

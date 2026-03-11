@@ -25,7 +25,8 @@ struct GuideView: PlatformView {
 
     @State
     private var selectedProgram: BaseItemDto?
-
+    @State
+    private var selectedDate: Date = .now
     @State
     private var timeRange: ClosedRange<Date> = {
         let start = GuideTimeScale.timeWindowStart()
@@ -42,8 +43,27 @@ struct GuideView: PlatformView {
         return selectedProgram
     }
 
+    private var isToday: Bool {
+        Calendar.current.isDateInToday(selectedDate)
+    }
+
     private func refreshTimeRange() {
-        timeRange = GuideTimeScale.timeWindowStart() ... GuideTimeScale.timeWindowEnd()
+        let calendar = Calendar.current
+        if isToday {
+            timeRange = GuideTimeScale.timeWindowStart() ... GuideTimeScale.timeWindowEnd()
+        } else {
+            let start = calendar.startOfDay(for: selectedDate)
+            let nextDay = calendar.date(byAdding: .day, value: 1, to: selectedDate) ?? selectedDate
+            let end = calendar.startOfDay(for: nextDay)
+            timeRange = start ... end
+        }
+    }
+
+    private func selectDay(_ date: Date) {
+        selectedDate = date
+        viewModel.selectedDate = date
+        refreshTimeRange()
+        viewModel.send(.refresh)
     }
 
     // MARK: - Play Action
@@ -102,6 +122,7 @@ struct GuideView: PlatformView {
         GuideGridView(
             channels: Array(viewModel.elements),
             timeRange: timeRange,
+            isToday: isToday,
             onProgramSelected: { program in
                 selectProgram(program)
             },
@@ -109,6 +130,15 @@ struct GuideView: PlatformView {
                 viewModel.send(.getNextPage)
             }
         )
+    }
+
+    // MARK: - Day Picker
+
+    @ViewBuilder
+    private var dayPicker: some View {
+        DayPicker(selectedDate: $selectedDate) { date in
+            selectDay(date)
+        }
     }
 
     // MARK: - tvOS Content Layout (Detail 33% + Grid 67%)
@@ -126,6 +156,9 @@ struct GuideView: PlatformView {
                     .animation(.easeInOut(duration: 0.2), value: displayedProgram?.id)
 
                 Divider()
+
+                dayPicker
+                    .padding(.vertical, 12)
 
                 guideGrid
                     .frame(height: gridHeight)
@@ -145,6 +178,9 @@ struct GuideView: PlatformView {
 
                 Divider()
             }
+
+            dayPicker
+                .padding(.vertical, 8)
 
             guideGrid
         }
