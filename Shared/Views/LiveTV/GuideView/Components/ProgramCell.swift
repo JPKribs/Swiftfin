@@ -84,8 +84,15 @@ extension GuideView {
                 }
                 .frame(width: width, height: rowHeight, alignment: .leading)
                 .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
+                #if os(tvOS)
+                    .hoverEffect(.highlight)
+                #endif
             }
+            #if os(tvOS)
+            .buttonStyle(.plain)
+            #else
             .buttonStyle(.card)
+            #endif
         }
     }
 
@@ -172,8 +179,15 @@ extension GuideView {
                 }
                 .frame(width: width, height: rowHeight)
                 .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
+                #if os(tvOS)
+                    .hoverEffect(.highlight)
+                #endif
             }
+            #if os(tvOS)
+            .buttonStyle(.plain)
+            #else
             .buttonStyle(.card)
+            #endif
         }
     }
 }

@@ -80,7 +80,7 @@ enum GuideTimeScale {
     /// Horizontal gap between adjacent program cells within a row.
     static let cellGap: CGFloat = {
         #if os(tvOS)
-        return 16
+        return 6
         #else
         if UIDevice.isPad {
             return 3
