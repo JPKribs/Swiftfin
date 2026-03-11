@@ -718,6 +718,8 @@ internal enum L10n {
   internal static let grid = L10n.tr("Localizable", "grid", fallback: "Grid")
   /// Guest star
   internal static let guestStar = L10n.tr("Localizable", "guestStar", fallback: "Guest star")
+  /// Guide
+  internal static let guide = L10n.tr("Localizable", "guide", fallback: "Guide")
   /// Half side-by-side
   internal static let halfSideBySide = L10n.tr("Localizable", "halfSideBySide", fallback: "Half side-by-side")
   /// Half top and bottom

@@ -25,6 +25,16 @@ struct ProgramsView: View {
     private var contentView: some View {
         ScrollView(showsIndicators: false) {
             VStack(spacing: 20) {
+                HStack(spacing: 20) {
+                    Button {
+                        router.route(to: .guide)
+                    } label: {
+                        Label(L10n.guide, systemImage: "list.bullet.rectangle")
+                    }
+                }
+                .padding(.horizontal, EdgeInsets.edgePadding)
+                .focusSection()
+
                 if programsViewModel.recommended.isNotEmpty {
                     programsSection(title: L10n.onNow, keyPath: \.recommended)
                 }

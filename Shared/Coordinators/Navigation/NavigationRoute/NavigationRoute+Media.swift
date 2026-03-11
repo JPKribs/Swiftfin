@@ -21,6 +21,12 @@ extension NavigationRoute {
         ChannelLibraryView()
     }
 
+    static let guide = NavigationRoute(
+        id: "guide"
+    ) {
+        GuideView()
+    }
+
     static let liveTV = NavigationRoute(
         id: "liveTV"
     ) {

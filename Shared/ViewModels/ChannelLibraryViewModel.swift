@@ -30,8 +30,10 @@ final class ChannelLibraryViewModel: PagingLibraryViewModel<ChannelProgram> {
 
     private func getPrograms(for channels: [BaseItemDto]) async throws -> [ChannelProgram] {
 
-        guard let minEndDate = Calendar.current.date(byAdding: .hour, value: -1, to: .now),
-              let maxStartDate = Calendar.current.date(byAdding: .hour, value: 6, to: .now) else { return [] }
+        let calendar = Calendar.current
+        let minEndDate = calendar.date(byAdding: .hour, value: -1, to: .now) ?? .now
+        let tomorrow = calendar.date(byAdding: .day, value: 1, to: .now) ?? .now
+        let maxStartDate = calendar.startOfDay(for: tomorrow)
 
         var parameters = Paths.GetLiveTvProgramsParameters()
         parameters.channelIDs = channels.compactMap(\.id)

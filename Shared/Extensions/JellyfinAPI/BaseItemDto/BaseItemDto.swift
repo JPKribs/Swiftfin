@@ -153,6 +153,13 @@ extension BaseItemDto {
         channelType == .tv
     }
 
+    /// Whether the program is currently airing based on its
+    /// start and end dates containing the current time.
+    var isAiring: Bool {
+        guard let startDate, let endDate else { return false }
+        return (startDate ... endDate).contains(Date.now)
+    }
+
     /// Whether the item has independent playable content, similar
     /// to if an item can provide its own media sources.
     ///
