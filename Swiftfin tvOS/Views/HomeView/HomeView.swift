@@ -7,6 +7,7 @@
 //
 
 import Defaults
+import Factory
 import Foundation
 import JellyfinAPI
 import SwiftUI
@@ -76,6 +77,20 @@ struct HomeView: View {
             if interval > 60 || viewModel.notificationsReceived.contains(.itemMetadataDidChange) {
                 viewModel.send(.backgroundRefresh)
                 viewModel.notificationsReceived.remove(.itemMetadataDidChange)
+            }
+        }
+        .onNotification(.topShelfItemSelected) { itemID in
+            Task {
+                guard let session = Container.shared.currentUserSession() else { return }
+
+                let parameters = Paths.GetItemsByUserIDParameters(ids: [itemID])
+                let request = Paths.getItemsByUserID(userID: session.user.id, parameters: parameters)
+
+                guard let item = try? await session.client.send(request).value.items?.first else { return }
+
+                await MainActor.run {
+                    router.route(to: .item(item: item))
+                }
             }
         }
     }

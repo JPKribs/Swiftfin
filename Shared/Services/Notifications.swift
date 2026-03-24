@@ -127,6 +127,10 @@ extension Notifications.Key {
         Key("processDeepLink")
     }
 
+    static var topShelfItemSelected: Key<String> {
+        Key("topShelfItemSelected")
+    }
+
     static var didPurge: Key<Void> {
         Key("didPurge")
     }

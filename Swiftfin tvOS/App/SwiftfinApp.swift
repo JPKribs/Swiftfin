@@ -63,6 +63,14 @@ struct SwiftfinApp: App {
     var body: some Scene {
         WindowGroup {
             RootView()
+                .onOpenURL { url in
+                    guard url.scheme == "swiftfin",
+                          url.host == "item",
+                          let itemID = url.pathComponents.dropFirst().first
+                    else { return }
+
+                    Notifications[.topShelfItemSelected].post(itemID)
+                }
                 .onNotification(.applicationDidEnterBackground) {
                     Defaults[.backgroundTimeStamp] = Date.now
                 }

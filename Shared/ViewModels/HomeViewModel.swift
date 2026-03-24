@@ -97,6 +97,10 @@ final class HomeViewModel: ViewModel, Stateful {
                         self.resumeItems.elements = resumeItems
                         self.backgroundStates.remove(.refresh)
                     }
+
+                    #if os(tvOS)
+                    self?.storeTopShelfData(resumeItems: resumeItems)
+                    #endif
                 } catch is CancellationError {
                     // cancelled
                 } catch {
@@ -170,6 +174,10 @@ final class HomeViewModel: ViewModel, Stateful {
             self.resumeItems.elements = resumeItems
             self.libraries = libraries
         }
+
+        #if os(tvOS)
+        storeTopShelfData(resumeItems: resumeItems)
+        #endif
     }
 
     private func getResumeItems() async throws -> [BaseItemDto] {
@@ -231,4 +239,48 @@ final class HomeViewModel: ViewModel, Stateful {
 
         _ = try await userSession.client.send(request)
     }
+
+    #if os(tvOS)
+    private func storeTopShelfData(resumeItems: [BaseItemDto]) {
+        guard let defaults = UserDefaults(suiteName: "group.org.jellyfin.swiftfin") else { return }
+
+        let serverURL = userSession.server.currentURL.absoluteString.trimmingCharacters(in: ["/"])
+        let accessToken = userSession.user.accessToken
+
+        defaults.set(serverURL, forKey: "topShelfServerURL")
+        defaults.set(topShelfDicts(from: resumeItems, serverURL: serverURL, accessToken: accessToken), forKey: "topShelfResumeItems")
+        defaults.set(
+            topShelfDicts(from: Array(nextUpViewModel.elements.prefix(10)), serverURL: serverURL, accessToken: accessToken),
+            forKey: "topShelfNextUpItems"
+        )
+        defaults.set(
+            topShelfDicts(from: Array(recentlyAddedViewModel.elements.prefix(10)), serverURL: serverURL, accessToken: accessToken),
+            forKey: "topShelfRecentlyAddedItems"
+        )
+    }
+
+    private func topShelfDicts(
+        from items: [BaseItemDto],
+        serverURL: String,
+        accessToken: String
+    ) -> [[String: String]] {
+        items.prefix(10).compactMap { item in
+            guard let id = item.id else { return [:] }
+            var dict: [String: String] = [
+                "id": id,
+                "name": item.name ?? "",
+            ]
+            if let imageURL = item.portraitImageSources().first?.url {
+                dict["imageURL"] = imageURL.absoluteString
+            }
+            if let positionTicks = item.userData?.playbackPositionTicks {
+                dict["playbackPositionTicks"] = String(positionTicks)
+            }
+            if let runTimeTicks = item.runTimeTicks {
+                dict["runTimeTicks"] = String(runTimeTicks)
+            }
+            return dict
+        }
+    }
+    #endif
 }
