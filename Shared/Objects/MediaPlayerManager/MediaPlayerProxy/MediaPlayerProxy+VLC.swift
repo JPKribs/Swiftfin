@@ -60,6 +60,8 @@ class VLCMediaPlayerProxy: VideoMediaPlayerProxy,
         vlcUIProxy.setRate(.absolute(rate))
     }
 
+    /// - Note: VLCKit does not provide a seek completion callback.
+    ///   The completion fires synchronously and always reports success.
     func setSeconds(_ seconds: Duration, completion: ((Bool) -> Void)? = nil) {
         vlcUIProxy.setSeconds(seconds)
         completion?(true)
@@ -232,19 +234,19 @@ extension VLCMediaPlayerProxy {
                     }
                     .backport
                     .onChange(of: subtitleColor) { _, newValue in
-                        if let proxy = proxy as? MediaPlayerSubtitleConfigurable {
+                        if let proxy = manager.proxy as? MediaPlayerSubtitleConfigurable {
                             proxy.setSubtitleColor(newValue)
                         }
                     }
                     .backport
                     .onChange(of: subtitleFontName) { _, newValue in
-                        if let proxy = proxy as? MediaPlayerSubtitleConfigurable {
+                        if let proxy = manager.proxy as? MediaPlayerSubtitleConfigurable {
                             proxy.setSubtitleFontName(newValue)
                         }
                     }
                     .backport
                     .onChange(of: subtitleSize) { _, newValue in
-                        if let proxy = proxy as? MediaPlayerSubtitleConfigurable {
+                        if let proxy = manager.proxy as? MediaPlayerSubtitleConfigurable {
                             proxy.setSubtitleFontSize(25 - newValue)
                         }
                     }

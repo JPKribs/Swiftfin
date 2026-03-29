@@ -17,10 +17,8 @@ import SwiftUI
 @MainActor
 class AVMediaPlayerProxy: NSObject,
     VideoMediaPlayerProxy,
-    MediaPlayerOffsetConfigurable,
     MediaPlayerPictureInPictureCapable,
-    MediaPlayerPlaybackInfoProvider,
-    MediaPlayerSubtitleConfigurable
+    MediaPlayerPlaybackInfoProvider
 {
 
     let isBuffering: PublishedBox<Bool> = .init(initialValue: false)
@@ -87,6 +85,17 @@ class AVMediaPlayerProxy: NSObject,
         super.init()
 
         player.appliesMediaSelectionCriteriaAutomatically = false
+        addTimeObserver()
+    }
+
+    /// Registers the periodic time observer that drives the progress bar and
+    /// manager seconds. Safe to call multiple times — removes any existing
+    /// observer before adding a new one.
+    private func addTimeObserver() {
+        if let timeObserver {
+            player.removeTimeObserver(timeObserver)
+            self.timeObserver = nil
+        }
 
         timeObserver = player.addPeriodicTimeObserver(
             forInterval: CMTime(seconds: 1, preferredTimescale: 1000),
@@ -148,15 +157,6 @@ class AVMediaPlayerProxy: NSObject,
     func setAspectFill(_ aspectFill: Bool) {
         avPlayerLayer.videoGravity = aspectFill ? .resizeAspectFill : .resizeAspect
     }
-
-    // AVFoundation does not support audio/subtitle delay offsets.
-    func setAudioOffset(_ seconds: Duration) {}
-    func setSubtitleOffset(_ seconds: Duration) {}
-
-    // AVFoundation does not support external subtitle style configuration.
-    func setSubtitleColor(_ color: Color) {}
-    func setSubtitleFontName(_ fontName: String) {}
-    func setSubtitleFontSize(_ fontSize: Int) {}
 
     func setAudioStream(_ stream: MediaStream) {
         guard let item = player.currentItem,
@@ -267,6 +267,9 @@ extension AVMediaPlayerProxy {
 
         let newAVPlayerItem = AVPlayerItem(url: item.url)
         newAVPlayerItem.externalMetadata = item.baseItem.avMetadata
+
+        // Ensure the time observer is active for the new item
+        addTimeObserver()
 
         statusObserver?.invalidate()
         videoSizeObserver?.invalidate()

@@ -1564,6 +1564,8 @@ internal enum L10n {
   internal static let type = L10n.tr("Localizable", "type", fallback: "Type")
   /// Unable to find host
   internal static let unableToFindHost = L10n.tr("Localizable", "unableToFindHost", fallback: "Unable to find host")
+  /// Unable to load this item.
+  internal static let unableToLoadThisItem = L10n.tr("Localizable", "unableToLoadThisItem", fallback: "Unable to load this item.")
   /// Unable to open trailer
   internal static let unableToOpenTrailer = L10n.tr("Localizable", "unableToOpenTrailer", fallback: "Unable to open trailer")
   /// Unable to open trailer in %1$@
