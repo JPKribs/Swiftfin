@@ -77,6 +77,7 @@ class VLCMediaPlayerProxy: VideoMediaPlayerProxy,
         vlcUIProxy.aspectFill(aspectFill ? 1 : 0)
     }
 
+    // TODO: Implement in VLCKit 4.0
     // VLCKit 3.7.0 does not support PiP
     // func startPiP() {}
     // func stopPiP() {}

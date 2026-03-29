@@ -103,10 +103,6 @@ struct SettingsView: View {
         Section(L10n.videoPlayer) {
             #if os(iOS)
             Picker(L10n.videoPlayerType, selection: $videoPlayerType)
-
-            ChevronButton(L10n.nativePlayer) {
-                router.route(to: .nativePlayerSettings)
-            }
             #else
             ListRowMenu(L10n.videoPlayerType, selection: $videoPlayerType)
             #endif
@@ -120,11 +116,11 @@ struct SettingsView: View {
             }
         } learnMore: {
             LabeledContent(
-                "Swiftfin",
+                "VLC",
                 value: L10n.playerSwiftfinDescription
             )
             LabeledContent(
-                L10n.native,
+                "AVPlayer",
                 value: L10n.playerNativeDescription
             )
         }
