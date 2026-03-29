@@ -138,8 +138,7 @@ struct VideoPlayer: View {
                     router.dismiss()
                 }
             } message: {
-                // TODO: localize
-                Text("Unable to load this item.")
+                Text(L10n.unableToLoadThisItem)
             }
             .colorScheme(.dark) // use over `preferredColorScheme(.dark)` to not have destination change
             .supportedOrientations(.allButUpsideDown)
