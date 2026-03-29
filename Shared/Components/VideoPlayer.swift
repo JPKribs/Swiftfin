@@ -6,6 +6,7 @@
 // Copyright (c) 2026 Jellyfin & Jellyfin Contributors
 //
 
+import Defaults
 import Factory
 import SwiftUI
 
@@ -30,6 +31,8 @@ struct VideoPlayer: View {
     private var audioOffset: Duration = .zero
     @State
     private var isBeingDismissedByTransition = false
+    @State
+    private var safeAreaInsets: EdgeInsets = .init()
 
     // TODO: move behavior to `PlaybackProgress`
     @State
@@ -41,7 +44,12 @@ struct VideoPlayer: View {
     private var containerState: VideoPlayerContainerState = .init()
 
     init() {
-        self._proxy = .init(wrappedValue: VLCMediaPlayerProxy())
+        switch Defaults[.VideoPlayer.videoPlayerType] {
+        case .native:
+            self._proxy = .init(wrappedValue: AVMediaPlayerProxy())
+        case .swiftfin:
+            self._proxy = .init(wrappedValue: VLCMediaPlayerProxy())
+        }
     }
 
     @ViewBuilder
@@ -63,6 +71,7 @@ struct VideoPlayer: View {
 
     var body: some View {
         containerView
+            .environment(\.safeAreaInsets, safeAreaInsets)
             .preference(key: IsStatusBarHiddenKey.self, value: !containerState.isPresentingOverlay)
             .backport
             .onChange(of: audioOffset) { _, newValue in
@@ -131,6 +140,14 @@ struct VideoPlayer: View {
             } message: {
                 // TODO: localize
                 Text("Unable to load this item.")
+            }
+            .colorScheme(.dark) // use over `preferredColorScheme(.dark)` to not have destination change
+            .supportedOrientations(.allButUpsideDown)
+            .ignoresSafeArea()
+            .persistentSystemOverlays(.hidden)
+            .toolbar(.hidden, for: .navigationBar)
+            .onSizeChanged { _, safeArea in
+                self.safeAreaInsets = safeArea.max(EdgeInsets.edgePadding)
             }
     }
 }

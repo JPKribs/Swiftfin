@@ -72,6 +72,8 @@ extension VideoPlayer.PlaybackControls.NavigationBar {
                 AutoPlay()
             case .gestureLock:
                 GestureLock()
+            case .pictureInPicture:
+                PictureInPicture()
             case .playbackSpeed:
                 PlaybackRateMenu()
 //            case .playbackQuality:

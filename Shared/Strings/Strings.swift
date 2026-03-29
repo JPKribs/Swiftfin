@@ -1098,6 +1098,8 @@ internal enum L10n {
   internal static let photoAlbums = L10n.tr("Localizable", "photoAlbums", fallback: "Photo albums")
   /// Photos
   internal static let photos = L10n.tr("Localizable", "photos", fallback: "Photos")
+  /// Picture in Picture
+  internal static let pictureInPicture = L10n.tr("Localizable", "pictureInPicture", fallback: "Picture in Picture")
   /// Pin
   internal static let pin = L10n.tr("Localizable", "pin", fallback: "Pin")
   /// Pinch

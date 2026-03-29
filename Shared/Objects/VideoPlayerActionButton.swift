@@ -14,6 +14,7 @@ enum VideoPlayerActionButton: String, CaseIterable, Displayable, Equatable, Iden
     case audio
     case autoPlay
     case gestureLock
+    case pictureInPicture
     case playbackSpeed
 //    case playbackQuality
     case playNextItem
@@ -30,6 +31,8 @@ enum VideoPlayerActionButton: String, CaseIterable, Displayable, Equatable, Iden
             L10n.autoPlay
         case .gestureLock:
             L10n.gestureLock
+        case .pictureInPicture:
+            L10n.pictureInPicture
         case .playbackSpeed:
             L10n.playbackSpeed
 //        case .playbackQuality:
@@ -53,6 +56,7 @@ enum VideoPlayerActionButton: String, CaseIterable, Displayable, Equatable, Iden
         case .audio: "speaker.wave.2.fill"
         case .autoPlay: "play.circle.fill"
         case .gestureLock: "lock.circle.fill"
+        case .pictureInPicture: "rectangle.inset.bottomright.filled"
         case .playbackSpeed: "speedometer"
 //        case .playbackQuality: "tv.circle.fill"
         case .playNextItem: "forward.end.circle.fill"
@@ -76,6 +80,7 @@ enum VideoPlayerActionButton: String, CaseIterable, Displayable, Equatable, Iden
     static let defaultBarActionButtons: [VideoPlayerActionButton] = [
         .aspectFill,
         .autoPlay,
+        .pictureInPicture,
         .playPreviousItem,
         .playNextItem,
     ]
