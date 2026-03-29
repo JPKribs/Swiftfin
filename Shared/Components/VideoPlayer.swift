@@ -97,7 +97,7 @@ struct VideoPlayer: View {
 
                 let scrubbedSeconds = containerState.scrubbedSeconds.value
                 manager.seconds = scrubbedSeconds
-                proxy.setSeconds(scrubbedSeconds)
+                proxy.setSeconds(scrubbedSeconds) { _ in }
             }
             .backport
             .onChange(of: subtitleOffset) { _, newValue in

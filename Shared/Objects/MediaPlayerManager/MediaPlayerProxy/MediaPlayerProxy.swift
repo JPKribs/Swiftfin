@@ -28,6 +28,14 @@ protocol MediaPlayerProxy: ObservableObject, MediaPlayerObserver {
     func setSeconds(_ seconds: Duration, completion: ((Bool) -> Void)?)
 }
 
+extension MediaPlayerProxy {
+
+    /// Convienence for `setSeconds` without a completion action.
+    func setSeconds(_ seconds: Duration) {
+        setSeconds(seconds, completion: nil)
+    }
+}
+
 @MainActor
 protocol VideoMediaPlayerProxy: MediaPlayerProxy {
 

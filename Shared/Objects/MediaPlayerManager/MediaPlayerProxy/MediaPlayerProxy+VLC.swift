@@ -60,7 +60,7 @@ class VLCMediaPlayerProxy: VideoMediaPlayerProxy,
         vlcUIProxy.setRate(.absolute(rate))
     }
 
-    func setSeconds(_ seconds: Duration, completion: ((Bool) -> Void)?) {
+    func setSeconds(_ seconds: Duration, completion: ((Bool) -> Void)? = nil) {
         vlcUIProxy.setSeconds(seconds)
         completion?(true)
     }

@@ -134,7 +134,7 @@ class AVMediaPlayerProxy: NSObject,
         player.rate = rate
     }
 
-    func setSeconds(_ seconds: Duration, completion: ((Bool) -> Void)?) {
+    func setSeconds(_ seconds: Duration, completion: ((Bool) -> Void)? = nil) {
         guard player.currentItem?.status == .readyToPlay else {
             completion?(false)
             return
