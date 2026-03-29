@@ -144,8 +144,17 @@ extension VLCMediaPlayerProxy {
 
             if !baseItem.isLiveStream {
                 configuration.startSeconds = startSeconds
-                configuration.audioIndex = .absolute(mediaSource.defaultAudioStreamIndex ?? -1)
-                configuration.subtitleIndex = .absolute(mediaSource.defaultSubtitleStreamIndex ?? -1)
+
+                let subtitleIndex = item.indexMap[item.selectedSubtitleStreamIndex] ?? -1
+
+                if mediaSource.transcodingURL != nil {
+                    configuration.audioIndex = .auto
+                } else {
+                    let audioIndex = item.indexMap[item.selectedAudioStreamIndex] ?? -1
+                    configuration.audioIndex = .absolute(audioIndex)
+                }
+
+                configuration.subtitleIndex = .absolute(subtitleIndex)
             }
 
             configuration.subtitleSize = .absolute(25 - Defaults[.VideoPlayer.Subtitle.subtitleSize])
@@ -155,8 +164,7 @@ extension VLCMediaPlayerProxy {
                 configuration.subtitleFont = .absolute(font)
             }
 
-            configuration.playbackChildren = item.subtitleStreams
-                .filter { $0.deliveryMethod == .external }
+            configuration.playbackChildren = item.subtitleStreams.sidecarSubtitles
                 .compactMap(\.asVLCPlaybackChild)
 
             return configuration
@@ -197,7 +205,7 @@ extension VLCMediaPlayerProxy {
                             manager.proxy?.isBuffering.value = true
                         case .ended:
                             // Live streams will send stopped/ended events
-                            guard !playbackItem.baseItem.isLiveStream else { return }
+                            guard !(manager.playbackItem?.baseItem.isLiveStream ?? false) else { return }
                             manager.proxy?.isBuffering.value = false
                             if let proxy = manager.proxy as? MediaPlayerPlaybackInfoProvider {
                                 proxy.playbackInfo.value = nil
@@ -216,6 +224,9 @@ extension VLCMediaPlayerProxy {
                         case .playing:
                             manager.proxy?.isBuffering.value = false
                             manager.setPlaybackRequestStatus(status: .playing)
+
+                            let tracks = info.subtitleTracks.map { (index: $0.index, title: $0.title) }
+                            manager.playbackItem?.getSubtitleIndexes(subtitleTracks: tracks)
                         case .paused:
                             manager.setPlaybackRequestStatus(status: .paused)
                         }
