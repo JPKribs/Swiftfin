@@ -329,15 +329,21 @@ final class MediaPlayerManager: ViewModel {
                 audioStreamIndex: newIndex
             )
         case .subtitle:
-            guard currentItem.subtitleStreams.first(where: { $0.index == newIndex }) != nil else {
+            let isNone = newIndex == nil || newIndex == -1
+            guard isNone || currentItem.subtitleStreams.first(where: { $0.index == newIndex }) != nil else {
                 logger.warning("MediaPlayerManager.SetTrack call with an invalid subtitle track index")
                 return
             }
 
-            if currentItem.isRebuildRequired(from: oldIndex, to: newIndex) {
+            // VLC may be able to continue with the existing HLS if the expected index is present
+            // AVMediaPlayerProxy ALWAYS needs to be rebuilt since HLS contains:
+            // - 0 or 1 subtitle track
+            // - 1 video track
+            // - 1 audio track
+            if proxy is AVMediaPlayerProxy || currentItem.isRebuildRequired(from: oldIndex, to: newIndex) {
                 try await updateMediaPlayerItem(
                     currentItem: currentItem,
-                    subtitleStreamIndex: newIndex
+                    subtitleStreamIndex: isNone ? -1 : newIndex
                 )
             } else {
                 currentItem.switchSubtitleTrack(index: newIndex)
