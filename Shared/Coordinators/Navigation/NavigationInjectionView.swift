@@ -8,9 +8,7 @@
 
 import PreferencesView
 import SwiftUI
-#if os(iOS)
 import Transmission
-#endif
 
 // TODO: have full screen zoom presentation zoom from/to center
 //       - probably need to make mock view with matching ids
@@ -102,17 +100,15 @@ struct NavigationInjectionView: View {
         #else
         .presentation(
                 $coordinator.presentedFullScreen,
-                // TODO: Validate on Transmission > 2.8.2
-                /* transition: .zoomIfAvailable(
+                transition: .zoomIfAvailable(
+                    options: .init(
+                        dimmingVisualEffect: .systemThickMaterialDark,
                         options: .init(
-                            dimmingVisualEffect: .systemThickMaterialDark,
-                            options: .init(
-                                isInteractive: isPresentationInteractive
-                            )
-                        ),
-                        otherwise: .slide(.init(edge: .bottom), options: .init(isInteractive: isPresentationInteractive))
-                    )*/
-                transition: .slide(.init(edge: .bottom), options: .init(isInteractive: isPresentationInteractive))
+                            isInteractive: isPresentationInteractive
+                        )
+                    ),
+                    otherwise: .slide(.init(edge: .bottom), options: .init(isInteractive: isPresentationInteractive))
+                )
             ) { routeBinding, _ in
                 let vc = UIPreferencesHostingController {
                     NavigationInjectionView(coordinator: .init()) {
