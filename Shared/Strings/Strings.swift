@@ -972,10 +972,6 @@ internal enum L10n {
   internal static let mvc = L10n.tr("Localizable", "mvc", fallback: "MVC")
   /// Name
   internal static let name = L10n.tr("Localizable", "name", fallback: "Name")
-  /// Native
-  internal static let native = L10n.tr("Localizable", "native", fallback: "Native")
-  /// Native Player
-  internal static let nativePlayer = L10n.tr("Localizable", "nativePlayer", fallback: "Native Player")
   /// Network timed out
   internal static let networkTimedOut = L10n.tr("Localizable", "networkTimedOut", fallback: "Network timed out")
   /// Never
@@ -1096,8 +1092,8 @@ internal enum L10n {
   internal static let photoAlbums = L10n.tr("Localizable", "photoAlbums", fallback: "Photo albums")
   /// Photos
   internal static let photos = L10n.tr("Localizable", "photos", fallback: "Photos")
-  /// Picture in Picture
-  internal static let pictureInPicture = L10n.tr("Localizable", "pictureInPicture", fallback: "Picture in Picture")
+  /// Picture in picture
+  internal static let pictureInPicture = L10n.tr("Localizable", "pictureInPicture", fallback: "Picture in picture")
   /// Pin
   internal static let pin = L10n.tr("Localizable", "pin", fallback: "Pin")
   /// Pinch
@@ -1114,8 +1110,8 @@ internal enum L10n {
   internal static let playCount = L10n.tr("Localizable", "playCount", fallback: "Play count")
   /// Played
   internal static let played = L10n.tr("Localizable", "played", fallback: "Played")
-  /// Uses Apple's AVPlayer which supports HDR, Picture in Picture, AirPlay casting, and HomePod or AirPlay-enabled speakers. However, codec & container support is very limited and may require additional transcoding.
-  internal static let playerNativeDescription = L10n.tr("Localizable", "playerNativeDescription", fallback: "Uses Apple's AVPlayer which supports HDR, Picture in Picture, AirPlay casting, and HomePod or AirPlay-enabled speakers. However, codec & container support is very limited and may require additional transcoding.")
+  /// Uses Apple's AVPlayer which supports HDR, Picture in Picture, AirPlay casting, and HomePod or AirPlay-enabled speakers. However, it has no subtitle support and is very restrictive with file formats.
+  internal static let playerNativeDescription = L10n.tr("Localizable", "playerNativeDescription", fallback: "Uses Apple's AVPlayer which supports HDR, Picture in Picture, AirPlay casting, and HomePod or AirPlay-enabled speakers. However, it has no subtitle support and is very restrictive with file formats.")
   /// Uses VLC's VLCKit to provide compatibility with nearly any file type. However, VLCKit cannot use HomePod or AirPlay-enabled speakers, HDR, Picture in Picture, or AirPlay casting.
   internal static let playerSwiftfinDescription = L10n.tr("Localizable", "playerSwiftfinDescription", fallback: "Uses VLC's VLCKit to provide compatibility with nearly any file type. However, VLCKit cannot use HomePod or AirPlay-enabled speakers, HDR, Picture in Picture, or AirPlay casting.")
   /// Play From beginning
@@ -1562,8 +1558,8 @@ internal enum L10n {
   internal static let type = L10n.tr("Localizable", "type", fallback: "Type")
   /// Unable to find host
   internal static let unableToFindHost = L10n.tr("Localizable", "unableToFindHost", fallback: "Unable to find host")
-  /// Unable to load this item.
-  internal static let unableToLoadThisItem = L10n.tr("Localizable", "unableToLoadThisItem", fallback: "Unable to load this item.")
+  /// Unable to load this item
+  internal static let unableToLoadThisItem = L10n.tr("Localizable", "unableToLoadThisItem", fallback: "Unable to load this item")
   /// Unable to open trailer
   internal static let unableToOpenTrailer = L10n.tr("Localizable", "unableToOpenTrailer", fallback: "Unable to open trailer")
   /// Unable to open trailer in %1$@
