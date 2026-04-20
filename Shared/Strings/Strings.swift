@@ -438,6 +438,8 @@ internal enum L10n {
   internal static let dateAdded = L10n.tr("Localizable", "dateAdded", fallback: "Date added")
   /// Date created
   internal static let dateCreated = L10n.tr("Localizable", "dateCreated", fallback: "Date created")
+  /// Date of last added content
+  internal static let dateLastContentAdded = L10n.tr("Localizable", "dateLastContentAdded", fallback: "Date of last added content")
   /// Date modified
   internal static let dateModified = L10n.tr("Localizable", "dateModified", fallback: "Date modified")
   /// Date of death
@@ -894,8 +896,6 @@ internal enum L10n {
   internal static let lyricist = L10n.tr("Localizable", "lyricist", fallback: "Lyricist")
   /// Lyrics
   internal static let lyrics = L10n.tr("Localizable", "lyrics", fallback: "Lyrics")
-  /// Manage
-  internal static let manage = L10n.tr("Localizable", "manage", fallback: "Manage")
   /// Management
   internal static let management = L10n.tr("Localizable", "management", fallback: "Management")
   /// Delete, upload, or search for external subtitles.
@@ -1010,8 +1010,6 @@ internal enum L10n {
   internal static let noEpisodesAvailable = L10n.tr("Localizable", "noEpisodesAvailable", fallback: "No episodes available")
   /// No items
   internal static let noItems = L10n.tr("Localizable", "noItems", fallback: "No items")
-  /// No item selected
-  internal static let noItemSelected = L10n.tr("Localizable", "noItemSelected", fallback: "No item selected")
   /// No local servers found
   internal static let noLocalServersFound = L10n.tr("Localizable", "noLocalServersFound", fallback: "No local servers found")
   /// None
