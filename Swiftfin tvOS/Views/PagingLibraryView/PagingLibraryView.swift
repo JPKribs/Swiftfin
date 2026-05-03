@@ -307,7 +307,7 @@ struct PagingLibraryView<Element: Poster & Identifiable>: View {
         .animation(.linear(duration: 0.1), value: viewModel.state)
         .navigationTitle(viewModel.parent?.displayTitle ?? "")
         .ignoresSafeArea(.all, edges: .vertical)
-        .letterPickerBar(filterViewModel: viewModel.filterViewModel)
+        .libraryFilters(viewModel: viewModel.filterViewModel, types: enabledDrawerFilters)
         .refreshable {
             viewModel.send(.refresh)
         }

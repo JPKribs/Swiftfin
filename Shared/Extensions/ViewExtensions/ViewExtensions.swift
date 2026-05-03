@@ -440,9 +440,11 @@ extension View {
     }
 
     func letterPickerBar(filterViewModel: FilterViewModel?) -> some View {
-        modifier(
-            LetterPickerBarModifier(viewModel: filterViewModel)
-        )
+        modifier(LibraryFiltersModifier(viewModel: filterViewModel, filterTypes: []))
+    }
+
+    func libraryFilters(viewModel: FilterViewModel?, types: [ItemFilterType]) -> some View {
+        modifier(LibraryFiltersModifier(viewModel: viewModel, filterTypes: types))
     }
 
     func maskLinearGradient(

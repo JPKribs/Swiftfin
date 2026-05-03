@@ -261,7 +261,7 @@ struct PagingLibraryView<Element: Poster>: View {
         }
         .animation(.linear(duration: 0.1), value: viewModel.state)
         .ignoresSafeArea(.all, edges: .vertical)
-        .letterPickerBar(filterViewModel: viewModel.filterViewModel)
+        .libraryFilters(viewModel: viewModel.filterViewModel, types: enabledDrawerFilters)
         .onSizeChanged { _, safeArea in
             self.safeArea = safeArea
         }
@@ -269,12 +269,6 @@ struct PagingLibraryView<Element: Poster>: View {
         .navigationBarTitleDisplayMode(.inline)
         .refreshable {
             viewModel.send(.refresh)
-        }
-        .ifLet(viewModel.filterViewModel) { view, filterViewModel in
-            view.navigationBarFilterDrawer(
-                viewModel: filterViewModel,
-                types: enabledDrawerFilters
-            )
         }
         .onChange(of: defaultDisplayType) { newValue in
             guard !Defaults[.Customization.Library.rememberLayout] else { return }
