@@ -31,18 +31,18 @@ extension View {
 
     @ViewBuilder
     func navigationBarFilterDrawer(
-        viewModel: FilterViewModel,
+        viewModel: FilterViewModel?,
         types: [ItemFilterType]
     ) -> some View {
-        if types.isEmpty {
-            self
-        } else {
+        if let viewModel, types.isNotEmpty {
             navigationBarDrawer {
                 NavigationBarFilterDrawer(
                     viewModel: viewModel,
                     types: types
                 )
             }
+        } else {
+            self
         }
     }
 

@@ -62,6 +62,6 @@ struct NavigationBarFilterDrawer: View {
         .padding(.horizontal)
         .padding(.bottom, 5)
         .labelStyle(NavigationDrawerLabelStyle())
-        .scrollIfLargerThanContainer(axes: .horizontal)
+        .scrollIfLargerThanContainer(axes: .horizontal, alignment: .leading)
     }
 }
