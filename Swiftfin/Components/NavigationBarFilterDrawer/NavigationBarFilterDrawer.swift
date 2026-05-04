@@ -29,40 +29,39 @@ struct NavigationBarFilterDrawer: View {
     }
 
     var body: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack {
-                if viewModel.currentFilters.isNotEmpty {
-                    Menu(L10n.reset, systemImage: "line.3.horizontal.decrease") {
-                        Button(L10n.reset, role: .destructive) {
-                            viewModel.reset(filterType: nil)
-                        }
+        HStack {
+            if viewModel.currentFilters.isNotEmpty {
+                Menu(L10n.reset, systemImage: "line.3.horizontal.decrease") {
+                    Button(L10n.reset, role: .destructive) {
+                        viewModel.reset(filterType: nil)
                     }
-                    .foregroundStyle(.primary, .secondary)
-                    .labelStyle(NavigationDrawerLabelStyle(isIconOnly: true))
                 }
-
-                ForEach(filterTypes, id: \.self) { type in
-                    Button {
-                        router.route(
-                            to: .filter(
-                                type: type,
-                                viewModel: viewModel
-                            )
-                        )
-                    } label: {
-                        Label {
-                            Text(type.displayTitle)
-                        } icon: {
-                            EmptyView()
-                        }
-                    }
-                    .foregroundStyle(.primary, .secondary)
-                    .isHighlighted(viewModel.isFilterSelected(type: type))
-                }
+                .foregroundStyle(.primary, .secondary)
+                .labelStyle(NavigationDrawerLabelStyle(isIconOnly: true))
             }
-            .padding(.horizontal)
-            .padding(.bottom, 5)
-            .labelStyle(NavigationDrawerLabelStyle())
+
+            ForEach(filterTypes, id: \.self) { type in
+                Button {
+                    router.route(
+                        to: .filter(
+                            type: type,
+                            viewModel: viewModel
+                        )
+                    )
+                } label: {
+                    Label {
+                        Text(type.displayTitle)
+                    } icon: {
+                        EmptyView()
+                    }
+                }
+                .foregroundStyle(.primary, .secondary)
+                .isHighlighted(viewModel.isFilterSelected(type: type))
+            }
         }
+        .padding(.horizontal)
+        .padding(.bottom, 5)
+        .labelStyle(NavigationDrawerLabelStyle())
+        .scrollIfLargerThanContainer(axes: .horizontal)
     }
 }

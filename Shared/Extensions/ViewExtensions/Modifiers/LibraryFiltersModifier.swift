@@ -40,7 +40,7 @@ struct LibraryFiltersModifier: ViewModifier {
                             .focusSection()
                     }
                     .safeAreaInset(edge: filterEdge, alignment: .center, spacing: 0) {
-                        NavigationBarFilterDrawer(viewModel: viewModel, types: filterTypes, edge: filterEdge)
+                        InsetFilterDrawer(viewModel: viewModel, types: filterTypes, edge: filterEdge)
                             .offset(x: filterEdge == .leading ? -EdgeInsets.edgePadding / 1.5 : EdgeInsets.edgePadding / 1.5)
                             .padding(filterEdge == .leading ? .trailing : .leading, -EdgeInsets.edgePadding / 2)
                             .focusSection()
@@ -61,7 +61,7 @@ struct LibraryFiltersModifier: ViewModifier {
                 .focusSection()
                 .ignoresSafeArea(.all, edges: filterEdge == .leading ? .trailing : .leading)
                 .safeAreaInset(edge: filterEdge, alignment: .center, spacing: 0) {
-                    NavigationBarFilterDrawer(viewModel: viewModel, types: filterTypes, edge: filterEdge)
+                    InsetFilterDrawer(viewModel: viewModel, types: filterTypes, edge: filterEdge)
                         .offset(x: filterEdge == .leading ? -EdgeInsets.edgePadding / 1.5 : EdgeInsets.edgePadding / 1.5)
                         .padding(filterEdge == .leading ? .trailing : .leading, -EdgeInsets.edgePadding / 2)
                         .focusSection()
