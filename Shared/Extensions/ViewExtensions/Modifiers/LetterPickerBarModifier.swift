@@ -23,7 +23,6 @@ struct LetterPickerBarModifier: ViewModifier {
         {
             content
                 .focusSection()
-                .ignoresSafeArea(.all, edges: edge == .leading ? .trailing : .leading)
                 .safeAreaInset(edge: edge, alignment: .center, spacing: 0) {
                     LetterPickerBar(viewModel: viewModel)
                         .if(!UIDevice.isTV) { view in
@@ -40,7 +39,6 @@ struct LetterPickerBarModifier: ViewModifier {
                 }
         } else {
             content
-                .ignoresSafeArea(.all, edges: .horizontal)
         }
     }
 }

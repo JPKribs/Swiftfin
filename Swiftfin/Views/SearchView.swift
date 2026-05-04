@@ -206,15 +206,13 @@ struct SearchView: View {
         .animation(.linear(duration: 0.2), value: viewModel.items)
         .animation(.linear(duration: 0.2), value: viewModel.state)
         .ignoresSafeArea(.keyboard, edges: .bottom)
+        .backport
+        .toolbarTitleDisplayMode(.inline)
         .navigationTitle(L10n.search)
-        .navigationBarTitleDisplayMode(.inline)
         .refreshable {
             viewModel.search(query: searchQuery)
         }
-        .navigationBarFilterDrawer(
-            viewModel: viewModel.filterViewModel,
-            types: enabledDrawerFilters
-        )
+        .filterBar(viewModel: viewModel.filterViewModel, types: enabledDrawerFilters)
         .onFirstAppear {
             viewModel.getSuggestions()
         }

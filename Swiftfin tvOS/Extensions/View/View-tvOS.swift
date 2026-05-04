@@ -30,30 +30,13 @@ extension View {
     }
 
     @ViewBuilder
-    func navigationBarFilterDrawer(
+    func filterBar(
         viewModel: FilterViewModel?,
         types: [ItemFilterType]
     ) -> some View {
-        if let viewModel, types.isNotEmpty {
-            let base = self
-                .toolbar {
-                    ToolbarItem(placement: .principal) {
-                        NavigationBarFilterDrawer(
-                            viewModel: viewModel,
-                            types: types
-                        )
-                        .ignoresSafeArea(.all, edges: .leading)
-                    }
-                }
-
-            if #available(tvOS 18, *) {
-                base.toolbarVisibility(.automatic, for: .automatic)
-            } else {
-                base
-            }
-        } else {
-            self
-        }
+        modifier(
+            FilterBarBarModifier(viewModel: viewModel, filterTypes: types)
+        )
     }
 
     /// - Important: This does nothing on tvOS.

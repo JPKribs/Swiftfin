@@ -30,7 +30,7 @@ extension View {
     }
 
     @ViewBuilder
-    func navigationBarFilterDrawer(
+    func filterBar(
         viewModel: FilterViewModel?,
         types: [ItemFilterType]
     ) -> some View {
