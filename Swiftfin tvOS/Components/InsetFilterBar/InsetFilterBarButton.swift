@@ -93,7 +93,7 @@ extension InsetFilterBar {
             } else if isSelected {
                 accentColor
             } else {
-                .primary
+                .secondarySystemFill
             }
         }
 
