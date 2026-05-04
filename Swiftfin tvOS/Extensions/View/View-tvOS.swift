@@ -7,7 +7,6 @@
 //
 
 import Defaults
-import JellyfinAPI
 import SwiftUI
 import SwiftUIIntrospect
 
@@ -28,6 +27,33 @@ extension View {
     @ViewBuilder
     func navigationBarTitleDisplayMode(_ mode: NavigationBarItem.TitleDisplayMode) -> some View {
         self
+    }
+
+    @ViewBuilder
+    func navigationBarFilterDrawer(
+        viewModel: FilterViewModel?,
+        types: [ItemFilterType]
+    ) -> some View {
+        if let viewModel, types.isNotEmpty {
+            let base = self
+                .toolbar {
+                    ToolbarItem(placement: .principal) {
+                        NavigationBarFilterDrawer(
+                            viewModel: viewModel,
+                            types: types
+                        )
+                        .ignoresSafeArea(.all, edges: .leading)
+                    }
+                }
+
+            if #available(tvOS 18, *) {
+                base.toolbarVisibility(.automatic, for: .automatic)
+            } else {
+                base
+            }
+        } else {
+            self
+        }
     }
 
     /// - Important: This does nothing on tvOS.

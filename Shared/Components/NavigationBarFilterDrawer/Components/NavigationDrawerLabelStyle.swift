@@ -56,8 +56,8 @@ struct NavigationDrawerLabelStyle: LabelStyle {
             ContainerRelativeShape()
                 .stroke(isHighlighted ? AnyShapeStyle(Color.accentColor) : AnyShapeStyle(ComplexSecondaryShapeStyle()), lineWidth: 2)
         }
-        .buttonStyle(.borderless)
         .clipShape(.capsule)
         .containerShape(.capsule)
+        .hoverEffect(.highlight)
     }
 }

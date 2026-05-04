@@ -12,11 +12,11 @@ import SwiftUI
 
 struct NavigationBarFilterDrawer: View {
 
-    @ObservedObject
-    private var viewModel: FilterViewModel
-
     @Router
     private var router
+
+    @ObservedObject
+    private var viewModel: FilterViewModel
 
     private let filterTypes: [ItemFilterType]
 
@@ -61,7 +61,9 @@ struct NavigationBarFilterDrawer: View {
         }
         .padding(.horizontal)
         .padding(.bottom, 5)
+        .buttonStyle(.borderless)
         .labelStyle(NavigationDrawerLabelStyle())
         .scrollIfLargerThanContainer(axes: .horizontal, alignment: .leading)
+        .fixedSize(horizontal: false, vertical: true)
     }
 }
