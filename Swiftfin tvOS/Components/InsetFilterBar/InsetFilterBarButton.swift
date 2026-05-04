@@ -58,34 +58,34 @@ extension InsetFilterBar {
             }
         }
 
-        @available(tvOS 26.0, *)
-        private var glassEffect: Glass {
-            switch (isFocused, isSelected, role) {
-            case (true, _, .destructive):
-                .regular.tint(.red).interactive()
+//        @available(tvOS 26.0, *)
+//        private var glassEffect: Glass {
+//            switch (isFocused, isSelected, role) {
+//            case (true, _, .destructive):
+//                .regular.tint(.red).interactive()
+//
+//            case (true, true, _):
+//                .regular.tint(accentColor)
+//
+//            case (true, false, _):
+//                .regular.interactive()
+//
+//            case (false, true, _):
+//                .regular.tint(accentColor)
+//
+//            case (false, false, _):
+//                .regular
+//            }
+//        }
 
-            case (true, true, _):
-                .regular.tint(accentColor)
-
-            case (true, false, _):
-                .regular.interactive()
-
-            case (false, true, _):
-                .regular.tint(accentColor)
-
-            case (false, false, _):
-                .regular
-            }
-        }
-
-        @available(tvOS 26.0, *)
-        private var glassForegroundStyle: Color {
-            if role == .destructive {
-                .red.overlayColor
-            } else {
-                .primary
-            }
-        }
+//        @available(tvOS 26.0, *)
+//        private var glassForegroundStyle: Color {
+//            if role == .destructive {
+//                .red.overlayColor
+//            } else {
+//                .primary
+//            }
+//        }
 
         private var backgroundStyle: Color {
             if isFocused && role == .destructive {
@@ -127,17 +127,17 @@ extension InsetFilterBar {
                 action()
             } label: {
                 Group {
-                    if #available(tvOS 26.0, *) {
-                        buttonLabel(foreground: glassForegroundStyle)
-                            .glassEffect(glassEffect, in: .capsule)
-                    } else {
-                        buttonLabel(foreground: foregroundStyle)
-                            .background {
-                                Capsule()
-                                    .foregroundStyle(backgroundStyle)
-                                    .shadow(radius: (isFocused || isSelected) ? 4 : 0, y: (isFocused || isSelected) ? 2 : 0)
-                            }
-                    }
+//                    if #available(tvOS 26.0, *) {
+//                        buttonLabel(foreground: glassForegroundStyle)
+//                            .glassEffect(glassEffect, in: .capsule)
+//                    } else {
+                    buttonLabel(foreground: foregroundStyle)
+                        .background {
+                            Capsule()
+                                .foregroundStyle(backgroundStyle)
+                                .shadow(radius: (isFocused || isSelected) ? 4 : 0, y: (isFocused || isSelected) ? 2 : 0)
+                        }
+//                    }
                 }
             }
             .buttonStyle(.borderless)

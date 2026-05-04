@@ -58,6 +58,5 @@ struct NavigationDrawerLabelStyle: LabelStyle {
         }
         .clipShape(.capsule)
         .containerShape(.capsule)
-        .hoverEffect(.highlight)
     }
 }

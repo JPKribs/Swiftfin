@@ -59,11 +59,10 @@ struct NavigationBarFilterDrawer: View {
                 .isHighlighted(viewModel.isFilterSelected(type: type))
             }
         }
+        .scrollIfLargerThanContainer(axes: .horizontal, alignment: .leading)
         .padding(.horizontal)
         .padding(.bottom, 5)
         .buttonStyle(.borderless)
         .labelStyle(NavigationDrawerLabelStyle())
-        .scrollIfLargerThanContainer(axes: .horizontal, alignment: .leading)
-        .fixedSize(horizontal: false, vertical: true)
     }
 }
