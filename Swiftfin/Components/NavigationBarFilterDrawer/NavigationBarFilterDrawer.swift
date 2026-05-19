@@ -32,13 +32,12 @@ struct NavigationBarFilterDrawer: View {
                 .labelStyle(NavigationDrawerLabelStyle(isIconOnly: true))
             }
 
-                ForEach(types, id: \.self) { type in
-                    Button {
-                        router.route(
-                            to: .filter(
-                                type: type,
-                                viewModel: viewModel
-                            )
+            ForEach(types, id: \.self) { type in
+                Button {
+                    router.route(
+                        to: .filter(
+                            type: type,
+                            viewModel: viewModel
                         )
                     )
                 } label: {
