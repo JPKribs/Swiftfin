@@ -12,21 +12,13 @@ import SwiftUI
 
 struct NavigationBarFilterDrawer: View {
 
+    @ObservedObject
+    var viewModel: FilterViewModel
+
     @Router
     private var router
 
-    @ObservedObject
-    private var viewModel: FilterViewModel
-
-    private let filterTypes: [ItemFilterType]
-
-    init(
-        viewModel: FilterViewModel,
-        types: [ItemFilterType]
-    ) {
-        self.viewModel = viewModel
-        self.filterTypes = types
-    }
+    let types: [ItemFilterType]
 
     var body: some View {
         HStack {
@@ -40,12 +32,13 @@ struct NavigationBarFilterDrawer: View {
                 .labelStyle(NavigationDrawerLabelStyle(isIconOnly: true))
             }
 
-            ForEach(filterTypes, id: \.self) { type in
-                Button {
-                    router.route(
-                        to: .filter(
-                            type: type,
-                            viewModel: viewModel
+                ForEach(types, id: \.self) { type in
+                    Button {
+                        router.route(
+                            to: .filter(
+                                type: type,
+                                viewModel: viewModel
+                            )
                         )
                     )
                 } label: {
