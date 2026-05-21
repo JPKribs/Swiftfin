@@ -62,11 +62,7 @@ struct Stepper<
         ChevronButton {
             isPresented = true
         } label: {
-            LabeledContent {
-                content()
-            } label: {
-                label()
-            }
+            label()
         }
         ._alert(title, isPresented: $isPresented) {
             VStack {
@@ -161,6 +157,28 @@ extension Stepper where Format == VerbatimFormatStyle<Value>, Label == Text, Con
         ) {
             Text(title)
         } content: {
+            EmptyView()
+        }
+    }
+}
+
+extension Stepper where Format == VerbatimFormatStyle<Value>, Content == EmptyView {
+
+    init(
+        _ title: String,
+        value: Binding<Value>,
+        in range: ClosedRange<Value>,
+        step: Value.Stride = 1,
+        @ViewBuilder label: @escaping () -> Label
+    ) {
+        self.init(
+            title,
+            value: value,
+            in: range,
+            step: step,
+            format: VerbatimFormatStyle(),
+            label: label
+        ) {
             EmptyView()
         }
     }

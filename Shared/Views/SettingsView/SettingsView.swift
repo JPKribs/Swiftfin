@@ -16,12 +16,10 @@ struct SettingsView: View {
     #if os(iOS)
     @Default(.userAppearance)
     private var appearance
+    #endif
+
     @Default(.userAccentColor)
     private var accentColor
-    #else
-    @Default(.accentColor)
-    private var accentColor
-    #endif
 
     @Default(.VideoPlayer.videoPlayerType)
     private var videoPlayerType
@@ -101,10 +99,6 @@ struct SettingsView: View {
         Section(L10n.videoPlayer) {
             #if os(iOS)
             Picker(L10n.videoPlayerType, selection: $videoPlayerType)
-
-            ChevronButton(L10n.nativePlayer) {
-                router.route(to: .nativePlayerSettings)
-            }
             #else
             ListRowMenu(L10n.videoPlayerType, selection: $videoPlayerType)
             #endif
