@@ -84,11 +84,15 @@ extension LabeledContentStyle where Self == PlaybackInfoLabeledContentStyle {
 
 struct PlaybackInfoLabeledContentStyle: LabeledContentStyle {
 
+    @FocusState
+    private var isFocused: Bool
+
     func makeBody(configuration: Configuration) -> some View {
         HStack(spacing: 0) {
             configuration.label
                 .foregroundStyle(.secondary)
 
+            // swiftlint:disable:next hard_coded_display_string
             Text(":")
                 .foregroundStyle(.secondary)
                 .padding(.trailing, 4)
@@ -99,6 +103,19 @@ struct PlaybackInfoLabeledContentStyle: LabeledContentStyle {
                 .foregroundStyle(.primary)
         }
         .font(.subheadline)
+        .if(UIDevice.isTV) { label in
+            label
+                .padding(.horizontal, 8)
+                .padding(.vertical, 8)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(isFocused ? Color.white.opacity(0.15) : Color.clear)
+                )
+                .backport
+                .focusable()
+                .focused($isFocused)
+                .animation(.easeInOut(duration: 0.15), value: isFocused)
+        }
     }
 }
 

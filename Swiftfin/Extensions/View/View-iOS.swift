@@ -7,6 +7,7 @@
 //
 
 import Defaults
+import Mantis
 import SwiftUI
 @_spi(Advanced) import SwiftUIIntrospect
 
@@ -32,8 +33,7 @@ extension View {
     @ViewBuilder
     func navigationBarFilterDrawer(
         viewModel: FilterViewModel,
-        types: [ItemFilterType],
-        onSelect: @escaping (NavigationBarFilterDrawer.Parameters) -> Void
+        types: [ItemFilterType]
     ) -> some View {
         if types.isEmpty {
             self
@@ -43,7 +43,6 @@ extension View {
                     viewModel: viewModel,
                     types: types
                 )
-                .onSelect(onSelect)
             }
         }
     }
@@ -86,5 +85,24 @@ extension View {
                 cell.layer.cornerRadius = radius
             }
         }
+    }
+
+    /// Photo Picker with cropping after selection
+    func photoPicker(
+        isPresented: Binding<Bool>,
+        isSaving: Bool,
+        cropShape: Mantis.CropShapeType = .rect,
+        presetRatio: Mantis.PresetFixedRatioType = .canUseMultiplePresetFixedRatio(defaultRatio: 0),
+        onSave: @escaping (UIImage) -> Void
+    ) -> some View {
+        modifier(
+            PhotoPickerModifier(
+                isPresented: isPresented,
+                isSaving: isSaving,
+                cropShape: cropShape,
+                presetRatio: presetRatio,
+                onSave: onSave
+            )
+        )
     }
 }

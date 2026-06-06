@@ -12,24 +12,13 @@ extension ItemView {
 
     struct AttributesHStack: View {
 
+        let attributes: [ItemViewAttribute]
+
         @ObservedObject
-        private var viewModel: ItemViewModel
+        var viewModel: ItemViewModel
 
-        private let alignment: HorizontalAlignment
-        private let attributes: [ItemViewAttribute]
-        private let flowDirection: FlowLayout.Direction
-
-        init(
-            attributes: [ItemViewAttribute],
-            viewModel: ItemViewModel,
-            alignment: HorizontalAlignment = .center,
-            flowDirection: FlowLayout.Direction = .up
-        ) {
-            self.viewModel = viewModel
-            self.alignment = alignment
-            self.attributes = attributes
-            self.flowDirection = flowDirection
-        }
+        var alignment: HorizontalAlignment = .center
+        var flowDirection: FlowLayout.Direction = .up
 
         var body: some View {
             if attributes.isNotEmpty {
@@ -59,6 +48,7 @@ extension ItemView {
             if let criticRating = viewModel.item.criticRating {
                 AttributeBadge(
                     style: .outline,
+                    // swiftlint:disable:next hard_coded_display_string
                     title: Text("\(criticRating, specifier: "%.0f")")
                 ) {
                     if criticRating >= 60 {
@@ -76,6 +66,7 @@ extension ItemView {
             if let communityRating = viewModel.item.communityRating {
                 AttributeBadge(
                     style: .outline,
+                    // swiftlint:disable:next hard_coded_display_string
                     title: Text("\(communityRating, specifier: "%.01f")"),
                     systemName: "star.fill"
                 )

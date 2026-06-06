@@ -17,6 +17,9 @@ extension EnvironmentValues {
     var isEditing: Bool = false
 
     @Entry
+    var isHighlighted: Bool = true
+
+    @Entry
     var isInMenu: Bool = false
 
     @Entry
@@ -33,4 +36,8 @@ extension EnvironmentValues {
 
     @Entry
     var subtitleOffset: Binding<Duration> = .constant(.zero)
+
+    // TODO: figure out this directional response stuff
+    @Entry
+    var panGestureDirection: Direction = .all
 }

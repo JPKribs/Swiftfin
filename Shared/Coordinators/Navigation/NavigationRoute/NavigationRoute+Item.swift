@@ -23,18 +23,6 @@ extension NavigationRoute {
         }
     }
 
-    static func addItemImage(viewModel: ItemImagesViewModel, imageType: ImageType) -> NavigationRoute {
-        NavigationRoute(
-            id: "addItemImage",
-            style: .push(.automatic)
-        ) {
-            AddItemImageView(
-                viewModel: viewModel,
-                imageType: imageType
-            )
-        }
-    }
-
     static func addPeople(viewModel: PeopleEditorViewModel) -> NavigationRoute {
         NavigationRoute(
             id: "addPeople",
@@ -63,10 +51,11 @@ extension NavigationRoute {
     }
     #endif
 
+    @MainActor
     static func castAndCrew(people: [BaseItemPerson], itemID: String?) -> NavigationRoute {
         let id: String? = itemID == nil ? nil : "castAndCrew-\(itemID!)"
         let viewModel = PagingLibraryViewModel(
-            title: L10n.castAndCrew,
+            title: L10n.castAndCrew.localizedCapitalized,
             id: id,
             people
         )
@@ -77,18 +66,6 @@ extension NavigationRoute {
     }
 
     #if os(iOS)
-    static func cropItemImage(viewModel: ItemImagesViewModel, image: UIImage, type: ImageType) -> NavigationRoute {
-        NavigationRoute(
-            id: "crop-Image"
-        ) {
-            ItemPhotoCropView(
-                viewModel: viewModel,
-                image: image,
-                type: type
-            )
-        }
-    }
-
     @MainActor
     static func editGenres(item: BaseItemDto) -> NavigationRoute {
         NavigationRoute(id: "editGenres") {
@@ -128,7 +105,7 @@ extension NavigationRoute {
     @MainActor
     static func editStudios(item: BaseItemDto) -> NavigationRoute {
         NavigationRoute(id: "editStudios") {
-            EditItemElementView<NameGuidPair>(
+            EditItemElementView<NameIDPair>(
                 viewModel: StudioEditorViewModel(item: item),
                 type: .studios,
                 route: { router, viewModel in
@@ -220,20 +197,7 @@ extension NavigationRoute {
         }
     }
 
-    static func itemImageDetails(viewModel: ItemImagesViewModel, imageInfo: ImageInfo) -> NavigationRoute {
-        NavigationRoute(
-            id: "itemImageDetails",
-            style: .sheet
-        ) {
-            ItemImageDetailsView(
-                viewModel: viewModel,
-                imageInfo: imageInfo
-            )
-            .isEditing(true)
-        }
-    }
-
-    static func itemImages(viewModel: ItemImagesViewModel) -> NavigationRoute {
+    static func itemImages(viewModel: ItemImageViewModel) -> NavigationRoute {
         NavigationRoute(
             id: "itemImages",
             style: .sheet
@@ -242,17 +206,42 @@ extension NavigationRoute {
         }
     }
 
-    static func itemImageSelector(viewModel: ItemImagesViewModel, imageType: ImageType) -> NavigationRoute {
+    static func itemImageDetail(viewModel: ItemImageViewModel, imageInfo: ImageInfo) -> NavigationRoute {
         NavigationRoute(
-            id: "itemImageSelector",
+            id: "itemImageDetail",
             style: .sheet
         ) {
-            ItemImagePicker(
+            ItemImageDetailView(
                 viewModel: viewModel,
-                type: imageType
+                imageInfo: imageInfo
             )
         }
     }
+
+    static func remoteImageDetail(
+        viewModel: ItemImageViewModel,
+        remoteImageInfo: RemoteImageInfo
+    ) -> NavigationRoute {
+        NavigationRoute(
+            id: "remoteImageDetail",
+            withNamespace: { .push(.zoom(sourceID: "item", namespace: $0)) }
+        ) {
+            RemoteImageDetailView(
+                viewModel: viewModel,
+                remoteImageInfo: remoteImageInfo
+            )
+        }
+    }
+
+    static func remoteImageSearch(viewModel: ItemImageViewModel, imageType: ImageType) -> NavigationRoute {
+        NavigationRoute(
+            id: "remoteImageSearch",
+            style: .sheet
+        ) {
+            RemoteImageSearchView(viewModel: viewModel, imageType: imageType)
+        }
+    }
+
     #endif
 
     static func itemMetadataRefresh(viewModel: ItemEditorViewModel<BaseItemDto>) -> NavigationRoute {
@@ -272,21 +261,4 @@ extension NavigationRoute {
             ItemOverviewView(item: item)
         }
     }
-
-    #if os(iOS)
-
-    static func itemSearchImageDetails(viewModel: ItemImagesViewModel, remoteImageInfo: RemoteImageInfo) -> NavigationRoute {
-        NavigationRoute(
-            id: "itemSearchImageDetails",
-            style: .sheet
-        ) {
-            ItemImageDetailsView(
-                viewModel: viewModel,
-                remoteImageInfo: remoteImageInfo
-            )
-            .isEditing(false)
-        }
-    }
-
-    #endif
 }

@@ -13,21 +13,19 @@ import SwiftUI
 
 struct SettingsView: View {
 
-    @Router
-    var router
-
     #if os(iOS)
     @Default(.userAppearance)
     private var appearance
+    #endif
+
     @Default(.userAccentColor)
     private var accentColor
-    #else
-    @Default(.accentColor)
-    private var accentColor
-    #endif
 
     @Default(.VideoPlayer.videoPlayerType)
     private var videoPlayerType
+
+    @Router
+    private var router
 
     @StateObject
     private var viewModel = SettingsViewModel()
@@ -55,7 +53,7 @@ struct SettingsView: View {
     private var serverSection: some View {
         Section {
             UserProfileRow(user: viewModel.userSession.user.data) {
-                router.route(to: .localUserSettings(viewModel: viewModel))
+                router.route(to: .localUserSettings(user: viewModel.userSession.user.data))
             }
 
             ChevronButton(
@@ -64,8 +62,6 @@ struct SettingsView: View {
                     router.route(to: .editServer(server: viewModel.userSession.server))
                 }
             ) {
-                EmptyView()
-            } subtitle: {
                 Label {
                     Text(viewModel.userSession.server.name)
                 } icon: {
@@ -103,10 +99,6 @@ struct SettingsView: View {
         Section(L10n.videoPlayer) {
             #if os(iOS)
             Picker(L10n.videoPlayerType, selection: $videoPlayerType)
-
-            ChevronButton(L10n.nativePlayer) {
-                router.route(to: .nativePlayerSettings)
-            }
             #else
             ListRowMenu(L10n.videoPlayerType, selection: $videoPlayerType)
             #endif
@@ -120,7 +112,7 @@ struct SettingsView: View {
             }
         } learnMore: {
             LabeledContent(
-                "Swiftfin",
+                L10n.swiftfin,
                 value: L10n.playerSwiftfinDescription
             )
             LabeledContent(
@@ -138,6 +130,7 @@ struct SettingsView: View {
             #if os(iOS)
             Picker(L10n.appearance, selection: $appearance)
             #endif
+
             ColorPicker(L10n.accentColor, selection: $accentColor, supportsOpacity: false)
 
             ChevronButton(L10n.advanced) {

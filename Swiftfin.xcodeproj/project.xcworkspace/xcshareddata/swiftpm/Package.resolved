@@ -1,5 +1,5 @@
 {
-  "originHash" : "4117aea6c512a3e43a7bb340fecc0d1cd1f5561733cee28088160bdbb312f092",
+  "originHash" : "abc5b4b8ea9d646a3adfbee724badcb25df112cd13492c1967d34287be490c73",
   "pins" : [
     {
       "identity" : "blurhashkit",
@@ -69,8 +69,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/nathantannar4/Engine",
       "state" : {
-        "revision" : "34664a7b8131caf91f1de0a407dfc6a590a4c52e",
-        "version" : "2.6.5"
+        "revision" : "57331268245d1b9c40670da82149805537ed8f36",
+        "version" : "2.7.0"
       }
     },
     {
@@ -105,8 +105,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/jellyfin/jellyfin-sdk-swift.git",
       "state" : {
-        "revision" : "e7bb3b79aed86dfc6b20e12fa847a5e738aa0f91",
-        "version" : "0.6.0"
+        "revision" : "09d8f31886b6bea1cfc4719a39bdb6eac1287344",
+        "version" : "2.1.0"
       }
     },
     {
@@ -186,8 +186,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/LePips/StatefulMacro",
       "state" : {
-        "revision" : "705981b6886c4e9c450d079b468fadb5715a1e9a",
-        "version" : "0.0.2"
+        "revision" : "43887a5d30bf32ed7b97d5ae86be02621bed20e3",
+        "version" : "0.1.4"
       }
     },
     {
@@ -206,6 +206,24 @@
       "state" : {
         "revision" : "87e50f483c54e6efd60e885f7f5aa946cee68023",
         "version" : "1.2.1"
+      }
+    },
+    {
+      "identity" : "swift-argument-parser",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-argument-parser",
+      "state" : {
+        "revision" : "5e0406d68a4937f21ae5f670b8f89dad1d156a1c",
+        "version" : "1.8.0"
+      }
+    },
+    {
+      "identity" : "swift-atomics",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-atomics.git",
+      "state" : {
+        "revision" : "b601256eab081c0f92f059e12818ac1d4f178ff7",
+        "version" : "1.3.0"
       }
     },
     {
@@ -245,6 +263,24 @@
       }
     },
     {
+      "identity" : "swift-nio",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-nio.git",
+      "state" : {
+        "revision" : "f71c8d2a5e74a2c6d11a0fbe324774b5d6084237",
+        "version" : "2.99.0"
+      }
+    },
+    {
+      "identity" : "swift-nio-transport-services",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-nio-transport-services.git",
+      "state" : {
+        "revision" : "67787bb645a5e67d2edcdfbe48a216cc549222d5",
+        "version" : "1.28.0"
+      }
+    },
+    {
       "identity" : "swift-numerics",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-numerics.git",
@@ -260,6 +296,15 @@
       "state" : {
         "revision" : "0687f71944021d616d34d922343dcef086855920",
         "version" : "600.0.1"
+      }
+    },
+    {
+      "identity" : "swift-system",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-system.git",
+      "state" : {
+        "revision" : "7c6ad0fc39d0763e0b699210e4124afd5041c5df",
+        "version" : "1.6.4"
       }
     },
     {
@@ -287,24 +332,6 @@
       "state" : {
         "revision" : "90806460f3b3e7564344647241c157aeb0b27a71",
         "version" : "0.3.0"
-      }
-    },
-    {
-      "identity" : "udpbroadcastconnection",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/gunterhager/UDPBroadcastConnection",
-      "state" : {
-        "revision" : "3680f532c00d18a168bb8da7b9f8f82fcd89180d",
-        "version" : "5.0.5"
-      }
-    },
-    {
-      "identity" : "urlqueryencoder",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/CreateAPI/URLQueryEncoder",
-      "state" : {
-        "revision" : "4ce950479707ea109f229d7230ec074a133b15d7",
-        "version" : "0.2.1"
       }
     },
     {

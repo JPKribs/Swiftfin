@@ -12,6 +12,9 @@ import SwiftUI
 
 // TODO: turned into spaghetti to get out, clean up with a better state system
 // TODO: verify timer states
+// TODO: for tvOS, some kind of focus token system
+//       - help with Menu
+//       - may help with alternate overlays
 
 @MainActor
 class VideoPlayerContainerState: ObservableObject {
@@ -73,6 +76,7 @@ class VideoPlayerContainerState: ObservableObject {
     var isPresentingOverlay: Bool = false {
         didSet {
             setPlaybackControlsVisibility()
+            presentationControllerShouldDismiss = isPresentingOverlay && !isPresentingSupplement
 
             if isPresentingOverlay, !isPresentingSupplement {
                 timer.poke()
@@ -84,7 +88,7 @@ class VideoPlayerContainerState: ObservableObject {
     private(set) var isPresentingSupplement: Bool = false {
         didSet {
             setPlaybackControlsVisibility()
-            presentationControllerShouldDismiss = !isPresentingSupplement
+            presentationControllerShouldDismiss = isPresentingOverlay && !isPresentingSupplement
 
             if isPresentingSupplement {
                 timer.stop()
@@ -107,7 +111,7 @@ class VideoPlayerContainerState: ObservableObject {
     }
 
     @Published
-    var presentationControllerShouldDismiss: Bool = true
+    var presentationControllerShouldDismiss: Bool = false
 
     @Published
     var selectedSupplement: (any MediaPlayerSupplement)? = nil {
@@ -117,16 +121,14 @@ class VideoPlayerContainerState: ObservableObject {
     }
 
     @Published
-    var supplementOffset: CGFloat = 0.0
-
-    @Published
-    var centerOffset: CGFloat = 0.0
+    var isProgressBarFocused: Bool = false
 
     var originalPlaybackRate: Float?
 
+    let centerOffsetBox: PublishedBox<CGFloat> = .init(initialValue: 0)
     let jumpProgressObserver: JumpProgressObserver = .init()
     let scrubbedSeconds: PublishedBox<Duration> = .init(initialValue: .zero)
-    let timer: PokeIntervalTimer = .init()
+    let timer: PokeIntervalTimer = .init(defaultInterval: UIDevice.isTV ? 10 : 5)
     let toastProxy: ToastProxy = .init()
 
     weak var containerView: VideoPlayer.UIVideoPlayerContainerViewController?
@@ -136,6 +138,33 @@ class VideoPlayerContainerState: ObservableObject {
     var panHandlingAction: (any _PanHandlingAction)?
     var didSwipe: Bool = false
     var lastTapLocation: CGPoint?
+    #endif
+
+    #if os(tvOS)
+    @Published
+    var isPresentingCloseConfirmation: Bool = false
+
+    var scrubOriginSeconds: Duration?
+
+    func commitScrub() {
+        guard isScrubbing else { return }
+
+        manager?.proxy?.setSeconds(scrubbedSeconds.value)
+        manager?.setPlaybackRequestStatus(status: .playing)
+        isScrubbing = false
+        scrubOriginSeconds = nil
+    }
+
+    func cancelScrub() {
+        guard isScrubbing else { return }
+
+        if let manager {
+            scrubbedSeconds.value = manager.seconds
+        }
+
+        isScrubbing = false
+        scrubOriginSeconds = nil
+    }
     #endif
 
     private var jumpProgressCancellable: AnyCancellable?

@@ -29,11 +29,9 @@ extension ItemView {
                 router.route(to: .item(item: .init(person: person)), in: namespace)
             }
             .trailing {
-                SeeAllButton()
-                    .onSelect {
-                        router.route(to: .castAndCrew(people: people, itemID: nil))
-                        router.route(to: .castAndCrew(people: people, itemID: nil))
-                    }
+                SeeAllButton {
+                    router.route(to: .castAndCrew(people: people, itemID: nil))
+                }
             }
         }
     }

@@ -67,9 +67,9 @@ func Section(
             VStack(alignment: .leading) {
                 footer()
 
-                _LearnMoreButton(
+                LearnMoreButton(
                     title,
-                    learnMore: learnMore
+                    content: learnMore
                 )
             }
         }
@@ -87,8 +87,7 @@ func Section(
 
 // MARK: - LearnMoreButton
 
-// TODO: Rename to `LearnMoreButton` once the original `LearnMoreButton` is removed
-private struct _LearnMoreButton: View {
+private struct LearnMoreButton: View {
 
     @State
     private var isPresented = false
@@ -98,14 +97,14 @@ private struct _LearnMoreButton: View {
 
     init(
         _ title: String,
-        @LabeledContentBuilder learnMore: @escaping () -> AnyView
+        @LabeledContentBuilder content: @escaping () -> AnyView
     ) {
-        self.content = learnMore()
+        self.content = content()
         self.title = title
     }
 
     var body: some View {
-        Button(L10n.learnMore + "\u{2026}") {
+        Button(L10n.learnMore + .ellipsis) {
             isPresented = true
         }
         .foregroundStyle(Color.accentColor)

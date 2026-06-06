@@ -42,6 +42,7 @@ struct PlaybackRateMediaPlayerSupplement: MediaPlayerSupplement {
                             RoundedRectangle(cornerRadius: 7)
                                 .foregroundStyle(.white)
 
+                            // swiftlint:disable:next hard_coded_display_string
                             Text("+")
                                 .fontWeight(.semibold)
                                 .foregroundColor(.black)
@@ -56,7 +57,7 @@ struct PlaybackRateMediaPlayerSupplement: MediaPlayerSupplement {
                             RoundedRectangle(cornerRadius: 7)
                                 .foregroundStyle(.white)
 
-                            Text("-")
+                            Text(String.hyphen)
                                 .fontWeight(.semibold)
                                 .foregroundColor(.black)
                         }
@@ -81,6 +82,9 @@ struct PlaybackRateMediaPlayerSupplement: MediaPlayerSupplement {
             }
         }
 
-        var tvOSView: some View {}
+        var tvOSView: some View {
+            Color.orange
+                .opacity(0.5)
+        }
     }
 }
