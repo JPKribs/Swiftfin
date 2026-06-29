@@ -32,6 +32,13 @@ struct ProgramsView: View {
                 ) {
                     router.route(to: .channels)
                 }
+
+                liveTVSectionPill(
+                    title: L10n.guide,
+                    systemImage: "tablecells"
+                ) {
+                    router.route(to: .liveGuide)
+                }
             }
             .edgePadding(.horizontal)
         }

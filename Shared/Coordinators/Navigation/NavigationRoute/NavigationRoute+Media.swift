@@ -27,6 +27,15 @@ extension NavigationRoute {
         }
     }
 
+    @MainActor
+    static var liveGuide: NavigationRoute {
+        NavigationRoute(
+            id: "liveGuide"
+        ) {
+            LiveTVGuideView()
+        }
+    }
+
     static var liveTV: NavigationRoute {
         NavigationRoute(
             id: "liveTV",

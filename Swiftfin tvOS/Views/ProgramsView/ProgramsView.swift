@@ -26,9 +26,42 @@ struct ProgramsView: View {
     private var programsViewModel = ProgramsViewModel()
 
     @ViewBuilder
+    private var headerButtons: some View {
+        HStack(spacing: 30) {
+            liveTVSectionPill(
+                title: L10n.channels,
+                systemImage: "play.square.stack"
+            ) {
+                router.route(to: .channels)
+            }
+
+            liveTVSectionPill(
+                title: L10n.guide,
+                systemImage: "tablecells"
+            ) {
+                router.route(to: .liveGuide)
+            }
+
+            Spacer()
+        }
+        .focusSection()
+    }
+
+    @ViewBuilder
+    private func liveTVSectionPill(title: String, systemImage: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Label(title, systemImage: systemImage)
+                .font(.callout.weight(.semibold))
+        }
+        .buttonStyle(.card)
+    }
+
+    @ViewBuilder
     private var contentView: some View {
         ScrollView(showsIndicators: false) {
             VStack(spacing: 20) {
+
+                headerButtons
 
                 if programsViewModel.recommended.isNotEmpty {
                     programsSection(title: L10n.onNow, keyPath: \.recommended)
