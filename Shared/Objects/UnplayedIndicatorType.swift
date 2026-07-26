@@ -6,18 +6,13 @@
 // Copyright (c) 2026 Jellyfin & Jellyfin Contributors
 //
 
-import Defaults
 import Foundation
 
-enum UnplayedIndicatorType: String, CaseIterable, Displayable, Identifiable, Defaults.Serializable {
+enum UnplayedIndicatorType: String, CaseIterable, Displayable, Hashable, Storable {
 
     case none
     case indicator
     case count
-
-    var id: String {
-        rawValue
-    }
 
     var displayTitle: String {
         switch self {

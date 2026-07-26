@@ -45,7 +45,8 @@ struct DevicesView: View {
         }
         .animation(.linear(duration: 0.2), value: viewModel.state)
         .navigationTitle(L10n.devices)
-        .navigationBarTitleDisplayMode(.inline)
+        .backport
+        .toolbarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(isEditing)
         .refreshable {
             viewModel.refresh()
@@ -63,12 +64,12 @@ struct DevicesView: View {
             }
             ToolbarItem(placement: .bottomBar) {
                 if isEditing {
-                    Button(L10n.delete) {
+                    Button(L10n.delete, role: .destructive) {
                         isPresentingDeleteSelectionConfirmation = true
                     }
-                    .buttonStyle(.toolbarPill(.red))
+                    .backport
+                    .buttonStyle(.glassProminent)
                     .disabled(selectedDevices.isEmpty)
-                    .frame(maxWidth: .infinity, alignment: .trailing)
                 }
             }
         }
@@ -96,7 +97,7 @@ struct DevicesView: View {
         .alert(L10n.deleteDeviceFailed, isPresented: $isPresentingSelfDeleteError) {
             Button(L10n.ok, role: .cancel) {}
         } message: {
-            Text(L10n.deleteDeviceSelfDeletion(viewModel.userSession.client.configuration.deviceName))
+            Text(L10n.deleteDeviceSelfDeletion(viewModel.userSession?.client.configuration.deviceName ?? ""))
         }
         .errorMessage($viewModel.error)
     }
@@ -157,15 +158,31 @@ struct DevicesView: View {
     private var navigationBarEditView: some View {
         if viewModel.background.is(.refreshing) {
             ProgressView()
-        } else {
-            Button(isEditing ? L10n.cancel : L10n.edit) {
-                isEditing.toggle()
+        } else if isEditing {
+            Button(L10n.cancel, role: .cancel) {
+                isEditing = false
                 UIDevice.impact(.light)
-                if !isEditing {
-                    selectedDevices.removeAll()
+                selectedDevices.removeAll()
+            }
+            .foregroundStyle(.primary, .secondary)
+            .if(true) { view in
+                if #available(iOS 26.0, *), Defaults[.isLiquidGlassEnabled] {
+                    view
+                } else {
+                    view
+                        .backport
+                        .buttonStyle(.glass)
                 }
             }
-            .buttonStyle(.toolbarPill)
+            .controlSize(.small)
+        } else {
+            Button(L10n.edit) {
+                isEditing = true
+                UIDevice.impact(.light)
+            }
+            .backport
+            .buttonStyle(.glass)
+            .controlSize(.small)
         }
     }
 
@@ -182,7 +199,17 @@ struct DevicesView: View {
                 selectedDevices = Set(viewModel.devices.compactMap(\.id))
             }
         }
-        .buttonStyle(.toolbarPill)
+        .foregroundStyle(.primary, .secondary)
+        .if(true) { view in
+            if #available(iOS 26.0, *), Defaults[.isLiquidGlassEnabled] {
+                view
+            } else {
+                view
+                    .backport
+                    .buttonStyle(.glass)
+            }
+        }
+        .controlSize(.small)
         .disabled(!isEditing)
     }
 
@@ -207,7 +234,7 @@ struct DevicesView: View {
 
         Button(L10n.delete, role: .destructive) {
             if let deviceToDelete = selectedDevices.first, selectedDevices.count == 1 {
-                if deviceToDelete == viewModel.userSession.client.configuration.deviceID {
+                if deviceToDelete == viewModel.userSession?.client.configuration.deviceID {
                     isPresentingSelfDeleteError = true
                 } else {
                     viewModel.delete(ids: [deviceToDelete])

@@ -7,13 +7,10 @@
 //
 
 import Defaults
-import Factory
+import FactoryKit
 import JellyfinAPI
 import OrderedCollections
 import SwiftUI
-
-// TODO: Need to change handling of splashscreen
-//       - change root item, needs to be background of navigation stack
 
 struct SelectUserView: View {
 
@@ -36,6 +33,9 @@ struct SelectUserView: View {
     private var authenticationAction
     @Environment(\.horizontalSizeClass)
     private var horizontalSizeClass
+
+    @Injected(\.userSessionManager)
+    private var userSessionManager: UserSessionManager
 
     @Router
     private var router
@@ -127,14 +127,10 @@ struct SelectUserView: View {
     }
 
     private func select(user: UserState) {
-        selectedUsers.insert(user)
-
         Task { @MainActor in
+
             do {
-                guard let authenticationAction else {
-                    selectedUsers.remove(user)
-                    return
-                }
+                guard let authenticationAction else { return }
 
                 let evaluatedPolicy = try await authenticationAction(
                     policy: user.accessPolicy,
@@ -143,35 +139,24 @@ struct SelectUserView: View {
                 let pin = (evaluatedPolicy as? PinEvaluatedUserAccessPolicy)?.pin ?? ""
 
                 await viewModel.signIn(user, pin: pin)
-
-                if user.accessPolicy == .requirePin {
-                    selectedUsers.remove(user)
-                }
-            } catch is CancellationError {
-                selectedUsers.remove(user)
             } catch {
-                selectedUsers.remove(user)
                 await viewModel.error(error)
             }
         }
     }
 
-    private func onSignedIn(_ user: UserState) {
-        Defaults[.lastSignedInUserID] = .signedIn(userID: user.id)
-        Container.shared.currentUserSession.reset()
-        UIDevice.feedback(.success)
-        Notifications[.didSignIn].post()
-    }
-
     @ViewBuilder
     private var splashScreenBackground: some View {
         if selectUserUseSplashscreen, splashScreenImageSources.isNotEmpty {
-            ZStack(alignment: .top) {
+            AlternateLayoutView {
+                Color.clear
+            } content: {
                 ImageView(splashScreenImageSources)
                     .pipeline(.Swiftfin.local)
                     .aspectRatio(contentMode: .fill)
                     .id(splashScreenImageSources)
-
+            }
+            .overlay {
                 Color.black
                     .opacity(0.9)
             }
@@ -197,7 +182,7 @@ struct SelectUserView: View {
                                     addUser(server: server)
                                 } label: {
                                     Text(server.name)
-                                    Text(server.currentURL.absoluteString)
+                                    Text(server.effectiveServerURL.absoluteString)
                                 }
                             }
                         }
@@ -259,7 +244,7 @@ struct SelectUserView: View {
                 .ignoresSafeArea(.all, edges: .horizontal)
             }
 
-            BottomBar(
+            Toolbar(
                 servers: viewModel.servers.keys,
                 allUsers: userItems,
                 isEditing: $isEditing,
@@ -308,36 +293,60 @@ struct SelectUserView: View {
                             areAllUsersSelected ? L10n.removeAll : L10n.selectAll,
                             action: toggleAllUsersSelected
                         )
-                        .buttonStyle(.toolbarPill)
+                        .foregroundStyle(.primary, .secondary)
+                        .if(true) { view in
+                            if #available(iOS 26.0, tvOS 26.0, *), Defaults[.isLiquidGlassEnabled] {
+                                view
+                            } else {
+                                view
+                                    .backport
+                                    .buttonStyle(.glass)
+                            }
+                        }
+                        .controlSize(.small)
                     }
                 }
 
                 ToolbarItemGroup(placement: .topBarTrailing) {
                     if isEditing {
-                        Button(L10n.cancel) {
+                        Button(L10n.cancel, role: .cancel) {
                             isEditing = false
                         }
-                        .buttonStyle(.toolbarPill)
+                        .foregroundStyle(.primary, .secondary)
+                        .if(true) { view in
+                            if #available(iOS 26.0, tvOS 26.0, *), Defaults[.isLiquidGlassEnabled] {
+                                view
+                            } else {
+                                view
+                                    .backport
+                                    .buttonStyle(.glass)
+                            }
+                        }
+                        .controlSize(.small)
                     } else {
-                        Menu {
-                            AdvancedMenu(
+                        Menu(
+                            L10n.advanced,
+                            systemImage: "gearshape.fill"
+                        ) {
+                            AdvancedMenuContent(
                                 hasUsers: userItems.isNotEmpty,
                                 isEditing: $isEditing
                             )
-                        } label: {
-                            Label(L10n.advanced, systemImage: "gearshape.fill")
                         }
+                        .backport
+                        .buttonStyle(.glass)
+                        .controlSize(.small)
                     }
                 }
 
                 ToolbarItem(placement: .bottomBar) {
                     if isEditing {
-                        Button(L10n.delete) {
+                        Button(L10n.delete, role: .destructive) {
                             isPresentingConfirmDeleteUsers = true
                         }
-                        .buttonStyle(.toolbarPill(.red))
+                        .backport
+                        .buttonStyle(.glassProminent)
                         .disabled(selectedUsers.isEmpty)
-                        .frame(maxWidth: .infinity, alignment: .trailing)
                     }
                 }
             }
@@ -377,14 +386,21 @@ struct SelectUserView: View {
         .onReceive(viewModel.events) { event in
             switch event {
             case let .signedIn(user):
-                onSignedIn(user)
+                Task { @MainActor in
+                    do {
+                        try await userSessionManager.signIn(userID: user.id)
+                        UIDevice.feedback(.success)
+                    } catch {
+                        await viewModel.error(error)
+                    }
+                }
             }
         }
         .onNotification(.didConnectToServer) { server in
             viewModel.background.getServers()
             serverSelection = .server(id: server.id)
         }
-        .onNotification(.didChangeCurrentServerURL) { _ in
+        .onNotification(.didChangeServerConnection) { _ in
             viewModel.background.getServers()
         }
         .onNotification(.didDeleteServer) { _ in

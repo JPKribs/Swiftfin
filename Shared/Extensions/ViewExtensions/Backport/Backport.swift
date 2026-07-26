@@ -21,12 +21,52 @@ extension Backport where Content: View {
     }
 
     @ViewBuilder
-    func toolbarTitleDisplayMode(_ mode: ToolbarTitleDisplayMode) -> some View {
+    func buttonStyle(
+        _ style: some BackportButtonStyle
+    ) -> some View {
+        content.buttonStyle(
+            BackportPrimitiveButtonStyle(style: style)
+        )
+    }
+
+    @ViewBuilder
+    func defaultFocus<V: Hashable>(
+        _ binding: FocusState<V>.Binding,
+        _ value: V,
+        priority: DefaultFocusEvaluationPriority = .automatic
+    )
+    -> some View {
         if #available(iOS 17, tvOS 17, *) {
-            content.toolbarTitleDisplayMode(mode.swiftUIValue)
+            content.defaultFocus(
+                binding,
+                value,
+                priority: priority
+            )
         } else {
-            content.navigationBarTitleDisplayMode(mode.navigationBarTitleDisplayMode)
+            content
         }
+    }
+
+    @ViewBuilder
+    func focusable(_ isFocusable: Bool = true) -> some View {
+        if #available(iOS 17, tvOS 17, *) {
+            content.focusable(isFocusable)
+        } else {
+            content
+        }
+    }
+
+    @ViewBuilder
+    func glassEffect(
+        _ glass: BackportGlass = .regular,
+        in shape: some Shape
+    ) -> some View {
+        content.modifier(
+            BackportGlassEffectModifier(
+                glass: glass,
+                shape: shape
+            )
+        )
     }
 
     @ViewBuilder
@@ -93,35 +133,20 @@ extension Backport where Content: View {
     }
 
     @ViewBuilder
-    func defaultFocus<V: Hashable>(
-        _ binding: FocusState<V>.Binding,
-        _ value: V,
-        priority: DefaultFocusEvaluationPriority = .automatic
-    )
-    -> some View {
-        if #available(iOS 17, tvOS 17, *) {
-            content
-                .defaultFocus(
-                    binding,
-                    value,
-                    priority: priority
-                )
+    func scrollEdgeEffectStyle(
+        _ style: ScrollEdgeEffectStyle?,
+        for edges: Edge.Set
+    ) -> some View {
+        if #available(iOS 26.0, tvOS 26.0, *) {
+            content.scrollEdgeEffectStyle(
+                style?.swiftUIValue,
+                for: edges
+            )
         } else {
             content
         }
     }
 
-    @ViewBuilder
-    func focusable(_ isFocusable: Bool = true) -> some View {
-        if #available(iOS 17, tvOS 17, *) {
-            content
-                .focusable(isFocusable)
-        } else {
-            content
-        }
-    }
-
-    @available(tvOS, unavailable)
     @ViewBuilder
     func searchFocused(
         _ isSearchFocused: FocusState<Bool>.Binding
@@ -132,32 +157,13 @@ extension Backport where Content: View {
             content
         }
     }
-}
 
-// MARK: ButtonBorderShape
-
-enum ButtonBorderShape {
-    case automatic
-    case capsule
-    case roundedRectangle
-    case circle
-
-    var swiftUIValue: SwiftUI.ButtonBorderShape {
-        switch self {
-        case .automatic: .automatic
-        case .capsule: .capsule
-        case .roundedRectangle: .roundedRectangle
-        case .circle:
-            if #available(iOS 17, *) {
-                .circle
-            } else {
-                .roundedRectangle
-            }
+    @ViewBuilder
+    func toolbarTitleDisplayMode(_ mode: ToolbarTitleDisplayMode) -> some View {
+        if #available(iOS 17, tvOS 17, *) {
+            content.toolbarTitleDisplayMode(mode.swiftUIValue)
+        } else {
+            content.navigationBarTitleDisplayMode(mode.navigationBarTitleDisplayMode)
         }
     }
-}
-
-enum NavigationTransition: Hashable {
-    case automatic
-    case zoom(sourceID: String, namespace: Namespace.ID)
 }

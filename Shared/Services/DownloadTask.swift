@@ -6,7 +6,7 @@
 // Copyright (c) 2026 Jellyfin & Jellyfin Contributors
 //
 
-import Factory
+import FactoryKit
 import Files
 import Foundation
 import Get
@@ -41,7 +41,7 @@ class DownloadTask: NSObject, ObservableObject {
 
     private let logger = Logger.swiftfin()
     @Injected(\.currentUserSession)
-    private var userSession: UserSession!
+    private var userSession: UserSession?
 
     @Published
     var state: State = .ready
@@ -115,9 +115,10 @@ class DownloadTask: NSObject, ObservableObject {
 
     private func downloadMedia() async throws {
 
-        guard let downloadFolder = item.downloadFolder else { return }
+        guard let userSession else { throw UserSessionError.missingCurrentSession }
+        guard let downloadFolder = item.downloadFolder, let itemID = item.id else { return }
 
-        let request = Paths.getDownload(itemID: item.id!)
+        let request = Paths.getDownload(itemID: itemID)
         let response = try await userSession.client.download(for: request, delegate: self)
 
         let subtype = response.response.mimeSubtype
@@ -137,6 +138,7 @@ class DownloadTask: NSObject, ObservableObject {
 
     private func downloadBackdropImage() async {
 
+        guard let userSession else { return }
         guard let type = item.type else { return }
 
         let imageURL: URL
@@ -144,10 +146,10 @@ class DownloadTask: NSObject, ObservableObject {
         // TODO: move to BaseItemDto
         switch type {
         case .movie, .series:
-            guard let url = item.imageSource(.backdrop, maxWidth: 600).url else { return }
+            guard let url = item.imageSource(.backdrop, environment: ImageSourceOptions(maxWidth: 600)).url else { return }
             imageURL = url
         case .episode:
-            guard let url = item.imageSource(.primary, maxWidth: 600).url else { return }
+            guard let url = item.imageSource(.primary, environment: ImageSourceOptions(maxWidth: 600)).url else { return }
             imageURL = url
         default:
             return
@@ -164,13 +166,14 @@ class DownloadTask: NSObject, ObservableObject {
 
     private func downloadPrimaryImage() async {
 
+        guard let userSession else { return }
         guard let type = item.type else { return }
 
         let imageURL: URL
 
         switch type {
         case .movie, .series:
-            guard let url = item.imageSource(.primary, maxWidth: 300).url else { return }
+            guard let url = item.imageSource(.primary, environment: ImageSourceOptions(maxWidth: 300)).url else { return }
             imageURL = url
         default:
             return

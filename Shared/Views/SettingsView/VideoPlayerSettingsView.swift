@@ -7,7 +7,7 @@
 //
 
 import Defaults
-import Factory
+import FactoryKit
 import JellyfinAPI
 import SwiftUI
 
@@ -49,12 +49,8 @@ struct VideoPlayerSettingsView: View {
 
     // MARK: - Subtitle Defaults
 
-    @Default(.VideoPlayer.Subtitle.subtitleFontName)
-    private var subtitleFontName
-    @Default(.VideoPlayer.Subtitle.subtitleSize)
-    private var subtitleSize
-    @Default(.VideoPlayer.Subtitle.subtitleColor)
-    private var subtitleColor
+    @Default(.VideoPlayer.Subtitle.configuration)
+    private var subtitleConfiguration
 
     // MARK: - Timestamp Defaults
 
@@ -68,12 +64,12 @@ struct VideoPlayerSettingsView: View {
     private var viewModel: ServerUserAdminViewModel
 
     init() {
-        /// If there is no User or UserSession, updating the user on the server has the potential of nuking all settings.
-        /// - Force Unwrap might crash but this is to prevent malformed UserDTO updating over real UserDTOs
-        _viewModel = StateObject(wrappedValue: ServerUserAdminViewModel(user: Container.shared.currentUserSession()!.user.data))
+        _viewModel =
+            StateObject(wrappedValue: ServerUserAdminViewModel(user: Container.shared.currentUserSession()?.user.data ?? UserDto()))
     }
 
     private func updateConfiguration(_ modify: (inout UserConfiguration) -> Void) {
+        guard viewModel.user.id != nil else { return }
         guard var configuration = viewModel.user.configuration else { return }
         modify(&configuration)
         viewModel.updateConfiguration(configuration)
@@ -315,18 +311,18 @@ struct VideoPlayerSettingsView: View {
         }
 
         Section {
-            ChevronButton(L10n.subtitleFont, content: subtitleFontName) {
-                router.route(to: .fontPicker(selection: $subtitleFontName))
+            ChevronButton(L10n.subtitleFont, content: subtitleConfiguration.fontName) {
+                router.route(to: .fontPicker(selection: $subtitleConfiguration.fontName))
             }
 
-            Stepper(L10n.subtitleSize, value: $subtitleSize, in: 1 ... 20, step: 1) {
+            Stepper(L10n.subtitleSize, value: $subtitleConfiguration.size, in: 1 ... 20, step: 1) {
                 LabeledContent(L10n.subtitleSize) {
-                    Text(subtitleSize.description)
+                    Text(subtitleConfiguration.size.description)
                         .foregroundStyle(.secondary)
                 }
             }
 
-            ColorPicker(L10n.subtitleColor, selection: $subtitleColor, supportsOpacity: false)
+            ColorPicker(L10n.subtitleColor, selection: $subtitleConfiguration.color, supportsOpacity: false)
         } footer: {
             // TODO: better wording
             Text(L10n.subtitlesDisclaimer)

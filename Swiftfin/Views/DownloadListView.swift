@@ -20,7 +20,8 @@ struct DownloadListView: View {
             }
         }
         .navigationTitle(L10n.downloads)
-        .navigationBarTitleDisplayMode(.inline)
+        .backport
+        .toolbarTitleDisplayMode(.inline)
     }
 }
 
@@ -44,7 +45,7 @@ extension DownloadListView {
                                 .opacity(0.8)
                         }
 //                        .posterStyle(type: .portrait, width: 60)
-                        .posterShadow()
+                        .subtleShadow()
 
                     VStack(alignment: .leading) {
                         Text(downloadTask.item.displayTitle)

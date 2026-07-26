@@ -21,15 +21,14 @@ struct ConnectToServerView: View {
     @Router
     private var router
 
-    @StateObject
-    private var viewModel = ConnectToServerViewModel()
-
     @State
     private var duplicateServer: ServerState? = nil
-    @State
-    private var isPresentingDuplicateServer: Bool = false
+
     @State
     private var url: String = ""
+
+    @StateObject
+    private var viewModel = ConnectToServerViewModel()
 
     private let timer = Timer.publish(every: 12, on: .main, in: .common).autoconnect()
 
@@ -42,14 +41,13 @@ struct ConnectToServerView: View {
         case let .duplicateServer(server):
             UIDevice.feedback(.warning)
             duplicateServer = server
-            isPresentingDuplicateServer = true
         }
     }
 
     @ViewBuilder
     private var connectSection: some View {
         Section(L10n.connectToServer) {
-            TextField(L10n.serverURL, text: $url)
+            TextField(L10n.url, text: $url)
                 .disableAutocorrection(true)
                 .textInputAutocapitalization(.never)
                 .keyboardType(.URL)
@@ -57,24 +55,46 @@ struct ConnectToServerView: View {
         }
 
         if viewModel.state == .connecting {
-            Button(L10n.cancel, role: .cancel) {
+            Button(role: .cancel) {
                 viewModel.cancel()
+            } label: {
+                Text(L10n.cancel)
+                    .frame(maxWidth: .infinity)
             }
-            .buttonStyle(.primary)
-            .frame(maxHeight: 75)
+            .listRowInsets(.zero)
+            .listRowBackground(Color.clear)
+            #if os(iOS)
+                .listRowSeparator(.hidden)
+            #endif
+                .fontWeight(.semibold)
+                .backport
+                .buttonStyle(.glassProminent.shadow(false))
+            #if os(iOS)
+                .controlSize(.large)
+            #endif
+                .frame(maxHeight: 75)
         } else {
-            Button(L10n.connect) {
+            Button {
                 isURLFocused = false
                 viewModel.connect(url: url)
+            } label: {
+                Text(L10n.connect)
+                    .frame(maxWidth: .infinity)
             }
-            .buttonStyle(.primary)
-            .frame(maxHeight: 75)
-            .disabled(url.isEmpty)
-            .foregroundStyle(
-                accentColor.overlayColor,
-                accentColor
-            )
-            .opacity(url.isEmpty ? 0.5 : 1)
+            .listRowInsets(.zero)
+            .listRowBackground(Color.clear)
+            #if os(iOS)
+                .listRowSeparator(.hidden)
+            #endif
+                .fontWeight(.semibold)
+                .backport
+                .buttonStyle(.glassProminent.shadow(false))
+                .tint(accentColor)
+            #if os(iOS)
+                .controlSize(.large)
+            #endif
+                .frame(maxHeight: 75)
+                .disabled(url.isEmpty)
         }
     }
 
@@ -107,7 +127,8 @@ struct ConnectToServerView: View {
 
             localServersSection
         }
-        .navigationBarTitleDisplayMode(.inline)
+        .backport
+        .toolbarTitleDisplayMode(.inline)
         .navigationBarCloseButton(disabled: viewModel.state == .connecting) {
             router.dismiss()
         }
@@ -147,20 +168,30 @@ struct ConnectToServerView: View {
                     ProgressView()
                 }
             }
-            .alert(
-                Text(L10n.server),
-                isPresented: $isPresentingDuplicateServer,
-                presenting: duplicateServer
-            ) { server in
-                Button(L10n.dismiss, role: .destructive) {}
-
-                Button(L10n.addURL) {
-                    viewModel.addNewURL(serverState: server)
-                    router.dismiss()
+        #if os(tvOS)
+            ._alert(
+                L10n.connection,
+                isPresented: $duplicateServer.isNotNil()
+            ) {
+                if let server = duplicateServer {
+                    DuplicateServerConnectionView(server: server) {
+                        viewModel.addConnection(serverState: server)
+                        duplicateServer = nil
+                        router.dismiss()
+                    }
                 }
-            } message: { server in
-                Text(L10n.serverAlreadyExistsPrompt(server.name))
             }
+        #else
+            .sheet(item: $duplicateServer) { server in
+                NavigationStack {
+                    DuplicateServerConnectionView(server: server) {
+                        viewModel.addConnection(serverState: server)
+                        duplicateServer = nil
+                        router.dismiss()
+                    }
+                }
+            }
+        #endif
             .errorMessage($viewModel.error)
     }
 }

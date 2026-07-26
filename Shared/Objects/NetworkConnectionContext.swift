@@ -1,0 +1,103 @@
+//
+// Swiftfin is subject to the terms of the Mozilla Public
+// License, v2.0. If a copy of the MPL was not distributed with this
+// file, you can obtain one at https://mozilla.org/MPL/2.0/.
+//
+// Copyright (c) 2026 Jellyfin & Jellyfin Contributors
+//
+
+import Foundation
+import Network
+
+#if os(iOS)
+import NetworkExtension
+#endif
+
+struct NetworkConnectionContext: Equatable {
+
+    let isSatisfied: Bool
+    let interface: ServerConnection.Interface
+    let wifiSSID: String?
+
+    init(
+        isSatisfied: Bool,
+        interface: ServerConnection.Interface,
+        wifiSSID: String?
+    ) {
+        self.isSatisfied = isSatisfied
+        self.interface = interface
+        self.wifiSSID = wifiSSID?.nilIfBlank
+    }
+
+    init(path: Network.NWPath) async {
+        let interface = Self.interface(for: path)
+        let wifiSSID = path.status == .satisfied && interface == .wifi ? await Self.currentWifiSSID() : nil
+
+        self.isSatisfied = path.status == .satisfied
+        self.interface = interface
+        self.wifiSSID = wifiSSID
+    }
+
+    static func current() async -> NetworkConnectionContext {
+        let monitor = NWPathMonitor()
+        let queue = DispatchQueue(label: "Swiftfin.NetworkConnectionContext")
+        let resumeState = ContinuationResumeState()
+
+        return await withCheckedContinuation { continuation in
+            monitor.pathUpdateHandler = { path in
+                guard resumeState.resume() else { return }
+                monitor.cancel()
+
+                Task {
+                    let context = await NetworkConnectionContext(path: path)
+                    continuation.resume(returning: context)
+                }
+            }
+
+            monitor.start(queue: queue)
+        }
+    }
+
+    static var unavailable: NetworkConnectionContext {
+        .init(
+            isSatisfied: false,
+            interface: .any,
+            wifiSSID: nil
+        )
+    }
+
+    private static func interface(for path: Network.NWPath) -> ServerConnection.Interface {
+        if path.usesInterfaceType(.wifi) {
+            .wifi
+        } else if path.usesInterfaceType(.cellular) {
+            .cellular
+        } else {
+            .any
+        }
+    }
+
+    static func currentWifiSSID() async -> String? {
+        #if os(iOS)
+        await (NEHotspotNetwork.fetchCurrent())?
+            .ssid
+            .nilIfBlank
+        #else
+        nil
+        #endif
+    }
+
+    private final class ContinuationResumeState {
+
+        private let lock = NSLock()
+        private var didResume = false
+
+        func resume() -> Bool {
+            lock.lock()
+            defer { lock.unlock() }
+
+            guard !didResume else { return false }
+            didResume = true
+            return true
+        }
+    }
+}

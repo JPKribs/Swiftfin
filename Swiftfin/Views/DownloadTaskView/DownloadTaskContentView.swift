@@ -7,7 +7,7 @@
 //
 
 import Defaults
-import Factory
+import FactoryKit
 import JellyfinAPI
 import SwiftUI
 
@@ -34,12 +34,12 @@ extension DownloadTaskView {
             VStack(alignment: .leading, spacing: 10) {
 
                 VStack(alignment: .center) {
-                    ImageView(downloadTask.item.landscapeImageSources(maxWidth: 600))
+                    ImageView(downloadTask.item.imageSources(for: .landscape, size: .custom(width: 600)))
                         .frame(maxHeight: 300)
                         .aspectRatio(1.77, contentMode: .fill)
                         .cornerRadius(10)
                         .padding(.horizontal)
-                        .posterShadow()
+                        .subtleShadow()
 
                     ShelfView(downloadTask: downloadTask)
 

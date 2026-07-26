@@ -16,6 +16,22 @@ struct LetterPickerBarModifier: ViewModifier {
 
     let viewModel: FilterViewModel?
 
+    // tvOS defers to FilterBarModifier, which knows both bar edges
+    private func unoccupiedEdges(besides edge: HorizontalEdge?) -> Edge.Set {
+        #if os(tvOS)
+        []
+        #else
+        switch edge {
+        case .leading:
+            .trailing
+        case .trailing:
+            .leading
+        case nil:
+            .horizontal
+        }
+        #endif
+    }
+
     @ViewBuilder
     func body(content: Content) -> some View {
         if let edge = letterPickerOrientation.edge,
@@ -23,22 +39,21 @@ struct LetterPickerBarModifier: ViewModifier {
         {
             content
                 .focusSection()
+                .ignoresSafeArea(.all, edges: unoccupiedEdges(besides: edge))
                 .safeAreaInset(edge: edge, alignment: .center, spacing: 0) {
                     LetterPickerBar(viewModel: viewModel)
-                        .if(!UIDevice.isTV) { view in
-                            view
-                                .padding(.vertical, EdgeInsets.edgePadding / 2)
-                                .padding(edge == .leading ? .leading : .trailing, EdgeInsets.edgePadding / 2)
+                }
+                .overlayPreferenceValue(LetterPickerActiveLetterKey.self) { letter in
+                    ZStack {
+                        if let letter {
+                            LetterPickerBar.LetterPickerCallout(letter: letter)
+                                .font(.system(size: UIDevice.isTV ? 128 : 64, design: .rounded).weight(.bold))
                         }
-                        .if(UIDevice.isTV) { view in
-                            view
-                                .offset(x: edge == .leading ? -EdgeInsets.edgePadding / 1.5 : EdgeInsets.edgePadding / 1.5)
-                                .padding(edge == .leading ? .trailing : .leading, -EdgeInsets.edgePadding / 2)
-                                .focusSection()
-                        }
+                    }
                 }
         } else {
             content
+                .ignoresSafeArea(.all, edges: unoccupiedEdges(besides: nil))
         }
     }
 }

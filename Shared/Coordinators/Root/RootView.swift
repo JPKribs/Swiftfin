@@ -6,6 +6,7 @@
 // Copyright (c) 2026 Jellyfin & Jellyfin Contributors
 //
 
+import FactoryKit
 import SwiftUI
 
 struct RootView: View {
@@ -15,25 +16,18 @@ struct RootView: View {
 
     var body: some View {
         ZStack {
-            if rootCoordinator.root.id == RootItem.appLoading.id {
-                RootItem.appLoading.content
+            switch rootCoordinator.state {
+            case .initial:
+                ProgressView()
+            case .error:
+                ErrorView(error: rootCoordinator.error ?? ErrorMessage(L10n.unknownError))
+            case .ready:
+                UserSessionRootView()
             }
-
-            if rootCoordinator.root.id == RootItem.mainTab.id {
-                RootItem.mainTab.content
-            }
-
-            if rootCoordinator.root.id == RootItem.selectUser.id {
-                RootItem.selectUser.content
-            }
-
-            #if os(iOS)
-            if rootCoordinator.root.id == RootItem.serverCheck.id {
-                RootItem.serverCheck.content
-            }
-            #endif
         }
-        .animation(.linear(duration: 0.1), value: rootCoordinator.root.id)
-        .environmentObject(rootCoordinator)
+        .animation(.linear(duration: 0.1), value: rootCoordinator.state)
+        .task {
+            rootCoordinator.start()
+        }
     }
 }

@@ -9,6 +9,7 @@
 #if canImport(LocalAuthentication)
 import LocalAuthentication
 #endif
+
 import SwiftUI
 
 struct LocalUserAuthenticationAction {
@@ -46,6 +47,14 @@ struct WithUserAuthentication<Content: View>: View {
         self.content = content()
     }
 
+    private func handlePinAuthentication() async throws -> String {
+        isPresentingLocalPin = true
+
+        return try await withCheckedThrowingContinuation { continuation in
+            pinContinuation = continuation
+        }
+    }
+
     private func handleDeviceAuthentication(reason: String?) async throws {
         #if os(iOS)
         let context = LAContext()
@@ -54,14 +63,6 @@ struct WithUserAuthentication<Content: View>: View {
         #else
         throw ErrorMessage(L10n.deviceAuthFailed)
         #endif
-    }
-
-    private func handlePinAuthentication() async throws -> String {
-        isPresentingLocalPin = true
-
-        return try await withCheckedThrowingContinuation { continuation in
-            pinContinuation = continuation
-        }
     }
 
     private func handleAuthentication(

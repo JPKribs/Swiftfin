@@ -181,6 +181,12 @@ extension VideoPlayerType {
                     VideoRangeType.sdr
                     VideoRangeType.doviWithSDR
                 }
+                ProfileCondition(
+                    condition: .notEquals,
+                    isRequired: false,
+                    property: .isInterlaced,
+                    value: "true"
+                )
             }
         )
 
@@ -196,6 +202,20 @@ extension VideoPlayerType {
                 ) {
                     nativeHDRProfiles
                 }
+                ProfileCondition(
+                    condition: .equalsAny,
+                    isRequired: true,
+                    property: .videoCodecTag
+                ) {
+                    "hvc1"
+                    "dvh1"
+                }
+                ProfileCondition(
+                    condition: .lessThanEqual,
+                    isRequired: true,
+                    property: .videoFramerate,
+                    value: "60"
+                )
             }
         )
 
@@ -245,6 +265,7 @@ extension VideoPlayerType {
         if PlaybackCapabilities.supportsHDR10 || PlaybackCapabilities.supportsDolbyVision {
             VideoRangeType.doviWithHDR10
             VideoRangeType.doviWithHDR10Plus
+            VideoRangeType.doviWithEL
             VideoRangeType.doviWithELHDR10Plus
         }
 

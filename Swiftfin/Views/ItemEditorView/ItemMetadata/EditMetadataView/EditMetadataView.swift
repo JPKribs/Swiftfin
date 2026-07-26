@@ -7,6 +7,7 @@
 //
 
 import Combine
+import Defaults
 import JellyfinAPI
 import SwiftUI
 
@@ -16,7 +17,7 @@ struct EditMetadataView: View {
     private var router
 
     @ObservedObject
-    private var viewModel: ItemEditorViewModel<BaseItemDto>
+    private var viewModel: ItemEditorViewModel
 
     @Binding
     private var item: BaseItemDto
@@ -26,7 +27,7 @@ struct EditMetadataView: View {
 
     private let itemType: BaseItemKind
 
-    init(viewModel: ItemEditorViewModel<BaseItemDto>) {
+    init(viewModel: ItemEditorViewModel) {
         self.viewModel = viewModel
         self._item = Binding(get: { viewModel.item }, set: { viewModel.item = $0 })
         self._tempItem = State(initialValue: viewModel.item)
@@ -39,17 +40,28 @@ struct EditMetadataView: View {
     var body: some View {
         contentView
             .navigationTitle(L10n.metadata)
-            .navigationBarTitleDisplayMode(.inline)
+            .backport
+            .toolbarTitleDisplayMode(.inline)
             .topBarTrailing {
                 if viewModel.background.states.contains(.updating) {
                     ProgressView()
                 }
 
-                Button(L10n.save) {
+                let saveAction: () -> Void = {
                     item = tempItem
                     viewModel.update(tempItem)
                 }
-                .buttonStyle(.toolbarPill)
+
+                Group {
+                    if #available(iOS 26, *), Defaults[.isLiquidGlassEnabled] {
+                        Button(L10n.save, role: .confirm, action: saveAction)
+                    } else {
+                        Button(L10n.save, action: saveAction)
+                            .backport
+                            .buttonStyle(.glassProminent)
+                            .controlSize(.small)
+                    }
+                }
                 .disabled(viewModel.item == tempItem)
             }
             .navigationBarCloseButton {

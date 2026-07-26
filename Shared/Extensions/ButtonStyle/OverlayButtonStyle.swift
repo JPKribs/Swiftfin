@@ -6,11 +6,15 @@
 // Copyright (c) 2026 Jellyfin & Jellyfin Contributors
 //
 
+import Defaults
 import SwiftUI
 
 extension VideoPlayer.PlaybackControls {
 
     struct OverlayButtonStyle: ButtonStyle {
+
+        @Default(.isLiquidGlassEnabled)
+        private var isLiquidGlassEnabled
 
         @Environment(\.isEnabled)
         private var isEnabled
@@ -29,7 +33,16 @@ extension VideoPlayer.PlaybackControls {
         }
 
         #if os(iOS)
+        @ViewBuilder
         private func iOSBody(_ configuration: Configuration) -> some View {
+            if #available(iOS 26.0, *), isLiquidGlassEnabled {
+                iOSGlassBody(configuration)
+            } else {
+                iOSLegacyBody(configuration)
+            }
+        }
+
+        private func iOSBaseLabel(_ configuration: Configuration) -> some View {
             configuration.label
                 .foregroundStyle(isEnabled ? isFocused ? AnyShapeStyle(Color.black) : AnyShapeStyle(HierarchicalShapeStyle.primary) :
                     AnyShapeStyle(Color.gray)
@@ -42,6 +55,21 @@ extension VideoPlayer.PlaybackControls {
                 .animation(.bouncy(duration: 0.25, extraBounce: 0.25), value: configuration.isPressed)
                 .padding(UIDevice.isTV ? 12 : 4)
                 .animation(nil, value: configuration.isPressed)
+        }
+
+        @available(iOS 26.0, *)
+        private func iOSGlassBody(_ configuration: Configuration) -> some View {
+            iOSBaseLabel(configuration)
+                .padding(4)
+                .glassEffect(.regular.interactive(), in: Circle())
+                .backport
+                .onChange(of: configuration.isPressed) { _, newValue in
+                    onPressed(newValue)
+                }
+        }
+
+        private func iOSLegacyBody(_ configuration: Configuration) -> some View {
+            iOSBaseLabel(configuration)
                 .background {
                     Circle()
                         .foregroundStyle(Color.white.opacity(configuration.isPressed ? 0.25 : isFocused ? 1 : 0))
@@ -59,28 +87,21 @@ extension VideoPlayer.PlaybackControls {
         #if os(tvOS)
         private func tvOSBody(_ configuration: Configuration) -> some View {
             configuration.label
-                .foregroundStyle(foregroundStyle)
                 .labelStyle(.iconOnly)
                 .font(.body)
                 .fontWeight(.semibold)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 8)
                 .frame(minHeight: 56)
-                .contentShape(Circle())
-                .background {
-                    if isFocused {
-                        Circle()
-                            .fill(Color.white)
-                    } else {
-                        Circle()
-                            .fill(Material.thin.tinted(.white.opacity(0.2)))
-                    }
-                }
-                .overlay {
-                    Circle()
-                        .stroke(.white.opacity(0.1), lineWidth: 1)
-                }
-                .clipShape(Circle())
+                .backport
+                .glassEffect(
+                    .regular.selection(
+                        tint: .white,
+                        foregroundColor: .black
+                    ),
+                    in: .circle
+                )
+                .isSelected(isFocused)
                 .scaleEffect(configuration.isPressed ? 0.90 : isFocused ? 1.1 : 1)
                 .shadow(color: isFocused ? .black.opacity(0.5) : .clear, radius: isFocused ? 10 : 0)
                 .animation(.linear(duration: 0.1), value: isFocused)
@@ -89,14 +110,6 @@ extension VideoPlayer.PlaybackControls {
                 .onChange(of: configuration.isPressed) { _, newValue in
                     onPressed(newValue)
                 }
-        }
-
-        private var foregroundStyle: AnyShapeStyle {
-            guard isEnabled else {
-                return AnyShapeStyle(Color.gray)
-            }
-
-            return AnyShapeStyle(isFocused ? Color.black : Color.white)
         }
         #endif
     }

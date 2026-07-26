@@ -6,12 +6,11 @@
 // Copyright (c) 2026 Jellyfin & Jellyfin Contributors
 //
 
-import Engine
 import SwiftUI
 import UIKit
 
 /// `TabView` has an "overscroll" bug on some index selections, workaround with manual `UIPageViewController`
-struct SupplementTabView<Item: Identifiable, Content: View>: UIViewControllerRepresentable {
+struct SupplementTabView<Item: Identifiable, Content: View>: PlatformViewControllerRepresentable {
 
     let items: [Item]
     let selection: Binding<Item.ID?>
@@ -119,10 +118,10 @@ struct SupplementTabView<Item: Identifiable, Content: View>: UIViewControllerRep
 
             for item in items {
                 if let host = viewControllers[item.id] {
-                    host.rootView = content(item)
+                    host.content = content(item)
                 } else {
                     let host = HostingController(content: content(item))
-                    host.disablesSafeArea = true
+                    host.disableSafeArea = true
                     host.view.backgroundColor = .clear
                     viewControllers[item.id] = host
                 }

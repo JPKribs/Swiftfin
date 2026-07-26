@@ -6,81 +6,163 @@
 // Copyright (c) 2026 Jellyfin & Jellyfin Contributors
 //
 
+import Combine
 import Defaults
-import Factory
-import Logging
+import FactoryKit
+import Foundation
 import SwiftUI
+import UIKit
+
+enum AppStartupError: Error {
+
+    case dataStack(Error)
+}
 
 @MainActor
+@Stateful
 final class RootCoordinator: ObservableObject {
 
-    @Published
-    var root: RootItem = .appLoading
+    @CasePathable
+    enum Action {
+        case start
 
-    private let logger = Logger.swiftfin()
-
-    init() {
-        Task {
-            do {
-                try await SwiftfinStore.setupDataStack()
-
-                if Container.shared.currentUserSession() != nil, !Defaults[.signOutOnClose] {
-                    #if os(tvOS)
-                    await MainActor.run {
-                        root(.mainTab)
-                    }
-                    #else
-                    await MainActor.run {
-                        root(.serverCheck)
-                    }
-                    #endif
-                } else {
-                    await MainActor.run {
-                        root(.selectUser)
-                    }
-                }
-
-            } catch {
-                await MainActor.run {
-                    Notifications[.didFailMigration].post()
-                }
+        var transition: Transition {
+            switch self {
+            case .start:
+                .to(.ready)
             }
         }
-
-        // Notification setup for state
-        Notifications[.didSignIn].subscribe(self, selector: #selector(didSignIn))
-        Notifications[.didSignOut].subscribe(self, selector: #selector(didSignOut))
-        Notifications[.didChangeCurrentServerURL].subscribe(self, selector: #selector(didChangeCurrentServerURL(_:)))
     }
 
-    func root(_ newRoot: RootItem) {
-        root = newRoot
+    enum State {
+        case initial
+        case error
+        case ready
     }
 
-    @objc
-    private func didSignIn() {
-        logger.info("Signed in")
+    private var started = false
+    private var accentColorCancellable: AnyCancellable?
+    private var appearanceCancellable: AnyCancellable?
+    private var currentSessionCancellable: AnyCancellable?
+    private var splashScreenCancellable: AnyCancellable?
 
-        #if os(tvOS)
-        root(.mainTab)
-        #else
-        root(.serverCheck)
+    @Injected(\.userSessionManager)
+    private var userSessionManager: UserSessionManager
+
+    deinit {
+        accentColorCancellable?.cancel()
+        appearanceCancellable?.cancel()
+        currentSessionCancellable?.cancel()
+        splashScreenCancellable?.cancel()
+    }
+
+    @Function(\Action.Cases.start)
+    private func _start() async throws {
+        guard !started else { return }
+        started = true
+
+        do {
+            try await SwiftfinStore.setupDataStack()
+            startPreferenceObservation()
+        } catch {
+            throw AppStartupError.dataStack(error)
+        }
+    }
+
+    private func startPreferenceObservation() {
+        setPreferenceObservation(for: userSessionManager.currentSession)
+
+        currentSessionCancellable = userSessionManager.$currentSession
+            .dropFirst()
+            .sink { [weak self] session in
+                Task { @MainActor in
+                    self?.setPreferenceObservation(for: session)
+                }
+            }
+    }
+
+    private func setPreferenceObservation(for session: UserSession?) {
+        if session == nil {
+            setAppDefaultsObservation()
+        } else {
+            setUserDefaultsObservation()
+        }
+    }
+
+    private func setUserDefaultsObservation() {
+        accentColorCancellable?.cancel()
+        appearanceCancellable?.cancel()
+        splashScreenCancellable?.cancel()
+
+        accentColorCancellable = Task {
+            applyAccentColor(Defaults[.userAccentColor])
+
+            for await newValue in Defaults.updates(.userAccentColor) {
+                applyAccentColor(newValue)
+            }
+        }
+        .asAnyCancellable()
+
+        appearanceCancellable = Task {
+            applyAppearance(Defaults[.userAppearance])
+
+            for await newValue in Defaults.updates(.userAppearance) {
+                applyAppearance(newValue)
+            }
+        }
+        .asAnyCancellable()
+    }
+
+    private func setAppDefaultsObservation() {
+        accentColorCancellable?.cancel()
+        appearanceCancellable?.cancel()
+        splashScreenCancellable?.cancel()
+
+        accentColorCancellable = Task {
+            applyAccentColor(.jellyfinPurple)
+        }
+        .asAnyCancellable()
+
+        appearanceCancellable = Task {
+            applyAppAppearance()
+
+            for await newValue in Defaults.updates(.appAppearance) {
+                guard !Defaults[.selectUserUseSplashscreen] else { continue }
+
+                applyAppearance(newValue)
+            }
+        }
+        .asAnyCancellable()
+
+        splashScreenCancellable = Task {
+            for await _ in Defaults.updates(.selectUserUseSplashscreen) {
+                applyAppAppearance()
+            }
+        }
+        .asAnyCancellable()
+    }
+
+    @MainActor
+    private func applyAccentColor(_ color: Color) {
+        Defaults[.accentColor] = color
+
+        #if os(iOS)
+        UIApplication.shared.setAccentColor(color.uiColor)
         #endif
     }
 
-    @objc
-    private func didSignOut() {
-        logger.info("Signed out")
-
-        root(.selectUser)
+    @MainActor
+    private func applyAppearance(_ appearance: AppAppearance) {
+        Defaults[.appearance] = appearance
+        UIApplication.shared.setAppearance(appearance.style)
     }
 
-    @objc
-    func didChangeCurrentServerURL(_ notification: Notification) {
-
-        guard Container.shared.currentUserSession() != nil else { return }
-
-        Container.shared.currentUserSession.reset()
-        Notifications[.didSignIn].post()
+    @MainActor
+    private func applyAppAppearance() {
+        if Defaults[.selectUserUseSplashscreen] {
+            applyAppearance(.dark)
+        } else {
+            applyAppearance(Defaults[.appAppearance])
+        }
     }
 }

@@ -7,7 +7,7 @@
 //
 
 import Defaults
-import Factory
+import FactoryKit
 import Foundation
 import SwiftUI
 import UIKit
@@ -80,7 +80,8 @@ extension Defaults.Keys {
 
     static let backgroundSignOutInterval: Key<TimeInterval> = AppKey("backgroundSignOutInterval", default: 3600)
     static let backgroundTimeStamp: Key<Date> = AppKey("backgroundTimeStamp", default: Date.now)
-    static let lastSignedInUserID: Key<UserSignInState> = AppKey("lastSignedInUserID", default: .signedOut)
+    static let lastSignedInUserID: Key<UserSessionState> = AppKey("lastSignedInUserID", default: .signedOut)
+    static let lastServerInformationRefreshDate: Key<Date> = AppKey("lastServerInformationRefreshDate", default: .distantPast)
 
     static let selectUserDisplayType: Key<LibraryDisplayType> = AppKey("selectUserDisplayType", default: .grid)
     static let selectUserServerSelection: Key<SelectUserServerSelection> = AppKey("selectUserServerSelection", default: .all)
@@ -111,11 +112,7 @@ extension Defaults.Keys {
     enum Customization {
 
         static var itemViewType: Key<ItemViewType> {
-            UserKey("itemViewType", default: .compactLogo)
-        }
-
-        static var showPosterLabels: Key<Bool> {
-            UserKey("showPosterLabels", default: true)
+            UserKey("mediaItemViewType", default: .enhanced)
         }
 
         static var nextUpPosterType: Key<PosterDisplayType> {
@@ -147,13 +144,6 @@ extension Defaults.Keys {
             UserKey("searchPosterType", default: .portrait)
         }
 
-        enum CinematicItemViewType {
-
-            static var usePrimaryImage: Key<Bool> {
-                UserKey("cinematicItemViewTypeUsePrimaryImage", default: false)
-            }
-        }
-
         enum Episodes {
 
             static var useSeriesLandscapeBackdrop: Key<Bool> {
@@ -163,20 +153,12 @@ extension Defaults.Keys {
 
         enum Indicators {
 
-            static var showFavorited: Key<Bool> {
-                UserKey("showFavoritedIndicator", default: true)
+            static var enabled: Key<PosterIndicator> {
+                UserKey("enabledPosterIndicators", default: .all)
             }
 
-            static var showProgress: Key<Bool> {
-                UserKey("showProgressIndicator", default: true)
-            }
-
-            static var showUnplayed: Key<UnplayedIndicatorType> {
-                UserKey("showUnplayedIndicator", default: .indicator)
-            }
-
-            static var showPlayed: Key<Bool> {
-                UserKey("showPlayedIndicator", default: true)
+            static var unplayedStyle: Key<UnplayedIndicatorType> {
+                UserKey("unplayedIndicatorStyle", default: .indicator)
             }
         }
 
@@ -197,16 +179,15 @@ extension Defaults.Keys {
                 UserKey("letterPickerOrientation", default: .disabled)
             }
 
-            static var displayType: Key<LibraryDisplayType> {
-                UserKey("libraryViewType", default: .grid)
-            }
-
-            static var posterType: Key<PosterDisplayType> {
-                UserKey("libraryPosterType", default: .portrait)
-            }
-
-            static var listColumnCount: Key<Int> {
-                UserKey("listColumnCount", default: 1)
+            static var style: Key<LibraryStyle> {
+                UserKey(
+                    "libraryStyle",
+                    default: .init(
+                        displayType: .grid,
+                        posterDisplayType: .portrait,
+                        listColumnCount: 1
+                    )
+                )
             }
 
             static var randomImage: Key<Bool> {
@@ -385,19 +366,10 @@ extension Defaults.Keys {
             }
         }
 
-        // TODO: transition into a SubtitleConfiguration instead of multiple types
         enum Subtitle {
 
-            static var subtitleColor: Key<Color> {
-                UserKey("subtitleColor", default: .white)
-            }
-
-            static var subtitleFontName: Key<String> {
-                UserKey("subtitleFontName", default: UIFont.systemFont(ofSize: 14).fontName)
-            }
-
-            static var subtitleSize: Key<Int> {
-                UserKey("subtitleSize", default: 9)
+            static var configuration: Key<SubtitleConfiguration> {
+                UserKey("subtitleConfiguration", default: .default)
             }
         }
 
@@ -414,12 +386,13 @@ extension Defaults.Keys {
         static var downloads: Key<Bool> {
             UserKey("experimentalDownloads", default: false)
         }
+
+        static var serverConnectionAutoSwitch: Key<Bool> {
+            UserKey("experimentalServerConnectionAutoSwitch", default: false)
+        }
     }
 
     // tvos specific
-    static var downActionShowsMenu: Key<Bool> {
-        UserKey("downActionShowsMenu", default: true)
-    }
 
     static var confirmClose: Key<Bool> {
         UserKey("confirmClose", default: false)

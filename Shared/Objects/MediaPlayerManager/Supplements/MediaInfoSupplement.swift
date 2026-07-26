@@ -10,6 +10,7 @@ import JellyfinAPI
 import SwiftUI
 
 // TODO: scroll if description too long
+// TODO: move currentProgram tracking to a MediaPlayerObserver
 
 struct MediaInfoSupplement: MediaPlayerSupplement {
 
@@ -40,7 +41,12 @@ extension MediaInfoSupplement {
         @EnvironmentObject
         private var manager: MediaPlayerManager
 
-        let item: BaseItemDto
+        @State
+        private var item: BaseItemDto
+
+        init(item: BaseItemDto) {
+            self._item = State(initialValue: item)
+        }
 
         @ViewBuilder
         private var accessoryView: some View {
@@ -75,17 +81,11 @@ extension MediaInfoSupplement {
                 manager.setPlaybackRequestStatus(status: .playing)
                 containerState.select(supplement: nil)
             } label: {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 7)
-                        .foregroundStyle(.white)
-
-                    Label(L10n.fromBeginning, systemImage: "play.fill")
-                        .font(.subheadline)
-                        .fontWeight(.semibold)
-                        .foregroundStyle(.black)
-                }
+                Label(L10n.fromBeginning, systemImage: "play.fill")
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
             }
-            .buttonStyle(.card)
+            .buttonStyle(.supplementAction)
             #if os(tvOS)
                 .focused($isResetButtonFocused)
             #endif
@@ -105,6 +105,9 @@ extension MediaInfoSupplement {
             }
             .padding(.leading, safeAreaInsets.leading)
             .padding(.trailing, safeAreaInsets.trailing)
+            .task(id: item.currentProgram?.endDate) {
+                await updateCurrentProgram()
+            }
         }
 
         @ViewBuilder
@@ -115,7 +118,15 @@ extension MediaInfoSupplement {
                     .lineLimit(2)
                     .multilineTextAlignment(.leading)
 
-                if let overview = item.overview {
+                if let currentProgram = item.currentProgram {
+                    Text(currentProgram.displayTitle)
+                        .fontWeight(.semibold)
+                        .lineLimit(2)
+                        .multilineTextAlignment(.leading)
+                        .foregroundStyle(.secondary)
+                }
+
+                if let overview = item.overview ?? item.currentProgram?.overview {
                     Text(overview)
                         .font(.subheadline)
                         .fontWeight(.regular)
@@ -151,11 +162,21 @@ extension MediaInfoSupplement {
 
                 VStack(alignment: .leading, spacing: 5) {
                     Text(item.displayTitle)
-                        .font(.callout.weight(.semibold))
+                        .font(.callout)
+                        .fontWeight(.semibold)
                         .lineLimit(2)
                         .multilineTextAlignment(.leading)
 
-                    if let overview = item.overview {
+                    if let currentProgram = item.currentProgram {
+                        Text(currentProgram.displayTitle)
+                            .font(.callout)
+                            .fontWeight(.semibold)
+                            .lineLimit(2)
+                            .multilineTextAlignment(.leading)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    if let overview = item.overview ?? item.currentProgram?.overview {
                         Text(overview)
                             .font(.subheadline)
                             .fontWeight(.regular)
@@ -201,6 +222,21 @@ extension MediaInfoSupplement {
                     true,
                     priority: .userInitiated
                 )
+                .task(id: item.currentProgram?.endDate) {
+                    await updateCurrentProgram()
+                }
+        }
+
+        private func updateCurrentProgram() async {
+            guard let userSession = manager.userSession,
+                  let endDate = item.currentProgram?.endDate
+            else { return }
+
+            try? await Task.sleep(for: .seconds(max(endDate.timeIntervalSinceNow + 1, 1)))
+
+            guard let newItem = try? await item.getFullItem(userSession: userSession) else { return }
+
+            item = newItem
         }
     }
 }

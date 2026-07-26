@@ -18,16 +18,6 @@ extension View {
         self
     }
 
-    @ViewBuilder
-    func filterBar(
-        viewModel: FilterViewModel?,
-        types: [ItemFilterType]
-    ) -> some View {
-        modifier(
-            FilterBarBarModifier(viewModel: viewModel, filterTypes: types)
-        )
-    }
-
     /// - Important: This does nothing on tvOS.
     @ViewBuilder
     func navigationBarCloseButton(
@@ -46,6 +36,12 @@ extension View {
     /// - Important: This does nothing on tvOS.
     @ViewBuilder
     func prefersStatusBarHidden(_ hidden: Bool = true) -> some View {
+        self
+    }
+
+    /// - Important: This does nothing on tvOS.
+    @ViewBuilder
+    func searchFocused(_ isFocused: FocusState<Bool>.Binding) -> some View {
         self
     }
 }

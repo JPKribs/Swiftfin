@@ -33,7 +33,7 @@ struct OverlayToastView<Content: View>: View {
         #if os(tvOS)
         60
         #else
-        safeAreaInsets.top + 15
+        safeAreaInsets.top + 10
         #endif
     }
 
@@ -107,17 +107,18 @@ private struct OverlayToastContent: View {
         }
         .padding(contentPadding)
         .frame(minHeight: minHeight)
-        .background(.thinMaterial)
-        .clipShape(Capsule())
-        .overlay(Capsule().stroke(Color.gray.opacity(0.2), lineWidth: 1))
-        .shadow(color: Color.black.opacity(0.2), radius: 6, x: 0, y: 5)
+        .backport
+        .glassEffect(
+            .regular.interactive(!UIDevice.isTV),
+            in: .capsule
+        )
     }
 
     private var contentPadding: EdgeInsets {
         #if os(tvOS)
         EdgeInsets(top: 24, leading: 24, bottom: 24, trailing: 24)
         #else
-        EdgeInsets(top: 8, leading: 24, bottom: 8, trailing: 24)
+        EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16)
         #endif
     }
 
@@ -133,7 +134,7 @@ private struct OverlayToastContent: View {
         #if os(tvOS)
         60
         #else
-        50
+        40
         #endif
     }
 

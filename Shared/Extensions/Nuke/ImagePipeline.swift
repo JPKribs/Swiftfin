@@ -6,7 +6,7 @@
 // Copyright (c) 2026 Jellyfin & Jellyfin Contributors
 //
 
-import Factory
+import FactoryKit
 import Foundation
 import Nuke
 import Pulse
@@ -20,6 +20,9 @@ extension ImagePipeline {
         guard var components = url.components else { return nil }
 
         var maxWidthValue: String?
+
+        // TODO: maxHeight
+        // TODO: cache reset
 
         if let maxWidth = components.queryItems?.first(where: { $0.name == "maxWidth" }) {
             maxWidthValue = maxWidth.value

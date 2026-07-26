@@ -7,7 +7,7 @@
 //
 
 import AVKit
-import Factory
+import FactoryKit
 import JellyfinAPI
 import Logging
 import SwiftUI
@@ -75,7 +75,7 @@ struct NativeVideoPlayer: View {
 
 extension NativeVideoPlayer {
 
-    private struct NativeVideoPlayerView: UIViewControllerRepresentable {
+    private struct NativeVideoPlayerView: PlatformViewControllerRepresentable {
 
         let proxy: AVMediaPlayerProxy
 

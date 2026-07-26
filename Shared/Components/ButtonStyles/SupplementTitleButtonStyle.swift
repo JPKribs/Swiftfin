@@ -24,11 +24,7 @@ extension VideoPlayer.UIVideoPlayerContainerViewController.SupplementContainerVi
 
         @ViewBuilder
         func makeBody(configuration: Configuration) -> some View {
-            if #available(tvOS 26.0, *), isLiquidGlassEnabled {
-                glassBody(configuration)
-            } else {
-                legacyBody(configuration)
-            }
+            glassBody(configuration)
         }
 
         private func baseLabel(_ configuration: Configuration) -> some View {
@@ -40,7 +36,6 @@ extension VideoPlayer.UIVideoPlayerContainerViewController.SupplementContainerVi
                 .frame(minHeight: 56)
         }
 
-        @available(tvOS 26.0, *)
         private func glassBody(_ configuration: Configuration) -> some View {
             baseLabel(configuration)
                 .foregroundStyle(isSelected ? .black : .white)
@@ -50,10 +45,6 @@ extension VideoPlayer.UIVideoPlayerContainerViewController.SupplementContainerVi
                         .interactive(isFocused),
                     in: Capsule()
                 )
-                .overlay {
-                    Capsule()
-                        .stroke(.white.opacity(0.1), lineWidth: 1)
-                }
                 .opacity(inactiveSelectedOpacity)
                 .animation(.easeInOut(duration: 0.1), value: isFocused)
                 .animation(.easeInOut(duration: 0.1), value: isSelected)
@@ -68,7 +59,11 @@ extension VideoPlayer.UIVideoPlayerContainerViewController.SupplementContainerVi
                             .fill(Color.white)
                     } else {
                         Capsule()
-                            .fill(Material.ultraThinMaterial.tinted(.white.opacity(0.2)))
+                            .fill(Material.ultraThinMaterial)
+                            .background {
+                                Capsule()
+                                    .fill(.white.opacity(0.2))
+                            }
                     }
                 }
                 .overlay {
@@ -76,6 +71,7 @@ extension VideoPlayer.UIVideoPlayerContainerViewController.SupplementContainerVi
                         .stroke(.white.opacity(0.1), lineWidth: 1)
                 }
                 .clipShape(Capsule())
+                .subtleShadow()
                 .opacity(inactiveSelectedOpacity)
                 .scaleEffect(isFocused ? 1.06 : 1)
                 .shadow(color: isFocused ? .black.opacity(0.5) : .clear, radius: isFocused ? 10 : 0)
@@ -104,7 +100,7 @@ extension VideoPlayer.UIVideoPlayerContainerViewController.SupplementContainerVi
         @ViewBuilder
         func makeBody(configuration: Configuration) -> some View {
             if #available(iOS 26.0, *), isLiquidGlassEnabled {
-                iOSGlassBody(configuration)
+                glassBody(configuration)
             } else {
                 legacyBody(configuration)
             }
@@ -132,19 +128,25 @@ extension VideoPlayer.UIVideoPlayerContainerViewController.SupplementContainerVi
                                 .fill(.ultraThinMaterial)
                         }
                     }
-                    .clipShape(Capsule()),
+                    .clipShape(Capsule())
+                    .overlay {
+                        Capsule()
+                            .stroke(.white.opacity(0.1), lineWidth: 1)
+                    }
+                    .subtleShadow(),
                 configuration: configuration
             )
         }
 
         @available(iOS 26.0, *)
-        private func iOSGlassBody(_ configuration: Configuration) -> some View {
+        private func glassBody(_ configuration: Configuration) -> some View {
             pressableBody(
                 baseLabel(configuration)
                     .foregroundStyle(isSelected ? .black : .white)
                     .glassEffect(
                         .regular
-                            .tint(isSelected ? .white : nil),
+                            .tint(isSelected ? .white : nil)
+                            .interactive(),
                         in: Capsule()
                     ),
                 configuration: configuration

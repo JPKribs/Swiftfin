@@ -36,15 +36,18 @@ final class TabCoordinator: ObservableObject {
         }
     }
 
-    @Published
-    var tabs: [TabData] = []
+    let tabs: [TabData]
 
     init(@ArrayBuilder<TabItem> tabs: () -> [TabItem]) {
         let tabs = tabs()
         self.tabs = tabs.map { tab in
-            let coordinator = NavigationCoordinator()
-            let event = TabItemSelectedPublisher()
-            return (tab, coordinator, event)
+            (tab, NavigationCoordinator(), TabItemSelectedPublisher())
         }
+        self.selectedTabID = tabs.first?.id
+    }
+
+    func route(to route: NavigationRoute) async {
+        guard let tab = tabs.first(where: { $0.item.id == selectedTabID }) else { return }
+        tab.coordinator.push(route)
     }
 }

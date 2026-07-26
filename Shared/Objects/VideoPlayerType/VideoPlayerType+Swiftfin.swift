@@ -118,8 +118,34 @@ extension VideoPlayerType {
             VideoCodec.mpeg1video
             VideoCodec.mpeg2video
             VideoCodec.mpeg4
-            VideoCodec.vc1
             VideoCodec.vp9
+        } containers: {
+            MediaContainer.mp4
+        }
+
+        /// Create a separate profile to allow VC1 to DirectStream
+        /// Necessary to avoid server-imposed HLS video restrictions in StreamBuilder _supportedHlsVideoCodecs
+        TranscodingProfile(
+            isBreakOnNonKeyFrames: true,
+            context: .streaming,
+            maxAudioChannels: "8",
+            minSegments: 2,
+            protocol: MediaStreamProtocol.hls,
+            type: .video
+        ) {
+            AudioCodec.aac
+            AudioCodec.ac3
+            AudioCodec.alac
+            AudioCodec.dts
+            AudioCodec.eac3
+            AudioCodec.flac
+            AudioCodec.mp1
+            AudioCodec.mp2
+            AudioCodec.mp3
+            AudioCodec.opus
+            AudioCodec.vorbis
+        } videoCodecs: {
+            VideoCodec.vc1
         } containers: {
             MediaContainer.mp4
         }
@@ -155,12 +181,9 @@ extension VideoPlayerType {
 
         SubtitleProfile.build(method: .external) {
             SubtitleFormat.ass
-            SubtitleFormat.dvbsub
-            SubtitleFormat.dvdsub
             SubtitleFormat.jacosub
             SubtitleFormat.libzvbi_teletextdec
             SubtitleFormat.mpl2
-            SubtitleFormat.pgssub
             SubtitleFormat.pjs
             SubtitleFormat.realtext
             SubtitleFormat.sami
@@ -172,6 +195,12 @@ extension VideoPlayerType {
             SubtitleFormat.ttml
             SubtitleFormat.vplayer
             SubtitleFormat.vtt
+        }
+
+        SubtitleProfile.build(method: .encode) {
+            SubtitleFormat.dvbsub
+            SubtitleFormat.dvdsub
+            SubtitleFormat.pgssub
             SubtitleFormat.xsub
         }
     }
@@ -296,6 +325,7 @@ extension VideoPlayerType {
             VideoRangeType.doviWithHLG
             VideoRangeType.doviWithHDR10
             VideoRangeType.doviWithHDR10Plus
+            VideoRangeType.doviWithEL
             VideoRangeType.doviWithELHDR10Plus
         }
     }

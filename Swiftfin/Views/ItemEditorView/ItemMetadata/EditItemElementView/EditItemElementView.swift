@@ -11,22 +11,20 @@ import Defaults
 import JellyfinAPI
 import SwiftUI
 
-// TODO: move away from the `route` method for adding a new item
-struct EditItemElementView<Element: Hashable>: View {
+// TODO: Only have people have .plain style, grouped for normal text
 
-    @Default(.accentColor)
-    private var accentColor
+struct EditItemElementView<Editor: ItemComponentEditor>: View {
 
     @ObservedObject
-    var viewModel: ItemEditorViewModel<Element>
+    private var viewModel: ItemComponentEditorViewModel<Editor>
 
     @Router
     private var router
 
     @State
-    private var elements: [Element]
+    private var elements: [Editor.Element]
     @State
-    private var selectedElements: Set<Element> = []
+    private var selectedElements: Set<Editor.Element> = []
     @State
     private var isEditing: Bool = false
     @State
@@ -34,26 +32,83 @@ struct EditItemElementView<Element: Hashable>: View {
     @State
     private var isPresentingDeletionConfirmation = false
 
-    private let type: ItemArrayElements
-    private let route: (NavigationCoordinator.Router, ItemEditorViewModel<Element>) -> Void
-
-    init(
-        viewModel: ItemEditorViewModel<Element>,
-        type: ItemArrayElements,
-        route: @escaping (NavigationCoordinator.Router, ItemEditorViewModel<Element>) -> Void
-    ) {
+    init(viewModel: ItemComponentEditorViewModel<Editor>) {
         self.viewModel = viewModel
-        self.type = type
-        self.route = route
-        self.elements = type.getElement(for: viewModel.item)
+        self.elements = viewModel.editor.elements(in: viewModel.item)
     }
 
-    // MARK: - Body
+    @ViewBuilder
+    private var navigationBarSelectView: some View {
+        let isAllSelected = selectedElements.count == (elements.count)
+        Button(isAllSelected ? L10n.removeAll : L10n.selectAll) {
+            selectedElements = isAllSelected ? [] : Set(elements)
+        }
+        .foregroundStyle(.primary, .secondary)
+        .if(true) { view in
+            if #available(iOS 26.0, *), Defaults[.isLiquidGlassEnabled] {
+                view
+            } else {
+                view
+                    .backport
+                    .buttonStyle(.glass)
+            }
+        }
+        .controlSize(.small)
+        .disabled(!isEditing)
+    }
+
+    @ViewBuilder
+    private var contentView: some View {
+        List {
+            InsetGroupedListHeader(viewModel.editor.displayTitle, description: viewModel.editor.description)
+                .listRowBackground(Color.clear)
+                .listRowSeparator(.hidden)
+                .padding(.vertical, 24)
+
+            if elements.isNotEmpty {
+                ForEach(elements, id: \.self) { element in
+                    element.makeBody(
+                        libraryStyle: .init(displayType: .list, posterDisplayType: .portrait, listColumnCount: 1),
+                        action: {
+                            if isEditing {
+                                selectedElements.toggle(value: element)
+                            }
+                        }
+                    )
+                    .isEditing(isEditing)
+                    .isSelected(selectedElements.contains(element))
+                    .listRowInsets(.edgeInsets)
+                    .swipeActions {
+                        Button(
+                            L10n.delete,
+                            systemImage: "trash"
+                        ) {
+                            selectedElements.toggle(value: element)
+                            isPresentingDeletionConfirmation = true
+                        }
+                        .tint(.red)
+                    }
+                }
+                .onMove { source, destination in
+                    guard isReordering else { return }
+                    elements.move(fromOffsets: source, toOffset: destination)
+                }
+            } else {
+                Text(L10n.none)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+                    .listRowSeparator(.hidden)
+                    .listRowInsets(.zero)
+            }
+        }
+        .listStyle(.plain)
+        .environment(\.editMode, isReordering ? .constant(.active) : .constant(.inactive))
+    }
 
     var body: some View {
         contentView
-            .navigationTitle(type.displayTitle)
-            .navigationBarTitleDisplayMode(.inline)
+            .navigationTitle(viewModel.editor.displayTitle)
+            .backport
+            .toolbarTitleDisplayMode(.inline)
             .navigationBarBackButtonHidden(isEditing || isReordering)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
@@ -61,42 +116,63 @@ struct EditItemElementView<Element: Hashable>: View {
                         navigationBarSelectView
                     }
                 }
+
                 ToolbarItem(placement: .topBarTrailing) {
                     if isEditing || isReordering {
-                        Button(L10n.cancel) {
+                        Button(L10n.cancel, role: .cancel) {
                             if isEditing {
                                 isEditing.toggle()
                             }
 
                             if isReordering {
-                                elements = type.getElement(for: viewModel.item)
+                                elements = viewModel.editor.elements(in: viewModel.item)
                                 isReordering.toggle()
                             }
 
                             UIDevice.impact(.light)
                             selectedElements.removeAll()
                         }
-                        .buttonStyle(.toolbarPill)
-                        .foregroundStyle(accentColor)
+                        .foregroundStyle(.primary, .secondary)
+                        .if(true) { view in
+                            if #available(iOS 26.0, *), Defaults[.isLiquidGlassEnabled] {
+                                view
+                            } else {
+                                view
+                                    .backport
+                                    .buttonStyle(.glass)
+                            }
+                        }
+                        .controlSize(.small)
                     }
                 }
+
                 ToolbarItem(placement: .bottomBar) {
                     if isEditing {
-                        Button(L10n.delete) {
+                        Button(L10n.delete, role: .destructive) {
                             isPresentingDeletionConfirmation = true
                         }
-                        .buttonStyle(.toolbarPill(.red))
+                        .backport
+                        .buttonStyle(.glassProminent)
                         .disabled(selectedElements.isEmpty)
-                        .frame(maxWidth: .infinity, alignment: .trailing)
                     }
 
                     if isReordering {
-                        Button(L10n.save) {
+                        let saveAction: () -> Void = {
                             viewModel.reorder(elements)
                             isReordering = false
                         }
-                        .buttonStyle(.toolbarPill)
-                        .disabled(type.getElement(for: viewModel.item) == elements)
+
+                        Group {
+                            if #available(iOS 26, *), Defaults[.isLiquidGlassEnabled] {
+                                Button(L10n.save, role: .confirm, action: saveAction)
+                            } else {
+                                Button(L10n.save, action: saveAction)
+                                    .backport
+                                    .buttonStyle(.glassProminent)
+                                    .controlSize(.small)
+                            }
+                        }
+                        .disabled(viewModel.editor.elements(in: viewModel.item) == elements)
                         .frame(maxWidth: .infinity, alignment: .trailing)
                     }
                 }
@@ -106,7 +182,7 @@ struct EditItemElementView<Element: Hashable>: View {
                 isHidden: isEditing || isReordering
             ) {
                 Button(L10n.add, systemImage: "plus") {
-                    route(router.router, viewModel)
+                    router.route(to: .addItemElement(viewModel: viewModel))
                 }
 
                 if elements.isNotEmpty == true {
@@ -120,13 +196,12 @@ struct EditItemElementView<Element: Hashable>: View {
                 }
             }
             .onNotification(.itemMetadataDidChange) { _ in
-                elements = type.getElement(for: viewModel.item)
+                elements = viewModel.editor.elements(in: viewModel.item)
             }
             .onReceive(viewModel.events) { event in
                 switch event {
-                case .deleted, .metadataRefreshStarted:
-                    break
                 case .updated:
+                    elements = viewModel.editor.elements(in: viewModel.item)
                     UIDevice.feedback(.success)
                 }
             }
@@ -147,61 +222,5 @@ struct EditItemElementView<Element: Hashable>: View {
                 Text(L10n.deleteSelectedConfirmation)
             }
             .errorMessage($viewModel.error)
-    }
-
-    // MARK: - Select/Remove All Button
-
-    @ViewBuilder
-    private var navigationBarSelectView: some View {
-        let isAllSelected = selectedElements.count == (elements.count)
-        Button(isAllSelected ? L10n.removeAll : L10n.selectAll) {
-            selectedElements = isAllSelected ? [] : Set(elements)
-        }
-        .buttonStyle(.toolbarPill)
-        .disabled(!isEditing)
-        .foregroundStyle(accentColor)
-    }
-
-    // MARK: - Content View
-
-    private var contentView: some View {
-        List {
-            InsetGroupedListHeader(type.displayTitle, description: type.description)
-                .listRowBackground(Color.clear)
-                .listRowSeparator(.hidden)
-                .padding(.vertical, 24)
-
-            if elements.isNotEmpty {
-                ForEach(elements, id: \.self) { element in
-                    EditItemElementRow(
-                        item: element,
-                        type: type,
-                        action: {
-                            if isEditing {
-                                selectedElements.toggle(value: element)
-                            }
-                        },
-                        onDelete: {
-                            selectedElements.toggle(value: element)
-                            isPresentingDeletionConfirmation = true
-                        }
-                    )
-                    .isEditing(isEditing)
-                    .isSelected(selectedElements.contains(element))
-                    .listRowInsets(.edgeInsets)
-                }
-                .onMove { source, destination in
-                    guard isReordering else { return }
-                    elements.move(fromOffsets: source, toOffset: destination)
-                }
-            } else {
-                Text(L10n.none)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-                    .listRowSeparator(.hidden)
-                    .listRowInsets(.zero)
-            }
-        }
-        .listStyle(.plain)
-        .environment(\.editMode, isReordering ? .constant(.active) : .constant(.inactive))
     }
 }

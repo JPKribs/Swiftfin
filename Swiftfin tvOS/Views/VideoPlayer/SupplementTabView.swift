@@ -6,12 +6,11 @@
 // Copyright (c) 2026 Jellyfin & Jellyfin Contributors
 //
 
-import Engine
 import SwiftUI
 import UIKit
 
 /// `TabView` acts weird with horizontal stacks, workaround with manual supplement presentation
-struct SupplementTabView<Item: Identifiable, Content: View>: UIViewControllerRepresentable {
+struct SupplementTabView<Item: Identifiable, Content: View>: PlatformViewControllerRepresentable {
 
     let items: [Item]
     let selection: Item.ID?
@@ -102,10 +101,10 @@ struct SupplementTabView<Item: Identifiable, Content: View>: UIViewControllerRep
 
             for item in items {
                 if let host = hosts[item.id] {
-                    host.rootView = content(item)
+                    host.content = content(item)
                 } else {
                     let host = HostingController(content: content(item))
-                    host.disablesSafeArea = true
+                    host.disableSafeArea = true
                     host.view.backgroundColor = .clear
                     hosts[item.id] = host
                 }
