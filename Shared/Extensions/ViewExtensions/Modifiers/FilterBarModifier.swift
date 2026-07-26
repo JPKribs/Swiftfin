@@ -19,15 +19,20 @@ struct FilterBarModifier: ViewModifier {
 
     let viewModel: FilterViewModel
     let types: [ItemFilterType]
+    let hasLetterPicker: Bool
+
+    private var letterPickerEdge: HorizontalEdge? {
+        hasLetterPicker ? letterPickerOrientation.edge : nil
+    }
 
     private var edge: HorizontalEdge {
-        letterPickerOrientation.edge == .leading ? .trailing : .leading
+        letterPickerEdge == .leading ? .trailing : .leading
     }
 
     private var unoccupiedEdges: Edge.Set {
         var edges: Edge.Set = .horizontal
 
-        for occupied in [letterPickerOrientation.edge, types.isEmpty ? nil : edge] {
+        for occupied in [letterPickerEdge, types.isEmpty ? nil : edge] {
             switch occupied {
             case .leading:
                 edges.remove(.leading)

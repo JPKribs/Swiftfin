@@ -85,7 +85,7 @@ struct FilterBar: PlatformView {
     }
 
     private var filterRail: some View {
-        VStack(spacing: dimension * 0.1) {
+        VStack(spacing: dimension * 0.3) {
             ForEach(rows, id: \.self) { row in
                 switch row {
                 case .reset:
@@ -98,6 +98,7 @@ struct FilterBar: PlatformView {
                     ) {
                         viewModel.reset(filterType: nil)
                     }
+                    .isSelected(isResetVisible)
                     .focused($focusedRow, equals: row)
                 case let .filter(type):
                     FilterBarButton(

@@ -133,12 +133,14 @@ extension View {
     @ViewBuilder
     func filterBar(
         viewModel: FilterViewModel,
-        types: [ItemFilterType]
+        types: [ItemFilterType],
+        hasLetterPicker: Bool = false
     ) -> some View {
         modifier(
             FilterBarModifier(
                 viewModel: viewModel,
-                types: types
+                types: types,
+                hasLetterPicker: hasLetterPicker
             )
         )
     }

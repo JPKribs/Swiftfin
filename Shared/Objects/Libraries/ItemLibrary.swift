@@ -299,7 +299,8 @@ private struct ItemLibraryBody<Content: View>: View {
             }
             .filterBar(
                 viewModel: filterViewModel,
-                types: enabledDrawerFilters
+                types: enabledDrawerFilters,
+                hasLetterPicker: true
             )
         #if os(tvOS)
             .background(alignment: .top) {

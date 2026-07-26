@@ -45,25 +45,28 @@ extension FilterBar {
             self.action = action
         }
 
-        private var isGlassVisible: Bool {
-            isFocused || isSelected
-        }
+        private var glass: BackportGlass {
+            switch (isFocused, isSelected, role) {
+            case (true, _, .destructive):
+                .regular.tint(.red).interactive()
 
-        private var glassTint: Color {
-            if role == .destructive {
-                .red
-            } else if isFocused {
-                .primary
-            } else {
-                accentColor
+            case (true, true, _):
+                .regular.tint(accentColor).interactive(false)
+
+            case (true, false, _):
+                .regular.interactive()
+
+            case (false, true, _):
+                .regular.tint(accentColor).interactive(false)
+
+            case (false, false, _):
+                .regular.interactive(false)
             }
         }
 
         private var foregroundStyle: Color {
-            if isGlassVisible {
-                glassTint.overlayColor
-            } else if role == .destructive {
-                .red
+            if role == .destructive {
+                .red.overlayColor
             } else {
                 .primary
             }
@@ -71,24 +74,24 @@ extension FilterBar {
 
         @ViewBuilder
         private var titleLabel: some View {
-            if isFocused {
-                Text(title)
-                    .lineLimit(1)
-                    .fixedSize()
-                    .padding(.horizontal, dimension / 2)
-            }
+            Text(title)
+                .lineLimit(1)
+                .fixedSize()
+                .padding(edge == .leading ? .leading : .trailing, 12)
+                .padding(edge == .leading ? .trailing : .leading, 24)
+                .transition(.move(edge: edge == .leading ? .leading : .trailing).combined(with: .opacity))
         }
 
-        private var label: some View {
+        private var buttonLabel: some View {
             HStack(spacing: 0) {
-                if edge == .trailing {
+                if edge == .trailing, isFocused {
                     titleLabel
                 }
 
                 Image(systemName: systemImage)
                     .frame(width: dimension, height: dimension)
 
-                if edge == .leading {
+                if edge == .leading, isFocused {
                     titleLabel
                 }
             }
@@ -96,28 +99,23 @@ extension FilterBar {
         }
 
         var body: some View {
-            Button(action: action) {
-                label
+            Button {
+                action()
+            } label: {
+                buttonLabel
                     .backport
-                    .glassEffect(
-                        isGlassVisible ? .regular.selection(
-                            tint: glassTint,
-                            foregroundColor: glassTint.overlayColor
-                        ) : .identity,
-                        in: .capsule
-                    )
-                    .isSelected(isGlassVisible)
+                    .glassEffect(glass, in: .capsule)
             }
             .buttonStyle(.borderless)
-            .backport
-            .buttonBorderShape(.capsule)
             .focused($isFocused)
             .frame(
                 width: dimension,
                 height: dimension,
                 alignment: edge == .leading ? .leading : .trailing
             )
-            .animation(.easeInOut(duration: 0.15), value: isFocused)
+            .animation(.easeInOut(duration: 0.2), value: isFocused)
+            .hoverEffectDisabled()
+            .focusEffectDisabled()
         }
     }
 }

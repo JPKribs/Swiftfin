@@ -118,7 +118,7 @@ enum ItemFilterType: String, CaseIterable, Displayable, Identifiable, Storable, 
         case .letter:
             "character.textbox"
         case .sortBy:
-            "line.3.horizontal.decrease"
+            "arrow.up.arrow.down"
         case .tags:
             "tag"
         case .traits:
