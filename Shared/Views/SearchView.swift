@@ -9,6 +9,8 @@
 import Defaults
 import SwiftUI
 
+// TODO: Figure out FilterBar solution for tvOS
+
 struct SearchView: View {
 
     @Default(.Customization.Search.enabledDrawerFilters)
@@ -95,9 +97,11 @@ struct SearchView: View {
             text: $searchQuery,
             prompt: L10n.search
         )
+        #if os(iOS)
         .filterBar(
             viewModel: viewModel.filterViewModel,
             types: enabledDrawerFilters
         )
+        #endif
     }
 }
