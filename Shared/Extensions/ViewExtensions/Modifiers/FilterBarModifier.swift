@@ -11,9 +11,6 @@ import SwiftUI
 
 struct FilterBarModifier: ViewModifier {
 
-    @Default(.isLiquidGlassEnabled)
-    private var isLiquidGlassEnabled
-
     @Default(.Customization.Library.letterPickerOrientation)
     private var letterPickerOrientation
 
