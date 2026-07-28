@@ -20,6 +20,7 @@ struct CustomizeViewsSettings: View {
     var body: some View {
         Form(systemImage: "gear") {
 
+            #if os(iOS)
             Section {
                 ChevronButton(L10n.search) {
                     router.route(to: .itemFilterDrawerSelector(selection: $searchEnabledDrawerFilters))
@@ -28,6 +29,7 @@ struct CustomizeViewsSettings: View {
             } header: {
                 Text(L10n.filters)
             }
+            #endif
 
             ChevronButton(L10n.items) {
                 router.route(to: .itemSettings)

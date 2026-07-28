@@ -62,7 +62,7 @@ struct SearchView: View {
             case .initial:
                 if viewModel.canSearch {
                     if viewModel.isEmpty {
-                        Text(L10n.noResults)
+                        ContentUnavailableView.search
                     } else {
                         resultsView
                     }
