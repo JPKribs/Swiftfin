@@ -264,6 +264,14 @@ extension NavigationRoute {
         }
     }
 
+    static var syncPlaySettings: NavigationRoute {
+        NavigationRoute(
+            id: "syncPlaySettings"
+        ) {
+            SyncPlaySettingsView()
+        }
+    }
+
     static var videoPlayerSettings: NavigationRoute {
         NavigationRoute(
             id: "videoPlayerSettings"

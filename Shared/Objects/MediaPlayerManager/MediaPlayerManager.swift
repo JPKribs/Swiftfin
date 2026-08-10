@@ -161,6 +161,11 @@ final class MediaPlayerManager: ViewModel {
         }
     }
 
+    private(set) var isStopping = false
+
+    /// Sent by proxies when the playhead is moved deliberately, as opposed to by playback progressing.
+    let didSeek = PassthroughSubject<Duration, Never>()
+
     /// The current seconds media playback is set to.
     let secondsBox: PublishedBox<Duration> = .init(initialValue: .zero)
 
@@ -269,6 +274,7 @@ final class MediaPlayerManager: ViewModel {
             )
         }
 
+        isStopping = true
         proxy?.stop()
         Container.shared.mediaPlayerManagerPublisher().send(nil)
         Container.shared.mediaPlayerManager.reset()
@@ -370,6 +376,7 @@ final class MediaPlayerManager: ViewModel {
     private func _stop() async throws {
         await self.cancel()
 
+        isStopping = true
         proxy?.stop()
         Container.shared.mediaPlayerManagerPublisher().send(nil)
         Container.shared.mediaPlayerManager.reset()

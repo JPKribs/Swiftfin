@@ -60,10 +60,18 @@ class VLCMediaPlayerProxy: VideoMediaPlayerProxy,
         guard target > .zero else { return }
 
         vlcUIProxy.jumpForward(target)
+
+        if let manager {
+            manager.didSeek.send(manager.seconds + target)
+        }
     }
 
     func jumpBackward(_ seconds: Duration) {
         vlcUIProxy.jumpBackward(seconds)
+
+        if let manager {
+            manager.didSeek.send(max(.zero, manager.seconds - seconds))
+        }
     }
 
     func setRate(_ rate: Float) {
@@ -72,6 +80,7 @@ class VLCMediaPlayerProxy: VideoMediaPlayerProxy,
 
     func setSeconds(_ seconds: Duration) {
         vlcUIProxy.setSeconds(seconds)
+        manager?.didSeek.send(seconds)
     }
 
     func setAudioStream(_ stream: MediaStream) {

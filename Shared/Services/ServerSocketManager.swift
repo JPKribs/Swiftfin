@@ -245,6 +245,20 @@ extension ServerSocketManager {
         }
     }
 
+    var syncPlayCommands: AnyPublisher<SendCommand, Never> {
+        commands { event in
+            guard case let .message(.syncPlayCommandMessage(message)) = event else { return nil }
+            return message.data
+        }
+    }
+
+    var syncPlayGroupUpdates: AnyPublisher<GroupUpdate, Never> {
+        commands { event in
+            guard case let .message(.syncPlayGroupUpdateMessage(message)) = event else { return nil }
+            return message.data
+        }
+    }
+
     private func commands<Command>(
         extract: @escaping (JellyfinSocket.Session.Event) -> Command?
     ) -> AnyPublisher<Command, Never> {

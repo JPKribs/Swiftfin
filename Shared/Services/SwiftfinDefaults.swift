@@ -384,6 +384,41 @@ extension Defaults.Keys {
         }
     }
 
+    enum SyncPlay {
+
+        static var enableSyncCorrection: Key<Bool> {
+            UserKey("syncPlayEnableSyncCorrection", default: true)
+        }
+
+        static var enableSpeedToSync: Key<Bool> {
+            UserKey("syncPlayEnableSpeedToSync", default: true)
+        }
+
+        static var speedToSyncMinimumDelay: Key<Int> {
+            UserKey("syncPlaySpeedToSyncMinimumDelay", default: 60)
+        }
+
+        static var speedToSyncMaximumDelay: Key<Int> {
+            UserKey("syncPlaySpeedToSyncMaximumDelay", default: 3000)
+        }
+
+        static var speedToSyncDuration: Key<Int> {
+            UserKey("syncPlaySpeedToSyncDuration", default: 1000)
+        }
+
+        static var enableSkipToSync: Key<Bool> {
+            UserKey("syncPlayEnableSkipToSync", default: true)
+        }
+
+        static var skipToSyncMinimumDelay: Key<Int> {
+            UserKey("syncPlaySkipToSyncMinimumDelay", default: 400)
+        }
+
+        static var extraTimeOffset: Key<Int> {
+            UserKey("syncPlayExtraTimeOffset", default: 0)
+        }
+    }
+
     // Experimental settings
     enum Experimental {
 

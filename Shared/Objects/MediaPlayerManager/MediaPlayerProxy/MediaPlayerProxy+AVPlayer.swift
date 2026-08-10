@@ -107,17 +107,20 @@ class AVMediaPlayerProxy: VideoMediaPlayerProxy {
         let currentTime = player.currentTime()
         let newTime = currentTime + CMTime(seconds: seconds.seconds, preferredTimescale: 1)
         player.seek(to: newTime, toleranceBefore: .zero, toleranceAfter: .zero)
+        manager?.didSeek.send(.seconds(newTime.seconds))
     }
 
     func jumpBackward(_ seconds: Duration) {
         let currentTime = player.currentTime()
         let newTime = max(.zero, currentTime - CMTime(seconds: seconds.seconds, preferredTimescale: 1))
         player.seek(to: newTime, toleranceBefore: .zero, toleranceAfter: .zero)
+        manager?.didSeek.send(.seconds(newTime.seconds))
     }
 
     func setSeconds(_ seconds: Duration) {
         let time = CMTime(seconds: seconds.seconds, preferredTimescale: 1)
         player.seek(to: time, toleranceBefore: .zero, toleranceAfter: .zero)
+        manager?.didSeek.send(seconds)
     }
 
     // TODO: complete

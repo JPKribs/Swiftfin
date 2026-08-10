@@ -138,6 +138,20 @@ extension ItemView {
                     }
                 }
 
+                // MARK: SyncPlay
+
+                if provider.item.canBePlayed {
+                    SyncPlayMenu { isInGroup in
+                        materialLabel(
+                            L10n.syncPlay,
+                            systemImage: isInGroup ? "person.2.fill" : "person.2",
+                            isHighlighted: isInGroup,
+                            tint: .blue,
+                            foregroundColor: .primary
+                        )
+                    }
+                }
+
                 // MARK: tvOS Options
 
                 #if os(tvOS)

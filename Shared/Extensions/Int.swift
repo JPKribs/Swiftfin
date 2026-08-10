@@ -92,3 +92,16 @@ struct SecondFormatter: FormatStyle {
             .prepending("-", if: isNegative)
     }
 }
+
+struct MillisecondFormatter: FormatStyle {
+
+    func format(_ value: Int) -> String {
+        let isNegative = value < 0
+        let value = abs(value)
+        let milliseconds = "\(value)"
+
+        return milliseconds
+            .appending("ms")
+            .prepending("-", if: isNegative)
+    }
+}

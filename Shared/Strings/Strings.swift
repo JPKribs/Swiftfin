@@ -620,6 +620,10 @@ internal enum L10n {
   internal static let enabled = L10n.tr("Localizable", "enabled", fallback: "Enabled")
   /// Enabled trailers
   internal static let enabledTrailers = L10n.tr("Localizable", "enabledTrailers", fallback: "Enabled trailers")
+  /// Sync correction method that consists in seeking to the estimated position. Sync correction must be enabled.
+  internal static let enableSkipToSyncDescription = L10n.tr("Localizable", "enableSkipToSyncDescription", fallback: "Sync correction method that consists in seeking to the estimated position. Sync correction must be enabled.")
+  /// Sync correction method that consists in speeding up the playback. Sync correction must be enabled.
+  internal static let enableSpeedToSyncDescription = L10n.tr("Localizable", "enableSpeedToSyncDescription", fallback: "Sync correction method that consists in speeding up the playback. Sync correction must be enabled.")
   /// End date
   internal static let endDate = L10n.tr("Localizable", "endDate", fallback: "End date")
   /// Ended
@@ -678,6 +682,10 @@ internal enum L10n {
   internal static let experimental = L10n.tr("Localizable", "experimental", fallback: "Experimental")
   /// External
   internal static let external = L10n.tr("Localizable", "external", fallback: "External")
+  /// Extra time offset
+  internal static let extraTimeOffset = L10n.tr("Localizable", "extraTimeOffset", fallback: "Extra time offset")
+  /// Manually adjust the time offset with the selected device for time sync. Tweak with care.
+  internal static let extraTimeOffsetDescription = L10n.tr("Localizable", "extraTimeOffsetDescription", fallback: "Manually adjust the time offset with the selected device for time sync. Tweak with care.")
   /// Failed to delete item at index %1$@: %2$@
   internal static func failedDeletionAtIndexError(_ p1: Any, _ p2: Any) -> String {
     return L10n.tr("Localizable", "failedDeletionAtIndexError", String(describing: p1), String(describing: p2), fallback: "Failed to delete item at index %1$@: %2$@")
@@ -750,8 +758,14 @@ internal enum L10n {
   internal static let green = L10n.tr("Localizable", "green", fallback: "Green")
   /// Grid
   internal static let grid = L10n.tr("Localizable", "grid", fallback: "Grid")
+  /// Group
+  internal static let group = L10n.tr("Localizable", "group", fallback: "Group")
   /// Grouping
   internal static let grouping = L10n.tr("Localizable", "grouping", fallback: "Grouping")
+  /// Group name
+  internal static let groupName = L10n.tr("Localizable", "groupName", fallback: "Group name")
+  /// Name used when creating a new SyncPlay group. Defaults to your username and device name when left empty.
+  internal static let groupNameDescription = L10n.tr("Localizable", "groupNameDescription", fallback: "Name used when creating a new SyncPlay group. Defaults to your username and device name when left empty.")
   /// Guest star
   internal static let guestStar = L10n.tr("Localizable", "guestStar", fallback: "Guest star")
   /// Half side-by-side
@@ -888,6 +902,8 @@ internal enum L10n {
   internal static let layout = L10n.tr("Localizable", "layout", fallback: "Layout")
   /// Learn more
   internal static let learnMore = L10n.tr("Localizable", "learnMore", fallback: "Learn more")
+  /// Leave group
+  internal static let leaveGroup = L10n.tr("Localizable", "leaveGroup", fallback: "Leave group")
   /// Left
   internal static let `left` = L10n.tr("Localizable", "left", fallback: "Left")
   /// Left vertical pan
@@ -976,6 +992,8 @@ internal enum L10n {
   internal static let maximumBitrate = L10n.tr("Localizable", "maximumBitrate", fallback: "Maximum bitrate")
   /// Limits the total number of connections a user can have to the server.
   internal static let maximumConnectionsDescription = L10n.tr("Localizable", "maximumConnectionsDescription", fallback: "Limits the total number of connections a user can have to the server.")
+  /// Maximum delay
+  internal static let maximumDelay = L10n.tr("Localizable", "maximumDelay", fallback: "Maximum delay")
   /// Maximum failed login policy
   internal static let maximumFailedLoginPolicy = L10n.tr("Localizable", "maximumFailedLoginPolicy", fallback: "Maximum failed login policy")
   /// Sets the maximum failed login attempts before a user is locked out.
@@ -1024,6 +1042,8 @@ internal enum L10n {
   internal static let metadataRefreshDescription = L10n.tr("Localizable", "metadataRefreshDescription", fallback: "Metadata is refreshed based on settings and internet services that are enabled in Jellyfin.")
   /// Method
   internal static let method = L10n.tr("Localizable", "method", fallback: "Method")
+  /// Minimum delay
+  internal static let minimumDelay = L10n.tr("Localizable", "minimumDelay", fallback: "Minimum delay")
   /// Minutes
   internal static let minutes = L10n.tr("Localizable", "minutes", fallback: "Minutes")
   /// Missing
@@ -1060,6 +1080,8 @@ internal enum L10n {
   internal static let never = L10n.tr("Localizable", "never", fallback: "Never")
   /// Never run
   internal static let neverRun = L10n.tr("Localizable", "neverRun", fallback: "Never run")
+  /// New group
+  internal static let newGroup = L10n.tr("Localizable", "newGroup", fallback: "New group")
   /// New password
   internal static let newPassword = L10n.tr("Localizable", "newPassword", fallback: "New password")
   /// News
@@ -1506,6 +1528,10 @@ internal enum L10n {
   internal static let simple = L10n.tr("Localizable", "simple", fallback: "Simple")
   /// Size
   internal static let size = L10n.tr("Localizable", "size", fallback: "Size")
+  /// Skip to Sync
+  internal static let skipToSync = L10n.tr("Localizable", "skipToSync", fallback: "Skip to Sync")
+  /// Minimum playback delay after which Skip to Sync tries to correct the playback position.
+  internal static let skipToSyncMinimumDelayDescription = L10n.tr("Localizable", "skipToSyncMinimumDelayDescription", fallback: "Minimum playback delay after which Skip to Sync tries to correct the playback position.")
   /// Slider
   internal static let slider = L10n.tr("Localizable", "slider", fallback: "Slider")
   /// Slow scrub
@@ -1530,6 +1556,14 @@ internal enum L10n {
   internal static let sourceCode = L10n.tr("Localizable", "sourceCode", fallback: "Source code")
   /// Special features
   internal static let specialFeatures = L10n.tr("Localizable", "specialFeatures", fallback: "Special features")
+  /// Speed to Sync
+  internal static let speedToSync = L10n.tr("Localizable", "speedToSync", fallback: "Speed to Sync")
+  /// Amount of time used by Speed to Sync to correct the playback position.
+  internal static let speedToSyncDurationDescription = L10n.tr("Localizable", "speedToSyncDurationDescription", fallback: "Amount of time used by Speed to Sync to correct the playback position.")
+  /// Maximum playback delay after which Skip to Sync is used instead of Speed to Sync.
+  internal static let speedToSyncMaximumDelayDescription = L10n.tr("Localizable", "speedToSyncMaximumDelayDescription", fallback: "Maximum playback delay after which Skip to Sync is used instead of Speed to Sync.")
+  /// Minimum playback delay after which Speed to Sync tries to correct the playback position.
+  internal static let speedToSyncMinimumDelayDescription = L10n.tr("Localizable", "speedToSyncMinimumDelayDescription", fallback: "Minimum playback delay after which Speed to Sync tries to correct the playback position.")
   /// Splashscreen
   internal static let splashscreen = L10n.tr("Localizable", "splashscreen", fallback: "Splashscreen")
   /// When all servers are selected, use the splashscreen from a single server or a random server.
@@ -1606,8 +1640,16 @@ internal enum L10n {
   internal static let supportsPersistentIdentifier = L10n.tr("Localizable", "supportsPersistentIdentifier", fallback: "Persistent identifier")
   /// Switch user
   internal static let switchUser = L10n.tr("Localizable", "switchUser", fallback: "Switch user")
+  /// Sync correction
+  internal static let syncCorrection = L10n.tr("Localizable", "syncCorrection", fallback: "Sync correction")
+  /// Enable active syncing of playback by either speeding up the media or by seeking to the estimated position. Disable this in case of heavy stuttering.
+  internal static let syncCorrectionDescription = L10n.tr("Localizable", "syncCorrectionDescription", fallback: "Enable active syncing of playback by either speeding up the media or by seeking to the estimated position. Disable this in case of heavy stuttering.")
   /// SyncPlay
   internal static let syncPlay = L10n.tr("Localizable", "syncPlay", fallback: "SyncPlay")
+  /// %1$@'s Group
+  internal static func syncPlayGroupName(_ p1: Any) -> String {
+    return L10n.tr("Localizable", "syncPlayGroupName", String(describing: p1), fallback: "%1$@'s Group")
+  }
   /// System
   internal static let system = L10n.tr("Localizable", "system", fallback: "System")
   /// Tagline
@@ -1662,6 +1704,8 @@ internal enum L10n {
   }
   /// Timestamp
   internal static let timestamp = L10n.tr("Localizable", "timestamp", fallback: "Timestamp")
+  /// Time sync
+  internal static let timeSync = L10n.tr("Localizable", "timeSync", fallback: "Time sync")
   /// Title
   internal static let title = L10n.tr("Localizable", "title", fallback: "Title")
   /// Total time
@@ -1822,6 +1866,8 @@ internal enum L10n {
   internal static let volume = L10n.tr("Localizable", "volume", fallback: "Volume")
   /// Votes
   internal static let votes = L10n.tr("Localizable", "votes", fallback: "Votes")
+  /// Watch with group
+  internal static let watchWithGroup = L10n.tr("Localizable", "watchWithGroup", fallback: "Watch with group")
   /// Weekday
   internal static let weekday = L10n.tr("Localizable", "weekday", fallback: "Weekday")
   /// Weekend
