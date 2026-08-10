@@ -12,7 +12,6 @@ import FactoryKit
 import Foundation
 import JellyfinAPI
 import Logging
-import UIKit
 
 @MainActor
 @Stateful
@@ -278,9 +277,9 @@ final class SyncPlayManager: ObservableObject {
 
         groupPlayback.playlistItemID = playing?.playlistItemID
         groupPlayback.isPlaying = queueUpdate.isPlaying ?? false
-        playingItemID = playing?.itemID
         groupPlayback.positionTicks = queueUpdate.startPositionTicks ?? 0
         groupPlayback.at = queueUpdate.lastUpdate ?? timeSync.serverTime(from: .now)
+        playingItemID = playing?.itemID
 
         lastCommand = nil
         reportedReadiness = nil
@@ -642,7 +641,6 @@ final class SyncPlayManager: ObservableObject {
             .store(in: &playerCancellables)
     }
 
-    // a group already showing something is the authority: opening anything locally must not replace it
     // starting the group's own item is joining in, while any other item deliberately replaces
     // what the group is watching
     private func setNewQueue(for item: BaseItemDto) {
