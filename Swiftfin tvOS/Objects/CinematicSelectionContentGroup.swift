@@ -84,9 +84,22 @@ struct CinematicSelectionContentGroup: ContentGroup {
                         EmptyView()
                     }
                     .failure {
-                        Text(item.displayTitle)
-                            .font(.largeTitle)
-                            .fontWeight(.semibold)
+                        AlternateLayoutView(alignment: .bottom) {
+                            Text(item.displayTitle)
+                                .fixedSize(horizontal: false, vertical: true)
+                                .lineLimit(2)
+                        } content: {
+                            ViewThatFits(in: .vertical) {
+                                Text(item.displayTitle)
+                                    .fixedSize(horizontal: false, vertical: true)
+                                    .multilineTextAlignment(.leading)
+
+                                Marquee(item.displayTitle)
+                            }
+                        }
+                        .font(.largeTitle)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(.primary)
                     }
                     .edgePadding(.leading)
                     .aspectRatio(contentMode: .fit)

@@ -43,16 +43,25 @@ extension ItemView {
                     EmptyView()
                 }
                 .failure {
-                    Text(provider.item.displayTitle)
-                        .fixedSize(horizontal: false, vertical: true)
-                        .font(.largeTitle)
-                        .fontWeight(.semibold)
-                        .lineLimit(2)
-                        .multilineTextAlignment(.center)
-                        .foregroundStyle(.primary)
+                    AlternateLayoutView(alignment: .bottom) {
+                        Text(provider.item.displayTitle)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .lineLimit(2)
+                    } content: {
+                        ViewThatFits(in: .vertical) {
+                            Text(provider.item.displayTitle)
+                                .fixedSize(horizontal: false, vertical: true)
+                                .multilineTextAlignment(.leading)
+
+                            Marquee(provider.item.displayTitle)
+                        }
+                    }
+                    .font(.largeTitle)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(.primary)
                 }
                 .aspectRatio(contentMode: .fit)
-                .frame(height: 70, alignment: .bottom)
+                .frame(alignment: .bottom)
                 .accessibilityLabel(provider.item.displayTitle)
                 .accessibilityRemoveTraits(.isImage)
             }
