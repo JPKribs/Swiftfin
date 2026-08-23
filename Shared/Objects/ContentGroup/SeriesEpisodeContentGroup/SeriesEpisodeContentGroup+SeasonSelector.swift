@@ -25,30 +25,31 @@ extension SeriesEpisodeContentGroup {
         @FocusState
         private var isPickerFocused: Bool
 
+        @Router
+        private var router
+
         private var selectedSeason: PagingLibraryViewModel<EpisodeLibrary>? {
             seasons.first { $0.id == selection }
         }
 
-        @ViewBuilder
-        private func title(_ value: String) -> some View {
-            Text(value)
-                .font(.title2)
-                .fontWeight(.semibold)
-                .edgePadding(.horizontal)
-        }
-
         var tvOSView: some View {
             if seasons.isEmpty {
-                title(L10n.episodes)
+                Text(L10n.episodes)
+                    .font(.title2)
+                    .fontWeight(.semibold)
+                    .edgePadding(.horizontal)
             } else {
                 ScrollView(.horizontal) {
                     HStack(spacing: 20) {
                         ForEach(seasons) { season in
                             let isSelected = selection == season.id
 
-                            Button(season.library.parent.displayTitle) {
-                                selection = season.id
+                            Menu(season.library.parent.displayTitle) {
+                                Button(L10n.openLibrary, systemImage: "square.grid.2x2.fill") {
+                                    router.route(to: .library(library: season.library))
+                                }
                             }
+                            .menuStyle(.button)
                             .buttonStyle(SeasonButtonStyle(isPickerFocused: isPickerFocused))
                             .isSelected(isSelected)
                             .focused($focusedSeason, equals: season.id)
@@ -124,12 +125,27 @@ extension SeriesEpisodeContentGroup {
 
         var iOSView: some View {
             if seasons.count <= 1 {
-                title(selectedSeason?.library.parent.displayTitle ?? L10n.episodes)
+                if let selectedSeason {
+                    LibraryHeaderButton(library: selectedSeason.library)
+                } else {
+                    Text(L10n.episodes)
+                        .font(.title2)
+                        .fontWeight(.semibold)
+                        .edgePadding(.horizontal)
+                }
             } else {
                 Menu(
                     selectedSeason?.library.parent.displayTitle ?? L10n.episodes,
                     systemImage: "chevron.down"
                 ) {
+                    if let selectedSeason {
+                        Button(L10n.openLibrary, systemImage: "square.grid.2x2.fill") {
+                            router.route(to: .library(library: selectedSeason.library))
+                        }
+
+                        Divider()
+                    }
+
                     Picker(L10n.seasons, selection: $selection) {
                         ForEach(seasons) { season in
                             Text(season.library.parent.displayTitle)
