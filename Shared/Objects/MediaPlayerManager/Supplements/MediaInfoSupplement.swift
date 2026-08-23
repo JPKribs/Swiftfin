@@ -121,7 +121,7 @@ extension MediaInfoSupplement {
                 }
 
                 if let overview = item.overview ?? item.currentProgram?.overview {
-                    Text(overview)
+                    Text(overview.plainText)
                         .font(.subheadline)
                         .fontWeight(.regular)
                 }
@@ -171,7 +171,7 @@ extension MediaInfoSupplement {
                     }
 
                     if let overview = item.overview ?? item.currentProgram?.overview {
-                        Text(overview)
+                        Text(overview.plainText)
                             .font(.subheadline)
                             .fontWeight(.regular)
                             .lineLimit(4)

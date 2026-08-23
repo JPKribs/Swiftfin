@@ -44,7 +44,7 @@ extension SeriesEpisodeContentGroup {
             if episode.isUnaired {
                 episode.airDateLabel ?? L10n.noOverviewAvailable
             } else {
-                episode.overview ?? L10n.noOverviewAvailable
+                episode.overview?.plainText ?? L10n.noOverviewAvailable
             }
         }
 

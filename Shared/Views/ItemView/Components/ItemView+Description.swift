@@ -38,13 +38,13 @@ extension ItemView {
                             Button {
                                 router.route(to: .itemOverview(item: item))
                             } label: {
-                                SeeMoreText(itemOverview)
+                                SeeMoreText(itemOverview.plainText)
                                     .font(.footnote)
                                     .lineLimit(3)
                             }
                             .buttonStyle(.plain)
                         } tvOSView: {
-                            Text(itemOverview)
+                            Text(itemOverview.plainText)
                                 .font(.footnote)
                                 .lineLimit(3)
                         }
