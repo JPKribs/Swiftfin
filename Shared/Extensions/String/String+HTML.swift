@@ -34,12 +34,17 @@ extension String {
         }
 
         var openTags: [OpenTag] = []
-        var result = AttributedString()
+
+        private var result = AttributedString()
+
+        private var pendingBreak: InlinePresentationIntent = []
 
         private let source: AttributedString
+        private let isHTML: Bool
 
         init(_ source: AttributedString) {
             self.source = source
+            isHTML = source.runs.contains { $0.inlinePresentationIntent?.contains(.inlineHTML) == true }
         }
 
         func parsed() -> AttributedString {
@@ -51,12 +56,6 @@ extension String {
                 }
             }
 
-            // Condense instances where there are 3+ line breaks down to just 2
-            while let range = result.characters.firstRange(of: String.newParagraph + .newLine) {
-                result.characters.replaceSubrange(range, with: String.newParagraph)
-            }
-
-            // Remove trailing spaces
             while result.characters.last?.isWhitespace == true {
                 result.characters.removeLast()
             }
@@ -64,18 +63,64 @@ extension String {
             return result
         }
 
+        /// Records a break. Adjacent requests merge, so the strongest one wins
+        func requestBreak(_ intent: InlinePresentationIntent) {
+            let breaks = intent.intersection(.breaks)
+
+            guard !breaks.isEmpty else { return }
+
+            pendingBreak.formUnion(openTags.contains(where: { $0.tag == .li }) ? breaks.inListItem : breaks)
+        }
+
+        /// `<br>` is explicit, so a second one before any text stacks into a paragraph
+        func requestStackedBreak() {
+            pendingBreak = pendingBreak.isEmpty ? .softBreak : .lineBreak
+        }
+
+        func append(_ text: String) {
+            flushBreak()
+
+            result.append(AttributedString(text))
+        }
+
+        /// Table cells are separated by a space unless one is already there
+        func appendCellSeparator() {
+            flushBreak()
+
+            guard result.characters.last?.isWhitespace == false else { return }
+
+            result.append(AttributedString(String.space))
+        }
+
+        /// The only place a break becomes characters
+        private func flushBreak() {
+            defer { pendingBreak = [] }
+
+            guard !pendingBreak.isEmpty, result.characters.isNotEmpty else { return }
+
+            while result.characters.last == Character(.space) || result.characters.last == Character(.tab) {
+                result.characters.removeLast()
+            }
+
+            var text = AttributedString(pendingBreak.text)
+            text.inlinePresentationIntent = pendingBreak
+
+            result.append(text)
+        }
+
         private func resolveElements(in range: Range<AttributedString.Index>) {
-            for element in source[range].characters.split(separator: ">").map(String.init) {
-                let name = String(element.drop { $0 == "<" || $0 == "/" }.prefix { $0.isLetter || $0.isNumber }).lowercased()
+            let elements = String(source[range].characters)
+                .matches(of: #/<(?<closer>/?)(?<name>[a-zA-Z0-9]+)(?<attributes>[^>]*)/#)
 
-                guard let tag = HTMLTag(rawValue: name) else { continue }
+            for element in elements {
+                guard let tag = HTMLTag(rawValue: element.output.name.lowercased()) else { continue }
 
-                if element.hasPrefix("</") {
+                if element.output.closer.isNotEmpty {
                     tag.close(in: self)
                 } else if tag == .br || tag == .hr {
                     tag.lineBreak(in: self)
-                } else if !element.hasSuffix("/") {
-                    tag.open(in: self, from: element)
+                } else if !element.output.attributes.hasSuffix("/") {
+                    tag.open(in: self, from: String(element.output.attributes))
                 }
             }
         }
@@ -83,90 +128,74 @@ extension String {
         private func appendText(for run: AttributedString.Runs.Run) {
             var piece = AttributedString(source[run.range])
 
-            // Collapse any non-<pre> HTML whitespace. Preserve Markdown-only text.
-            if source.runs.contains(where: { $0.inlinePresentationIntent?.contains(.inlineHTML) == true }),
-               !openTags.contains(where: { $0.tag == .pre })
-            {
-                piece = AttributedString(collapseWhitespace(in: String(piece.characters)), attributes: run.attributes)
+            // HTML renders any whitespace run as one space, or a paragraph break for blank lines. Preserve Markdown-only and `<pre>` text.
+            if isHTML, !openTags.contains(where: { $0.tag == .pre }) {
+                let collapsed = String(piece.characters).replacing(#/\s+/#) { match in
+                    match.output.filter(\.isNewline).count > 1 ? String.newParagraph : .space
+                }
+
+                piece = AttributedString(collapsed, attributes: run.attributes)
             }
 
-            trimLeadingWhitespace(of: &piece)
-            style(&piece, within: run.inlinePresentationIntent ?? [])
-
-            result.append(piece)
-        }
-
-        private func trimLeadingWhitespace(of piece: inout AttributedString) {
-            if result.characters.isEmpty || result.characters.last == Character(.newLine) {
-                while piece.characters.first?.isWhitespace == true {
-                    piece.characters.removeFirst()
-                }
+            if !pendingBreak.isEmpty || result.characters.isEmpty || result.characters.last == Character(.newLine) {
+                piece.characters.trimPrefix(while: \.isWhitespace)
             } else if result.characters.last == Character(.space) {
-                while piece.characters.first == Character(.space) {
-                    piece.characters.removeFirst()
-                }
-            }
-        }
-
-        private func style(_ piece: inout AttributedString, within runIntent: InlinePresentationIntent) {
-            let intent = openTags.reduce(runIntent) { $0.union($1.tag.intent) }
-            piece.inlinePresentationIntent = intent.isEmpty ? nil : intent
-
-            if openTags.contains(where: { $0.tag == .u || $0.tag == .ins }) {
-                piece.underlineStyle = .single
+                piece.characters.trimPrefix { $0 == Character(.space) }
             }
 
-            let baselineOffset = openTags.reduce(0) { $0 + $1.tag.baselineOffset }
+            // Whitespace-only runs between tags must not flush a pending break
+            guard piece.characters.isNotEmpty else { return }
 
-            if baselineOffset != 0 {
-                piece.baselineOffset = baselineOffset
-            }
+            flushBreak()
 
-            piece.link = link(inheriting: piece.link)
+            let intent = openTags.reduce(run.inlinePresentationIntent ?? []) { $0.union($1.tag.intent) }
+            let presentation = intent.subtracting(.custom).subtracting(.breaks)
+
+            piece.inlinePresentationIntent = presentation.isEmpty ? nil : presentation
+            piece.underlineStyle = intent.underlineStyle
+            piece.baselineOffset = intent.baselineOffset
+
+            // No hyperlinks on tvOS since they can't be opened
+            let link = UIDevice.isTV ? nil : openTags.last(where: { $0.link != nil })?.link ?? piece.link
+            piece.link = ["http", "https", "mailto"].contains(link?.scheme?.lowercased() ?? "") ? link : nil
 
             if let color = openTags.last(where: { $0.color != nil })?.color {
                 piece.foregroundColor = color
             }
+
+            result.append(piece)
         }
+    }
 
-        private func link(inheriting inherited: URL?) -> URL? {
-            guard !UIDevice.isTV else { return nil } // No hyperlinks on tvOS since they can't be opened
+    /// Named HTML entities that can appear in attribute values
+    private enum SpecialCharacter: String {
+        case amp
+        case apos
+        case gt
+        case lt
+        case nbsp
+        case quot
 
-            let link = openTags.last(where: { $0.link != nil })?.link ?? inherited
-
-            guard let scheme = link?.scheme?.lowercased(), ["http", "https", "mailto"].contains(scheme) else { return nil }
-
-            return link
-        }
-
-        private func collapseWhitespace(in element: String) -> String {
-            var result: String = .empty
-            var newlines: Int?
-
-            for character in element {
-                if character == Character(.space) || character == Character(.tab) || character.isNewline {
-                    newlines = (newlines ?? 0) + (character.isNewline ? 1 : 0)
-                } else {
-                    if let newlines {
-                        result += newlines > 1 ? .newParagraph : .space
-                    }
-
-                    newlines = nil
-                    result.append(character)
-                }
+        var character: Character {
+            switch self {
+            case .amp:
+                "&"
+            case .apos:
+                "'"
+            case .gt:
+                ">"
+            case .lt:
+                "<"
+            case .nbsp:
+                "\u{00A0}"
+            case .quot:
+                "\""
             }
-
-            if let newlines {
-                result += newlines > 1 ? .newParagraph : .space
-            }
-
-            return result
         }
     }
 
     // MARK: HTML Tags & Rules
 
-    /// HTML tags that can be used to denote usable `InlinePresentationIntent`s
     private enum HTMLTag: String {
         case a
         case b
@@ -178,7 +207,6 @@ extension String {
         case dfn
         case div
         case em
-        case font
         case h1
         case h2
         case h3
@@ -195,7 +223,6 @@ extension String {
         case pre
         case s
         case samp
-        case span
         case strike
         case strong
         case sub
@@ -208,13 +235,47 @@ extension String {
         case u
         case ul
 
+        /// Unused but required to capture colors from
+        /// `<font color=...>` and `<span style="color:...">`
+        case font
+        case span
+
+        var intent: InlinePresentationIntent {
+            switch self {
+            case .h1, .h2, .h3, .h4, .h5, .h6:
+                [.stronglyEmphasized, .lineBreak]
+            case .b, .strong, .th:
+                .stronglyEmphasized
+            case .i, .em, .cite, .dfn:
+                .emphasized
+            case .s, .strike, .del:
+                .strikethrough
+            case .pre:
+                [.code, .lineBreak]
+            case .code, .tt, .kbd, .samp:
+                .code
+            case .u, .ins:
+                .underlined
+            case .sup:
+                .superscripted
+            case .sub:
+                .subscripted
+            case .p, .blockquote, .hr, .ul, .ol, .table:
+                .lineBreak
+            case .div, .li, .tr:
+                .softBreak
+            default:
+                []
+            }
+        }
+
         func open(in parser: HTMLParser, from element: String) {
-            lineBreak(in: parser)
+            parser.requestBreak(intent)
 
             if self == .li {
-                parser.result.append(AttributedString(String.bullet + String.space))
-            } else if self == .td || self == .th, parser.result.characters.last?.isWhitespace == false {
-                parser.result.append(AttributedString(String.space))
+                parser.append(String.bullet + String.space)
+            } else if self == .td || self == .th {
+                parser.appendCellSeparator()
             }
 
             parser.openTags.append(
@@ -231,88 +292,45 @@ extension String {
                 parser.openTags.remove(at: index)
             }
 
-            lineBreak(in: parser)
+            parser.requestBreak(intent)
         }
 
         func lineBreak(in parser: HTMLParser) {
-            guard parser.result.characters.isNotEmpty, self == .br || blockBreaks > 0 else { return }
-
-            while parser.result.characters.last == Character(.space) || parser.result.characters.last == Character(.tab) {
-                parser.result.characters.removeLast()
-            }
-
             if self == .br {
-                if !parser.result.characters.suffix(2).elementsEqual(String.newParagraph) {
-                    parser.result.append(AttributedString(String.newLine))
-                }
-
-                return
-            }
-
-            // List items are single spaced regardless of what the tag would otherwise break
-            let count = parser.openTags.contains(where: { $0.tag == .li }) ? Swift.min(blockBreaks, 1) : blockBreaks
-
-            while !parser.result.characters.suffix(count).elementsEqual(repeatElement(Character(.newLine), count: count)) {
-                parser.result.append(AttributedString(String.newLine))
+                parser.requestStackedBreak()
+            } else {
+                parser.requestBreak(intent)
             }
         }
 
         private func attribute(_ name: String, in element: String) -> String? {
-            guard let range = element.range(of: " \(name)=", options: .caseInsensitive) else { return nil }
+            guard let regex = try? Regex("(?i) \(name)=(?:\"([^\"]*)\"|'([^']*)'|(\\S+))"),
+                  let match = element.firstMatch(of: regex)
+            else { return nil }
 
-            let rest = element[range.upperBound...]
-            let quote = rest.first.flatMap { $0 == "\"" || $0 == "'" ? $0 : nil }
-            let value = quote.map { quote in rest.dropFirst().prefix { $0 != quote } } ?? rest.prefix { !$0.isWhitespace }
+            let value = match.output.dropFirst().compactMap(\.substring).first ?? ""
 
-            return String(value).replacingOccurrences(of: "&amp;", with: "&")
+            // Foundation decodes entities in text runs but leaves raw HTML untouched
+            return String(value).replacing(#/&(?:#(?<code>[xX]?[0-9a-fA-F]+)|(?<name>[a-zA-Z]+));/#) { entity in
+                if let name = entity.output.name {
+                    SpecialCharacter(rawValue: String(name)).map { String($0.character) } ?? String(entity.output.0)
+                } else if let code = entity.output.code {
+                    (code.hasPrefix("x") || code.hasPrefix("X") ? UInt32(code.dropFirst(), radix: 16) : UInt32(code))
+                        .flatMap(Unicode.Scalar.init)
+                        .map { String(Character($0)) } ?? String(entity.output.0)
+                } else {
+                    String(entity.output.0)
+                }
+            }
         }
 
         private func color(in element: String) -> Color? {
             let styleColor = attribute("style", in: element)?
-                .split(separator: ";")
-                .map { $0.split(separator: ":", maxSplits: 1) }
-                .first { $0.first?.trimmingCharacters(in: .whitespaces).lowercased() == "color" }?
-                .last
+                .firstMatch(of: #/(?:^|[;\s])color\s*:\s*(?<value>[^;]+)/#.ignoresCase())?
+                .output.value
 
             return (styleColor.map(String.init) ?? attribute("color", in: element))
                 .flatMap { Color(html: $0) }
-        }
-
-        var intent: InlinePresentationIntent {
-            switch self {
-            case .b, .strong, .th, .h1, .h2, .h3, .h4, .h5, .h6:
-                .stronglyEmphasized
-            case .i, .em, .cite, .dfn:
-                .emphasized
-            case .s, .strike, .del:
-                .strikethrough
-            case .code, .tt, .kbd, .samp, .pre:
-                .code
-            default:
-                []
-            }
-        }
-
-        var blockBreaks: Int {
-            switch self {
-            case .p, .h1, .h2, .h3, .h4, .h5, .h6, .blockquote, .pre, .hr, .ul, .ol, .table:
-                2
-            case .div, .li, .tr:
-                1
-            default:
-                0
-            }
-        }
-
-        var baselineOffset: CGFloat {
-            switch self {
-            case .sup:
-                5
-            case .sub:
-                -3
-            default:
-                0
-            }
         }
     }
 }
