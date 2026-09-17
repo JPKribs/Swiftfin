@@ -86,7 +86,7 @@ enum StoredValues {
 
             return Defaults.Key(
                 resolvedName,
-                suite: UserDefaults(suiteName: ownerID)!,
+                suite: UserDefault.suite(ownerID),
                 default: defaultValue
             )
         }

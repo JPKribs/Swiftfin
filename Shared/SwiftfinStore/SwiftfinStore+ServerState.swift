@@ -67,7 +67,7 @@ extension ServerState {
             try AnyStoredData.deleteAll(ownerID: user.id)
         }
         try AnyStoredData.deleteAll(ownerID: id)
-        UserDefaults.userSuite(id: id).removeAll()
+        UserDefault.user(id).removeAll()
 
         var storedUsers = StoredValues[.User.users]
         storedUsers.removeAll { $0.serverID == id }
@@ -78,7 +78,7 @@ extension ServerState {
         StoredValues[.Server.servers] = servers
 
         for user in users {
-            UserDefaults.userSuite(id: user.id).removeAll()
+            UserDefault.user(user.id).removeAll()
         }
     }
 

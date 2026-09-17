@@ -116,7 +116,7 @@ extension UserState {
     /// Deletes user settings from `UserDefaults` and `StoredValues`
     func deleteSettings() throws {
         try AnyStoredData.deleteAll(ownerID: id)
-        UserDefaults.userSuite(id: id).removeAll()
+        UserDefault.user(id).removeAll()
     }
 
     /// Must pass the server to create a JellyfinClient

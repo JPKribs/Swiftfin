@@ -18,43 +18,18 @@ import UIKit
 // Note: Only use Defaults for basic single-value settings.
 //       For larger data types and collections, use `StoredValue` instead.
 
-// MARK: Suites
-
-extension UserDefaults {
-
-    // MARK: App
-
-    /// Settings that should apply to the app
-    static let appSuite = UserDefaults(suiteName: "swiftfinApp")!
-
-    // MARK: User
-
-    static var currentUserSuite: UserDefaults {
-        switch Defaults[.lastSignedInUserID] {
-        case .signedOut:
-            userSuite(id: "default")
-        case let .signedIn(userID):
-            userSuite(id: userID)
-        }
-    }
-
-    static func userSuite(id: String) -> UserDefaults {
-        UserDefaults(suiteName: id)!
-    }
-}
-
 private extension Defaults.Keys {
 
     static func AppKey<Value: Defaults.Serializable>(_ name: String) -> Key<Value?> {
-        Key(name, suite: .appSuite)
+        Key(name, suite: UserDefault.app)
     }
 
     static func AppKey<Value: Defaults.Serializable>(_ name: String, default: Value) -> Key<Value> {
-        Key(name, default: `default`, suite: .appSuite)
+        Key(name, default: `default`, suite: UserDefault.app)
     }
 
     static func UserKey<Value: Defaults.Serializable>(_ name: String, default: Value) -> Key<Value> {
-        Key(name, default: `default`, suite: .currentUserSuite)
+        Key(name, default: `default`, suite: UserDefault.currentUser)
     }
 }
 
@@ -440,7 +415,7 @@ extension UserDefaults {
 extension Defaults.Keys {
 
     static func DebugKey<Value: Defaults.Serializable>(_ name: String, default: Value) -> Key<Value> {
-        Key(name, default: `default`, suite: .appSuite)
+        Key(name, default: `default`, suite: UserDefault.app)
     }
 
     static let sendProgressReports: Key<Bool> = DebugKey("sendProgressReports", default: true)
