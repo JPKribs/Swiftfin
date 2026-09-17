@@ -32,14 +32,10 @@ enum UserDefault {
     static var currentUser: UserDefaults {
         switch Defaults[.lastSignedInUserID] {
         case .signedOut:
-            user("default")
+            suite("default")
         case let .signedIn(userID):
-            user(userID)
+            suite(userID)
         }
-    }
-
-    static func user(_ id: String) -> UserDefaults {
-        suite(id)
     }
 
     static func suite(_ name: String) -> UserDefaults {
