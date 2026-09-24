@@ -24,7 +24,7 @@ struct MediaSegmentSettingsView: View {
     var body: some View {
         Form(systemImage: "forward.end") {
             Section {
-                ForEach(MediaSegmentType.allCases, id: \.self) { type in
+                ForEach(MediaSegmentType.supportedCases, id: \.self) { type in
                     PlatformPicker(type.displayTitle, selection: $mediaSegmentConfiguration[type])
                 }
 
@@ -43,7 +43,7 @@ struct MediaSegmentSettingsView: View {
                     noneTitle: L10n.fullDuration
                 )
             } footer: {
-                Text(L10n.swipeToDismissPrompt)
+                Text(UIDevice.isTV ? L10n.pressToDismissPrompt : L10n.swipeToDismissPrompt)
             }
         }
         .navigationTitle(L10n.mediaSegments.localizedCapitalized)

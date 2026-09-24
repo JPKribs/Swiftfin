@@ -21,6 +21,7 @@ extension MediaPlayerItem {
     static func build(
         for initialItem: BaseItemDto,
         mediaSource _initialMediaSource: MediaSourceInfo? = nil,
+        mediaSegments existingMediaSegments: [MediaSegmentDto]? = nil,
         audioStreamIndex: Int? = nil,
         subtitleStreamIndex: Int? = nil,
         videoPlayerType: VideoPlayerType = Defaults[.VideoPlayer.videoPlayerType],
@@ -40,6 +41,13 @@ extension MediaPlayerItem {
             logger.critical("No user session!")
             throw ErrorMessage(L10n.unknownError)
         }
+
+        async let mediaSegments = fetchMediaSegments(
+            for: itemID,
+            existing: existingMediaSegments,
+            userSession: userSession,
+            logger: logger
+        )
 
         var item = try await initialItem.getFullItem(userSession: userSession)
 
@@ -168,12 +176,10 @@ extension MediaPlayerItem {
             return nil
         }()
 
-        let mediaSegments = try? await userSession.client.send(Paths.getItemSegments(itemID: itemID)).value.items
-
-        return .init(
+        return await .init(
             baseItem: item,
             mediaSource: mediaSource,
-            mediaSegments: mediaSegments ?? [],
+            mediaSegments: mediaSegments,
             playSessionID: playSessionID,
             url: playbackURL,
             requestedBitrate: requestedBitrate,
@@ -183,6 +189,24 @@ extension MediaPlayerItem {
             previewImageProvider: previewImageProvider,
             thumbnailProvider: item.getNowPlayingImage
         )
+    }
+
+    private static func fetchMediaSegments(
+        for itemID: String,
+        existing: [MediaSegmentDto]?,
+        userSession: UserSession,
+        logger: Logger
+    ) async -> [MediaSegmentDto] {
+        if let existing {
+            return existing
+        }
+
+        do {
+            return try await userSession.client.send(Paths.getItemSegments(itemID: itemID)).value.items ?? []
+        } catch {
+            logger.warning("Unable to get media segments for item \(itemID): \(error.localizedDescription)")
+            return []
+        }
     }
 
     // TODO: audio type stream

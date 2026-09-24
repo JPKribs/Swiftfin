@@ -446,8 +446,6 @@ internal enum L10n {
   internal static let customFailedLogins = L10n.tr("Localizable", "customFailedLogins", fallback: "Custom failed logins")
   /// Customize
   internal static let customize = L10n.tr("Localizable", "customize", fallback: "Customize")
-  /// Provide a custom jump interval in seconds.
-  internal static let customJumpIntervalDescription = L10n.tr("Localizable", "customJumpIntervalDescription", fallback: "Provide a custom jump interval in seconds.")
   /// Custom name
   internal static let customName = L10n.tr("Localizable", "customName", fallback: "Custom name")
   /// Provide a custom playback speed multiplier.
@@ -1284,6 +1282,8 @@ internal enum L10n {
   internal static let premiereDate = L10n.tr("Localizable", "premiereDate", fallback: "Premiere date")
   /// Press and hold to unlock
   internal static let pressAndHoldToUnlock = L10n.tr("Localizable", "pressAndHoldToUnlock", fallback: "Press and hold to unlock")
+  /// Press left or right on a prompt to dismiss it.
+  internal static let pressToDismissPrompt = L10n.tr("Localizable", "pressToDismissPrompt", fallback: "Press left or right on a prompt to dismiss it.")
   /// Preview
   internal static let preview = L10n.tr("Localizable", "preview", fallback: "Preview")
   /// Preview image

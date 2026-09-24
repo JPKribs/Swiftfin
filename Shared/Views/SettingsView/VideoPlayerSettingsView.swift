@@ -175,14 +175,16 @@ struct VideoPlayerSettingsView: View {
     @ViewBuilder
     private var buttonSettings: some View {
         Section(L10n.buttons) {
-            JumpIntervalPicker(
+            DurationPicker(
                 title: L10n.jumpBackwardLength,
-                selection: $jumpBackwardLength
+                selection: $jumpBackwardLength.map(getter: \.rawValue, setter: MediaJumpInterval.init(rawValue:)),
+                options: MediaJumpInterval.allCases.map(\.rawValue)
             )
 
-            JumpIntervalPicker(
+            DurationPicker(
                 title: L10n.jumpForwardLength,
-                selection: $jumpForwardLength
+                selection: $jumpForwardLength.map(getter: \.rawValue, setter: MediaJumpInterval.init(rawValue:)),
+                options: MediaJumpInterval.allCases.map(\.rawValue)
             )
 
             ChevronButton(L10n.barButtons) {

@@ -100,6 +100,18 @@ final class MediaPlayerManager: ViewModel {
         case paused
     }
 
+    private struct MediaSegmentPromptState: Equatable {
+
+        let prompt: MediaSegmentPrompt
+        let startSeconds: Duration
+        var isDismissed = false
+        var isExpired = false
+
+        var visiblePrompt: MediaSegmentPrompt? {
+            isDismissed || isExpired ? nil : prompt
+        }
+    }
+
     @Published
     var playbackItem: MediaPlayerItem? = nil {
         didSet {
@@ -128,7 +140,7 @@ final class MediaPlayerManager: ViewModel {
     @Published
     private(set) var item: BaseItemDto
     @Published
-    private(set) var mediaSegmentPrompt: MediaSegmentPrompt? = nil
+    private var mediaSegmentPromptState: MediaSegmentPromptState? = nil
     @Published
     private(set) var playbackRequestStatus: PlaybackRequestStatus = .playing
     @Published
@@ -172,53 +184,43 @@ final class MediaPlayerManager: ViewModel {
         self.supplements = newSupplements
     }
 
-    private func updateMediaSegmentPrompt(for seconds: Duration) {
-        let prompt = resolveMediaSegmentPrompt(for: seconds)
+    private func mediaSegmentSecondsDidChange(_ seconds: Duration) {
+        let segment = playbackItem?.mediaSegments.first { $0.contains(seconds) }
+        let behavior = segment.map { mediaSegmentConfiguration[$0.type ?? .unknown] }
 
-        if prompt != mediaSegmentPromptState?.prompt {
-            mediaSegmentPromptState = prompt.map { ($0, seconds, false) }
-        }
-
-        var visiblePrompt = mediaSegmentPromptState.flatMap { $0.isDismissed ? nil : $0.prompt }
-
-        if let promptDuration = mediaSegmentConfiguration.promptDuration,
-           let startSeconds = mediaSegmentPromptState?.startSeconds,
-           seconds - startSeconds >= promptDuration
+        if let segment,
+           behavior == .skip,
+           state == .playback,
+           let proxy,
+           let id = segment.id,
+           let endSeconds = segment.endSeconds,
+           skippedMediaSegmentIDs.insert(id).inserted
         {
-            visiblePrompt = nil
+            proxy.setSeconds(endSeconds)
         }
 
-        if visiblePrompt != mediaSegmentPrompt {
-            mediaSegmentPrompt = visiblePrompt
-        }
-    }
-
-    private func resolveMediaSegmentPrompt(for seconds: Duration) -> MediaSegmentPrompt? {
-        if let nextEpisodeDuration = mediaSegmentConfiguration.nextEpisode,
-           queue?.nextItem != nil,
-           let runtime = item.runtime,
-           runtime - seconds <= nextEpisodeDuration
+        let prompt: MediaSegmentPrompt? = if let nextEpisode = mediaSegmentConfiguration.nextEpisode,
+                                             queue?.nextItem != nil,
+                                             let runtime = item.runtime,
+                                             runtime - seconds <= nextEpisode
         {
-            return .nextEpisode
+            .nextEpisode
+        } else if let segment, behavior == .ask {
+            .segment(segment)
+        } else {
+            nil
         }
 
-        guard let segment = playbackItem?.mediaSegments.first(where: { $0.contains(seconds) }) else { return nil }
+        var promptState = prompt == mediaSegmentPromptState?.prompt
+            ? mediaSegmentPromptState
+            : prompt.map { MediaSegmentPromptState(prompt: $0, startSeconds: seconds) }
 
-        switch mediaSegmentConfiguration[segment.type ?? .unknown] {
-        case .disabled:
-            return nil
-        case .ask:
-            return .segment(segment)
-        case .skip:
-            if state == .playback,
-               let proxy,
-               let id = segment.id,
-               let endSeconds = segment.endSeconds,
-               skippedMediaSegmentIDs.insert(id).inserted
-            {
-                proxy.setSeconds(endSeconds)
-            }
-            return nil
+        if let promptDuration = mediaSegmentConfiguration.promptDuration, let startSeconds = promptState?.startSeconds {
+            promptState?.isExpired = seconds - startSeconds >= promptDuration
+        }
+
+        if promptState != mediaSegmentPromptState {
+            mediaSegmentPromptState = promptState
         }
     }
 
@@ -229,8 +231,12 @@ final class MediaPlayerManager: ViewModel {
         get { secondsBox.value }
         set {
             secondsBox.value = newValue
-            updateMediaSegmentPrompt(for: newValue)
+            mediaSegmentSecondsDidChange(newValue)
         }
+    }
+
+    var mediaSegmentPrompt: MediaSegmentPrompt? {
+        mediaSegmentPromptState?.visiblePrompt
     }
 
     var playbackBitrate: PlaybackBitrate {
@@ -248,7 +254,6 @@ final class MediaPlayerManager: ViewModel {
 
     private var initialMediaPlayerItemProvider: MediaPlayerItemProvider?
     private var mediaSegmentConfiguration: MediaSegmentConfiguration = Defaults[.VideoPlayer.MediaSegment.configuration]
-    private var mediaSegmentPromptState: (prompt: MediaSegmentPrompt, startSeconds: Duration, isDismissed: Bool)?
     private var skippedMediaSegmentIDs: Set<String> = []
 
     // MARK: init
@@ -284,14 +289,12 @@ final class MediaPlayerManager: ViewModel {
         super.init()
 
         self.queue?.manager = self
-
         self.playbackItem = playbackItem
     }
 
     @Function(\Action.Cases.dismissMediaSegmentPrompt)
     private func _dismissMediaSegmentPrompt() {
         mediaSegmentPromptState?.isDismissed = true
-        mediaSegmentPrompt = nil
     }
 
     @Function(\Action.Cases.ended)
@@ -505,6 +508,7 @@ final class MediaPlayerManager: ViewModel {
         let newItem = try await MediaPlayerItem.build(
             for: currentItem.baseItem,
             mediaSource: currentItem.mediaSource,
+            mediaSegments: currentItem.mediaSegments,
             audioStreamIndex: audioStreamIndex ?? currentItem.selectedAudioStreamIndex,
             subtitleStreamIndex: subtitleStreamIndex ?? currentItem.selectedSubtitleStreamIndex,
             requestedBitrate: requestedBitrate ?? currentItem.requestedBitrate,

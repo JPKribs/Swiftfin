@@ -25,7 +25,7 @@ enum MediaSegmentPrompt: Displayable, Hashable, SystemImageable {
     var systemImage: String {
         switch self {
         case .nextEpisode:
-            "forward.end.fill"
+            VideoPlayerActionButton.playNextItem.systemImage
         case let .segment(segment):
             (segment.type ?? .unknown).systemImage
         }

@@ -39,7 +39,7 @@ struct MediaSegmentConfiguration: Hashable, Storable, WithDefaultValue {
     )
 
     subscript(type: MediaSegmentType) -> Behavior {
-        get { segments[type] ?? .ask }
+        get { type.isSupported ? segments[type] ?? .ask : .disabled }
         set { segments[type] = newValue }
     }
 }

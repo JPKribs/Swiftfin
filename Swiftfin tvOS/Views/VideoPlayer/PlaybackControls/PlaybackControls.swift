@@ -18,6 +18,8 @@ extension VideoPlayer {
             case mediaSegmentButton
         }
 
+        private let spacing: CGFloat = 30
+
         @Default(.VideoPlayer.jumpBackwardInterval)
         var jumpBackwardInterval
         @Default(.VideoPlayer.jumpForwardInterval)
@@ -40,11 +42,8 @@ extension VideoPlayer {
         var isSpeedBoosting: Bool = false
         @State
         var pendingJumpWork: DispatchWorkItem?
-        private let spacing: CGFloat = 30
-
         @State
         var mediaSegmentDismissEdge: Edge = .trailing
-
         @State
         private var progressFrame: CGRect = .zero
 

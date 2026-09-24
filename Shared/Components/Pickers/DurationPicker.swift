@@ -17,11 +17,11 @@ struct DurationPicker: View {
 
     let title: String
     let selection: Binding<Duration?>
-    let noneTitle: String
+    var noneTitle: String?
     var options: [Duration] = []
 
     private var selectionTitle: String {
-        selection.wrappedValue?.formatted(.minuteSecondsNarrow) ?? noneTitle
+        selection.wrappedValue?.formatted(.minuteSecondsNarrow) ?? noneTitle ?? ""
     }
 
     @ViewBuilder
@@ -47,8 +47,10 @@ struct DurationPicker: View {
                     }
                 )
         ) {
-            Text(noneTitle)
-                .tag(nil as Duration?)
+            if let noneTitle {
+                Text(noneTitle)
+                    .tag(nil as Duration?)
+            }
 
             ForEach(options, id: \.self) { duration in
                 Text(duration, format: .minuteSecondsNarrow)
@@ -87,5 +89,16 @@ struct DurationPicker: View {
             } message: {
                 Text(L10n.enterCustomDuration)
             }
+    }
+}
+
+extension DurationPicker {
+
+    init(title: String, selection: Binding<Duration>, options: [Duration]) {
+        self.init(
+            title: title,
+            selection: selection.map(getter: { Optional($0) }, setter: { $0 ?? selection.wrappedValue }),
+            options: options
+        )
     }
 }

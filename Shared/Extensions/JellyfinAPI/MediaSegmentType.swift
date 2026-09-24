@@ -9,7 +9,7 @@
 import Foundation
 import JellyfinAPI
 
-extension MediaSegmentType: Displayable, SystemImageable {
+extension MediaSegmentType: Displayable, SupportedCaseIterable, SystemImageable {
 
     var displayTitle: String {
         switch self {
@@ -41,5 +41,9 @@ extension MediaSegmentType: Displayable, SystemImageable {
         case .recap:
             "clock.arrow.circlepath"
         }
+    }
+
+    static var supportedCases: [MediaSegmentType] {
+        [.recap, .intro, .commercial, .outro, .preview]
     }
 }

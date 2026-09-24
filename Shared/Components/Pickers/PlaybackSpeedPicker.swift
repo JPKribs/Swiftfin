@@ -9,7 +9,7 @@
 import SwiftUI
 
 // TODO: Generic StorablePicker?
-// - Combine PlaybackSpeedPicker & JumpIntervalPicker if possible
+// - Combine PlaybackSpeedPicker & DurationPicker if possible
 
 struct PlaybackSpeedPicker: View {
 
