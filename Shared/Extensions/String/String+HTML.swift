@@ -26,7 +26,7 @@ extension String {
             return cached.value
         }
 
-        let value: AttributedString
+        var value: AttributedString
 
         if let markdown = try? AttributedString(
             markdown: self,
@@ -38,6 +38,15 @@ extension String {
             value = AttributedString(self)
         }
 
+        for (link, range) in value.runs[\.link] {
+            guard let link else { continue }
+
+            // tvOS can't open links
+            if UIDevice.isTV || !["http", "https", "mailto"].contains(link.scheme?.lowercased() ?? "") {
+                value[range].link = nil
+            }
+        }
+
         Self.richTextCache.setObject(RichTextBox(value), forKey: self as NSString)
 
         return value
@@ -47,6 +56,8 @@ extension String {
         String(richText.characters)
     }
 }
+
+// MARK: - Rules
 
 extension String {
 
@@ -62,6 +73,17 @@ extension String {
                 .newParagraph
             }
         }
+    }
+
+    private struct HTMLRule {
+        var attributes = AttributeContainer()
+        var intent: InlinePresentationIntent = []
+        var htmlBreak: HTMLBreak?
+        var childMarker: ((Int) -> String)?
+        var compactsBreaks = false
+        var preservesWhitespace = false
+        var isHidden = false
+        var isVoid = false
     }
 
     private enum HTMLTag: String {
@@ -105,39 +127,75 @@ extension String {
         case u
         case ul
 
-        var intent: InlinePresentationIntent {
+        func rule(attributes: Substring) -> HTMLRule {
             switch self {
-            case .b, .strong, .th, .h1, .h2, .h3, .h4, .h5, .h6:
-                .stronglyEmphasized
+            case .a:
+                HTMLRule(attributes: Self.href(in: attributes).map { AttributeContainer().link($0) } ?? AttributeContainer())
+            case .b, .strong:
+                HTMLRule(intent: .stronglyEmphasized)
             case .i, .em, .cite, .dfn:
-                .emphasized
+                HTMLRule(intent: .emphasized)
             case .s, .strike, .del:
-                .strikethrough
-            case .code, .kbd, .pre, .samp, .tt:
-                .code
-            default:
-                []
+                HTMLRule(intent: .strikethrough)
+            case .u, .ins:
+                HTMLRule(attributes: AttributeContainer().underlineStyle(Text.LineStyle.single))
+            case .code, .kbd, .samp, .tt:
+                HTMLRule(intent: .code)
+            case .pre:
+                HTMLRule(intent: .code, htmlBreak: .paragraph, preservesWhitespace: true)
+            case .sup:
+                HTMLRule(attributes: AttributeContainer().baselineOffset(CGFloat(5)))
+            case .sub:
+                HTMLRule(attributes: AttributeContainer().baselineOffset(CGFloat(-3)))
+            case .h1, .h2, .h3, .h4, .h5, .h6:
+                HTMLRule(intent: .stronglyEmphasized, htmlBreak: .paragraph)
+            case .p, .blockquote, .table:
+                HTMLRule(htmlBreak: .paragraph)
+            case .div:
+                HTMLRule(htmlBreak: .line)
+            case .br:
+                HTMLRule(htmlBreak: .line, isVoid: true)
+            case .hr:
+                HTMLRule(htmlBreak: .paragraph, isVoid: true)
+            case .ul:
+                HTMLRule(htmlBreak: .paragraph, childMarker: { _ in .bullet + .space })
+            case .ol:
+                HTMLRule(htmlBreak: .paragraph, childMarker: { "\($0)." + .space })
+            case .li:
+                HTMLRule(htmlBreak: .line, compactsBreaks: true)
+            case .tr:
+                HTMLRule(htmlBreak: .line, childMarker: { $0 > 1 ? .space : .empty })
+            case .td:
+                HTMLRule()
+            case .th:
+                HTMLRule(intent: .stronglyEmphasized)
+            case .script, .style:
+                HTMLRule(isHidden: true)
             }
         }
 
-        var htmlBreak: HTMLBreak? {
-            switch self {
-            case .blockquote, .h1, .h2, .h3, .h4, .h5, .h6, .hr, .ol, .p, .pre, .table, .ul:
-                .paragraph
-            case .div, .li, .tr:
-                .line
-            default:
-                nil
-            }
+        private static func href(in attributes: Substring) -> URL? {
+            guard let match = attributes.firstMatch(
+                of: #/\shref\s*=\s*(?:"(?<double>[^"]*)"|'(?<single>[^']*)'|(?<bare>[^\s"']+))/#.ignoresCase()
+            ) else { return nil }
+
+            let value = match.output.double ?? match.output.single ?? match.output.bare ?? ""
+
+            return URL(string: String(value).replacing("&amp;", with: "&"))
         }
     }
+}
+
+// MARK: - Parser
+
+extension String {
 
     private struct HTMLParser {
 
         private struct OpenTag {
             let tag: HTMLTag
-            let link: URL?
-            var itemCount = 0
+            let rule: HTMLRule
+            var childCount = 0
         }
 
         private let source: AttributedString
@@ -157,7 +215,7 @@ extension String {
                 if run.inlinePresentationIntent?.contains(.inlineHTML) == true {
                     resolveTags(in: run.range)
                 } else {
-                    append(run)
+                    appendRun(run)
                 }
             }
 
@@ -168,8 +226,8 @@ extension String {
             return result
         }
 
-        private func isOpen(_ tags: HTMLTag...) -> Bool {
-            openTags.contains { tags.contains($0.tag) }
+        private func isOpen(where predicate: (HTMLRule) -> Bool) -> Bool {
+            openTags.contains { predicate($0.rule) }
         }
 
         private mutating func resolveTags(in range: Range<AttributedString.Index>) {
@@ -180,81 +238,79 @@ extension String {
 
                 if match.output.closing.isNotEmpty {
                     close(tag)
-                } else if tag == .br {
-                    requestBreak(pendingBreak == nil ? .line : .paragraph)
-                } else if tag == .hr {
-                    requestBreak(.paragraph)
-                } else if !match.output.attributes.hasSuffix("/") {
-                    open(tag, attributes: match.output.attributes)
+                } else {
+                    let rule = tag.rule(attributes: match.output.attributes)
+
+                    if rule.isVoid || !match.output.attributes.hasSuffix("/") {
+                        open(tag, rule: rule)
+                    }
                 }
             }
         }
 
-        private mutating func open(_ tag: HTMLTag, attributes: Substring) {
-            requestBreak(tag.htmlBreak)
+        private mutating func open(_ tag: HTMLTag, rule: HTMLRule) {
+            requestBreak(rule.htmlBreak, stacks: rule.isVoid)
 
-            if tag == .li {
-                if let index = openTags.lastIndex(where: { $0.tag == .ol || $0.tag == .ul }), openTags[index].tag == .ol {
-                    openTags[index].itemCount += 1
-                    appendText("\(openTags[index].itemCount)." + .space)
-                } else {
-                    appendText(.bullet + .space)
-                }
-            } else if tag == .td || tag == .th {
-                flushBreak()
+            if let parent = openTags.indices.last {
+                openTags[parent].childCount += 1
 
-                if result.characters.last?.isWhitespace == false {
-                    result.append(AttributedString(String.space))
+                if let marker = openTags[parent].rule.childMarker?(openTags[parent].childCount) {
+                    append(AttributedString(marker))
                 }
             }
 
-            openTags.append(OpenTag(tag: tag, link: tag == .a ? link(in: attributes) : nil))
+            if !rule.isVoid {
+                openTags.append(OpenTag(tag: tag, rule: rule))
+            }
         }
 
         private mutating func close(_ tag: HTMLTag) {
-            if let index = openTags.lastIndex(where: { $0.tag == tag }) {
-                openTags.remove(at: index)
+            guard let index = openTags.lastIndex(where: { $0.tag == tag }) else { return }
+
+            let closed = openTags.remove(at: index)
+
+            requestBreak(closed.rule.htmlBreak, stacks: false)
+        }
+
+        private mutating func requestBreak(_ htmlBreak: HTMLBreak?, stacks: Bool) {
+            guard var htmlBreak else { return }
+
+            if stacks, pendingBreak != nil {
+                htmlBreak = .paragraph
             }
 
-            requestBreak(tag.htmlBreak)
-        }
-
-        private mutating func requestBreak(_ htmlBreak: HTMLBreak?) {
-            guard let htmlBreak else { return }
-
-            let newBreak = isOpen(.li) ? .line : htmlBreak
-            pendingBreak = Swift.max(pendingBreak ?? newBreak, newBreak)
-        }
-
-        private mutating func flushBreak() {
-            defer { pendingBreak = nil }
-
-            guard let pendingBreak, result.characters.isNotEmpty else { return }
-
-            while result.characters.last == " " || result.characters.last == "\t" {
-                result.characters.removeLast()
+            if isOpen(where: \.compactsBreaks) {
+                htmlBreak = .line
             }
 
-            result.append(AttributedString(pendingBreak.text))
+            pendingBreak = Swift.max(pendingBreak ?? htmlBreak, htmlBreak)
         }
 
-        private mutating func appendText(_ text: String) {
-            flushBreak()
-            result.append(AttributedString(text))
-        }
-
-        private mutating func append(_ run: AttributedString.Runs.Run) {
-            guard !isOpen(.script, .style) else { return }
+        private mutating func appendRun(_ run: AttributedString.Runs.Run) {
+            guard !isOpen(where: \.isHidden) else { return }
 
             var text = AttributedString(source[run.range])
 
-            if isHTML, !isOpen(.pre) {
+            if isHTML, !isOpen(where: \.preservesWhitespace) {
                 let collapsed = String(text.characters).replacing(#/\s+/#) { match in
                     match.output.filter(\.isNewline).count > 1 ? String.newParagraph : .space
                 }
 
                 text = AttributedString(collapsed, attributes: run.attributes)
             }
+
+            let intent = openTags.reduce(run.inlinePresentationIntent ?? []) { $0.union($1.rule.intent) }
+            text.inlinePresentationIntent = intent.isEmpty ? nil : intent
+
+            for openTag in openTags {
+                text.mergeAttributes(openTag.rule.attributes)
+            }
+
+            append(text)
+        }
+
+        private mutating func append(_ text: AttributedString) {
+            var text = text
 
             if pendingBreak != nil || result.characters.isEmpty || result.characters.last == "\n" {
                 text.characters.trimPrefix(while: \.isWhitespace)
@@ -264,37 +320,16 @@ extension String {
 
             guard text.characters.isNotEmpty else { return }
 
-            flushBreak()
+            if let pendingBreak, result.characters.isNotEmpty {
+                while result.characters.last == " " || result.characters.last == "\t" {
+                    result.characters.removeLast()
+                }
 
-            let intent = openTags.reduce(run.inlinePresentationIntent ?? []) { $0.union($1.tag.intent) }
-            text.inlinePresentationIntent = intent.isEmpty ? nil : intent
-
-            if isOpen(.u, .ins) {
-                text.underlineStyle = .single
+                result.append(AttributedString(pendingBreak.text))
             }
 
-            if isOpen(.sup) {
-                text.baselineOffset = 5
-            } else if isOpen(.sub) {
-                text.baselineOffset = -3
-            }
-
-            // tvOS can't open links
-            let link = openTags.last { $0.link != nil }?.link ?? text.link
-            let isAllowed = link?.scheme.map { ["http", "https", "mailto"].contains($0.lowercased()) } == true
-            text.link = !UIDevice.isTV && isAllowed ? link : nil
-
+            pendingBreak = nil
             result.append(text)
-        }
-
-        private func link(in attributes: Substring) -> URL? {
-            guard let match = attributes.firstMatch(
-                of: #/\shref\s*=\s*(?:"(?<double>[^"]*)"|'(?<single>[^']*)'|(?<bare>[^\s"']+))/#.ignoresCase()
-            ) else { return nil }
-
-            let value = match.output.double ?? match.output.single ?? match.output.bare ?? ""
-
-            return URL(string: String(value).replacing("&amp;", with: "&"))
         }
     }
 }
