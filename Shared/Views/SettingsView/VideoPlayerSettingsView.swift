@@ -96,6 +96,8 @@ struct VideoPlayerSettingsView: View {
 
             resumeSettings
 
+            mediaSegmentSettings
+
             sliderSettings
 
             supplementSettings
@@ -227,6 +229,17 @@ struct VideoPlayerSettingsView: View {
             Text(L10n.resume)
         } footer: {
             Text(L10n.resumeOffsetDescription)
+        }
+    }
+
+    // MARK: - Media Segment Settings
+
+    @ViewBuilder
+    private var mediaSegmentSettings: some View {
+        Section(L10n.mediaSegments) {
+            ChevronButton(L10n.mediaSegments) {
+                router.route(to: .mediaSegmentSettings)
+            }
         }
     }
 

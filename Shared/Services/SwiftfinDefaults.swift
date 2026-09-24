@@ -343,6 +343,13 @@ extension Defaults.Keys {
             }
         }
 
+        enum MediaSegment {
+
+            static var configuration: Key<MediaSegmentConfiguration> {
+                UserKey("mediaSegmentConfiguration", default: .default)
+            }
+        }
+
         enum Overlay {
 
             static var chapterSlider: Key<Bool> {
