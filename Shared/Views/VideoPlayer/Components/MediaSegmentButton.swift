@@ -18,38 +18,40 @@ extension VideoPlayer.PlaybackControls {
         @State
         private var dragOffset: CGFloat = 0
 
-        var body: some View {
-            if let prompt = manager.mediaSegmentPrompt {
-                Button {
-                    manager.skipMediaSegment()
-                } label: {
-                    Label(prompt.displayTitle, systemImage: prompt.systemImage)
-                        .font(.subheadline)
-                        .fontWeight(.semibold)
-                        .edgePadding(.horizontal)
-                }
-                .buttonStyle(.supplementAction)
-                .frame(height: UIDevice.isTV ? 80 : 40)
-                .fixedSize(horizontal: true, vertical: false)
-                #if os(iOS)
-                .offset(x: dragOffset)
-                .highPriorityGesture(
-                    DragGesture(minimumDistance: 10)
-                        .onChanged { value in
-                            dragOffset = value.translation.width
-                        }
-                        .onEnded { value in
-                            if abs(value.predictedEndTranslation.width) > 100 {
-                                manager.dismissMediaSegmentPrompt()
-                            }
+        let prompt: MediaSegmentPrompt
 
-                            withAnimation(.bouncy) {
-                                dragOffset = 0
-                            }
-                        }
-                )
-                #endif
+        var body: some View {
+            Button {
+                manager.skipMediaSegment()
+            } label: {
+                Label(prompt.displayTitle, systemImage: prompt.systemImage)
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                    .edgePadding(.horizontal)
             }
+            .buttonStyle(.supplementAction)
+            .frame(height: UIDevice.isTV ? 80 : 40)
+            .fixedSize(horizontal: true, vertical: false)
+            #if os(iOS)
+            .offset(x: dragOffset)
+            .highPriorityGesture(
+                DragGesture(minimumDistance: 10)
+                    .onChanged { value in
+                        dragOffset = value.translation.width
+                    }
+                    .onEnded { value in
+                        let isDismissing = abs(value.predictedEndTranslation.width) > 100
+
+                        withAnimation(.bouncy) {
+                            dragOffset = isDismissing ? value.predictedEndTranslation.width : 0
+                        }
+
+                        if isDismissing {
+                            manager.dismissMediaSegmentPrompt()
+                        }
+                    }
+            )
+            #endif
         }
     }
 }

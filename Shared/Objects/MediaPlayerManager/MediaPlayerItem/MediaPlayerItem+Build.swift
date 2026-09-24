@@ -168,9 +168,12 @@ extension MediaPlayerItem {
             return nil
         }()
 
+        let mediaSegments = try? await userSession.client.send(Paths.getItemSegments(itemID: itemID)).value.items
+
         return .init(
             baseItem: item,
             mediaSource: mediaSource,
+            mediaSegments: mediaSegments ?? [],
             playSessionID: playSessionID,
             url: playbackURL,
             requestedBitrate: requestedBitrate,

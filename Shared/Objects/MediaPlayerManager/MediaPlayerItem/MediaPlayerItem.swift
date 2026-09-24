@@ -51,6 +51,7 @@ class MediaPlayerItem: ViewModel, MediaPlayerObserver {
     let baseItem: BaseItemDto
     let deviceProfile: DeviceProfile
     let mediaSource: MediaSourceInfo
+    let mediaSegments: [MediaSegmentDto]
     let playSessionID: String
     let previewImageProvider: (any PreviewImageProvider)?
     let thumbnailProvider: ThumbnailProvider?
@@ -67,6 +68,7 @@ class MediaPlayerItem: ViewModel, MediaPlayerObserver {
     init(
         baseItem: BaseItemDto,
         mediaSource: MediaSourceInfo,
+        mediaSegments: [MediaSegmentDto] = [],
         playSessionID: String,
         url: URL,
         requestedBitrate: PlaybackBitrate = .max,
@@ -78,6 +80,7 @@ class MediaPlayerItem: ViewModel, MediaPlayerObserver {
     ) {
         self.baseItem = baseItem
         self.mediaSource = mediaSource
+        self.mediaSegments = mediaSegments
         self.playSessionID = playSessionID
         self.requestedBitrate = requestedBitrate
         self.deviceProfile = deviceProfile

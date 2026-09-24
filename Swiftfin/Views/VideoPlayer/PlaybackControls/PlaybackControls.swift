@@ -87,10 +87,20 @@ extension VideoPlayer {
                 PlaybackButtons()
                     .isVisible(!isScrubbing && containerState.isPresentingPlaybackControls)
             }
+            .overlay(alignment: .bottomTrailing) {
+                if let prompt = manager.mediaSegmentPrompt, !isScrubbing, !isPresentingSupplement {
+                    MediaSegmentButton(prompt: prompt)
+                        .padding(.trailing, safeAreaInsets.trailing)
+                        .edgePadding([.bottom, .trailing])
+                        .offset(y: isPresentingOverlay ? -bottomContentFrame.height : -safeAreaInsets.bottom)
+                        .transition(.opacity)
+                }
+            }
             .modifier(VideoPlayer.KeyCommandsModifier())
             .animation(.linear(duration: 0.1), value: isScrubbing)
             .animation(.bouncy(duration: 0.4), value: containerState.isPresentingSupplement)
             .animation(.bouncy(duration: 0.25), value: containerState.isPresentingOverlay)
+            .animation(.easeInOut(duration: 0.25), value: manager.mediaSegmentPrompt)
             .onChange(of: manager.proxy?.isBuffering.value) {
                 activeIsBuffering = manager.proxy?.isBuffering.value ?? false
             }

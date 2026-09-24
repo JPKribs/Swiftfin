@@ -12,6 +12,19 @@ extension VideoPlayer.PlaybackControls {
 
     func handlePressEvent(_ press: VideoPlayer.UIVideoPlayerContainerViewController.PressEvent) {
 
+        if focusTarget == .mediaSegmentButton, ![.upArrow, .downArrow].contains(press.type) {
+            if [.leftArrow, .rightArrow].contains(press.type) {
+                if press.phase == .ended {
+                    mediaSegmentDismissEdge = press.type == .leftArrow ? .leading : .trailing
+                    manager.dismissMediaSegmentPrompt()
+                }
+                press.resolve(.handled)
+            } else {
+                press.resolve(.fallback)
+            }
+            return
+        }
+
         if !containerState.isPresentingOverlay {
             containerState.isPresentingOverlay = true
             press.resolve(.handled)

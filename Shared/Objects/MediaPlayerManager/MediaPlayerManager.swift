@@ -52,6 +52,7 @@ final class MediaPlayerManager: ViewModel {
 
     @CasePathable
     enum Action {
+        case dismissMediaSegmentPrompt
         case ended
         case error
         case playNewItem(provider: MediaPlayerItemProvider)
@@ -59,6 +60,7 @@ final class MediaPlayerManager: ViewModel {
         case setPlaybackRequestStatus(status: PlaybackRequestStatus)
         case setRate(rate: Float)
         case setTrack(type: MediaStreamType, from: Int?, to: Int? = nil)
+        case skipMediaSegment
         case start
         case stop
         case togglePlayPause
@@ -103,6 +105,7 @@ final class MediaPlayerManager: ViewModel {
         didSet {
             if let playbackItem {
                 self.item = playbackItem.baseItem
+                mediaSegmentConfiguration = Defaults[.VideoPlayer.MediaSegment.configuration]
                 seconds = playbackItem.baseItem.startSeconds ?? .zero
                 playbackItem.manager = self
                 setSupplements()
@@ -124,6 +127,8 @@ final class MediaPlayerManager: ViewModel {
 
     @Published
     private(set) var item: BaseItemDto
+    @Published
+    private(set) var mediaSegmentPrompt: MediaSegmentPrompt? = nil
     @Published
     private(set) var playbackRequestStatus: PlaybackRequestStatus = .playing
     @Published
@@ -167,12 +172,60 @@ final class MediaPlayerManager: ViewModel {
         self.supplements = newSupplements
     }
 
+    private func updateMediaSegmentPrompt(for seconds: Duration) {
+        let prompt = resolveMediaSegmentPrompt(for: seconds)
+
+        if prompt != mediaSegmentPromptState?.prompt {
+            mediaSegmentPromptState = prompt.map { ($0, seconds, false) }
+        }
+
+        var visiblePrompt = mediaSegmentPromptState.flatMap { $0.isDismissed ? nil : $0.prompt }
+
+        if case let .fixed(duration) = mediaSegmentConfiguration.promptDuration,
+           let startSeconds = mediaSegmentPromptState?.startSeconds,
+           seconds - startSeconds >= duration
+        {
+            visiblePrompt = nil
+        }
+
+        if visiblePrompt != mediaSegmentPrompt {
+            mediaSegmentPrompt = visiblePrompt
+        }
+    }
+
+    private func resolveMediaSegmentPrompt(for seconds: Duration) -> MediaSegmentPrompt? {
+        if case let .fromEnd(duration) = mediaSegmentConfiguration.nextEpisode,
+           queue?.nextItem != nil,
+           let runtime = item.runtime,
+           runtime - seconds <= duration
+        {
+            return .nextEpisode
+        }
+
+        guard let segment = playbackItem?.mediaSegments.first(where: { $0.contains(seconds) }) else { return nil }
+
+        switch mediaSegmentConfiguration[segment.type ?? .unknown] {
+        case .disabled:
+            return nil
+        case .ask:
+            return .segment(segment)
+        case .skip:
+            if let endSeconds = segment.endSeconds {
+                proxy?.setSeconds(endSeconds)
+            }
+            return nil
+        }
+    }
+
     /// The current seconds media playback is set to.
     let secondsBox: PublishedBox<Duration> = .init(initialValue: .zero)
 
     var seconds: Duration {
         get { secondsBox.value }
-        set { secondsBox.value = newValue }
+        set {
+            secondsBox.value = newValue
+            updateMediaSegmentPrompt(for: newValue)
+        }
     }
 
     var playbackBitrate: PlaybackBitrate {
@@ -189,6 +242,8 @@ final class MediaPlayerManager: ViewModel {
     }
 
     private var initialMediaPlayerItemProvider: MediaPlayerItemProvider?
+    private var mediaSegmentConfiguration: MediaSegmentConfiguration = Defaults[.VideoPlayer.MediaSegment.configuration]
+    private var mediaSegmentPromptState: (prompt: MediaSegmentPrompt, startSeconds: Duration, isDismissed: Bool)?
 
     // MARK: init
 
@@ -223,7 +278,14 @@ final class MediaPlayerManager: ViewModel {
         super.init()
 
         self.queue?.manager = self
+
         self.playbackItem = playbackItem
+    }
+
+    @Function(\Action.Cases.dismissMediaSegmentPrompt)
+    private func _dismissMediaSegmentPrompt() {
+        mediaSegmentPromptState?.isDismissed = true
+        mediaSegmentPrompt = nil
     }
 
     @Function(\Action.Cases.ended)
@@ -357,6 +419,23 @@ final class MediaPlayerManager: ViewModel {
             }
         default:
             logger.warning("MediaPlayerManager.SetTrack called with unsupported type: \(String(describing: type))")
+        }
+    }
+
+    @Function(\Action.Cases.skipMediaSegment)
+    private func _skipMediaSegment() async throws {
+        let prompt = mediaSegmentPrompt
+        _dismissMediaSegmentPrompt()
+
+        switch prompt {
+        case .nextEpisode:
+            guard let nextItem = queue?.nextItem else { return }
+            await self.playNewItem(provider: nextItem)
+        case let .segment(segment):
+            guard let endSeconds = segment.endSeconds else { return }
+            proxy?.setSeconds(endSeconds)
+        case nil:
+            return
         }
     }
 

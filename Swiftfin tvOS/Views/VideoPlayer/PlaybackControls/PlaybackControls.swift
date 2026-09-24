@@ -13,6 +13,11 @@ extension VideoPlayer {
 
     struct PlaybackControls: View {
 
+        enum FocusTarget {
+            case playbackProgress
+            case mediaSegmentButton
+        }
+
         @Default(.VideoPlayer.jumpBackwardInterval)
         var jumpBackwardInterval
         @Default(.VideoPlayer.jumpForwardInterval)
@@ -27,7 +32,7 @@ extension VideoPlayer {
         var toaster: ToastProxy
 
         @FocusState
-        private var isPlaybackProgressFocused: Bool
+        var focusTarget: FocusTarget?
 
         @State
         var speedBoostTimer: Timer?
@@ -35,9 +40,16 @@ extension VideoPlayer {
         var isSpeedBoosting: Bool = false
         @State
         var pendingJumpWork: DispatchWorkItem?
+        private let spacing: CGFloat = 30
+
+        @State
+        var mediaSegmentDismissEdge: Edge = .trailing
+
+        @State
+        private var progressFrame: CGRect = .zero
 
         var body: some View {
-            VStack(spacing: 30) {
+            VStack(spacing: spacing) {
 
                 Toolbar()
                     .isVisible(
@@ -48,19 +60,49 @@ extension VideoPlayer {
                     .disabled(containerState.isPresentingSupplement)
 
                 PlaybackProgress()
-                    .focused($isPlaybackProgressFocused)
+                    .focused($focusTarget, equals: .playbackProgress)
                     .fixedSize(horizontal: false, vertical: true)
+                    .trackingFrame($progressFrame)
                     .isVisible(
                         (containerState.isPresentingOverlay || containerState.isScrubbing) &&
                             !containerState.isPresentingSupplement
                     )
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+            .overlay(alignment: .bottomTrailing) {
+                if let prompt = manager.mediaSegmentPrompt, !containerState.isScrubbing, !containerState.isPresentingSupplement {
+                    MediaSegmentButton(prompt: prompt)
+                        .focused($focusTarget, equals: .mediaSegmentButton)
+                        .padding(.trailing)
+                        .frame(maxWidth: .infinity, alignment: .trailing)
+                        .focusSection()
+                        .offset(
+                            y: containerState.isPresentingOverlay
+                                ? -progressFrame.height - Toolbar.buttonSize - spacing * 2
+                                : EdgeInsets.edgePadding
+                        )
+                        .task {
+                            mediaSegmentDismissEdge = .trailing
+
+                            if !containerState.isPresentingOverlay {
+                                focusTarget = .mediaSegmentButton
+                            }
+                        }
+                        .transition(
+                            .asymmetric(
+                                insertion: .move(edge: .trailing),
+                                removal: .move(edge: mediaSegmentDismissEdge)
+                            )
+                            .combined(with: .opacity)
+                        )
+                }
+            }
             .edgePadding(.horizontal)
             .focusSection()
             .animation(.easeInOut(duration: 0.25), value: containerState.isPresentingSupplement)
             .animation(.easeInOut(duration: 0.25), value: containerState.isPresentingOverlay)
             .animation(.linear(duration: 0.1), value: containerState.isScrubbing)
+            .animation(.easeInOut(duration: 0.25), value: manager.mediaSegmentPrompt)
             .alert(L10n.closePlayer, isPresented: $containerState.isPresentingCloseConfirmation) {
                 Button(L10n.cancel, role: .cancel) {}
 
@@ -71,7 +113,9 @@ extension VideoPlayer {
                 Text(L10n.closePlayerWarning)
             }
             .onChange(of: containerState.isPresentingOverlay) {
-                isPlaybackProgressFocused = true
+                if focusTarget != .mediaSegmentButton {
+                    focusTarget = .playbackProgress
+                }
             }
             .onChange(of: manager.playbackRequestStatus) {
                 if manager.playbackRequestStatus == .paused, !containerState.isPresentingOverlay {

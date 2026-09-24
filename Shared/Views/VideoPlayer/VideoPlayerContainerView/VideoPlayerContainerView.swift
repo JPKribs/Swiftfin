@@ -327,6 +327,9 @@ extension VideoPlayer {
         private var playerCompactBottomAnchor: NSLayoutConstraint?
         private var supplementHeightAnchor: NSLayoutConstraint?
         private var supplementBottomAnchor: NSLayoutConstraint?
+        #if os(iOS)
+        private lazy var playbackControlsFullHeightAnchor = playbackControlsView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        #endif
 
         private var centerOffset: CGFloat {
             guard containerState.isCompact,
@@ -604,14 +607,22 @@ extension VideoPlayer {
             let gesture = UITapGestureRecognizer(target: self, action: #selector(handleMenuEnded))
             gesture.allowedPressTypes = [NSNumber(value: UIPress.PressType.menu.rawValue)]
             view.addGestureRecognizer(gesture)
+            #endif
 
             containerState.$isPresentingOverlay
                 .receive(on: DispatchQueue.main)
                 .sink { [weak self] isPresenting in
-                    self?.supplementContainerView.isUserInteractionEnabled = isPresenting
+                    guard let self else { return }
+                    supplementContainerView.isUserInteractionEnabled = isPresenting
+
+                    #if os(iOS)
+                    playbackControlsFullHeightAnchor.isActive = !isPresenting
+                    UIView.animate(withDuration: 0.25, delay: 0, options: .allowUserInteraction) {
+                        self.view.layoutIfNeeded()
+                    }
+                    #endif
                 }
                 .store(in: &cancellables)
-            #endif
         }
 
         // Setup player view separately after view appears to hopefully
@@ -700,6 +711,7 @@ extension VideoPlayer {
             let playbackControlsBottomAnchor = playbackControlsView.bottomAnchor.constraint(
                 equalTo: supplementContainerView.topAnchor
             )
+            playbackControlsBottomAnchor.priority = .defaultHigh
             #endif
 
             playbackControlsConstraints = [
@@ -775,6 +787,8 @@ extension VideoPlayer {
 
         override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
             super.touchesBegan(touches, with: event)
+
+            guard containerState.isPresentingOverlay || manager.mediaSegmentPrompt == nil else { return }
 
             let now = CACurrentMediaTime()
             guard now - lastTouchPokeTime > 1.0 else { return }
@@ -874,6 +888,11 @@ extension VideoPlayer {
         }
 
         private func handleSelectEnded(_ press: UIPress, event: UIPressesEvent?) {
+            if !containerState.isPresentingOverlay, manager.mediaSegmentPrompt != nil {
+                manager.skipMediaSegment()
+                return
+            }
+
             if !containerState.isPresentingOverlay {
                 containerState.isPresentingOverlay = true
                 containerState.timer.poke()
