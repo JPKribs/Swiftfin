@@ -21,6 +21,14 @@ extension String {
 
     private static let richTextCache = NSCache<NSString, RichTextBox>()
 
+    private var containsHTML: Bool {
+        contains(#/<\/?[a-zA-Z][^>]*>|&(?:[a-zA-Z]+|#[0-9]+|#[xX][0-9a-fA-F]+);/#)
+    }
+
+    private var containsMarkdown: Bool {
+        contains(#/(?:^|[^\w*])([*_]{1,2})[^\s*_](?:.*?[^\s*_])?\1(?:$|[^\w*])|~~.+?~~|`[^`]+`|\[[^\]]+\]\([^)\s]+\)/#)
+    }
+
     var richText: AttributedString {
         if let cached = Self.richTextCache.object(forKey: self as NSString) {
             return cached.value
@@ -28,14 +36,13 @@ extension String {
 
         var value: AttributedString
 
-        if let markdown = try? AttributedString(
-            markdown: self,
-            options: .init(interpretedSyntax: .inlineOnlyPreservingWhitespace)
-        ) {
-            var parser = HTMLParser(markdown)
+        if containsHTML {
+            var parser = HTMLParser(escapingMarkdown.markdown ?? AttributedString(self))
             value = parser.parse()
+        } else if containsMarkdown {
+            value = markdown ?? AttributedString(self)
         } else {
-            value = AttributedString(self)
+            return AttributedString(self)
         }
 
         for (link, range) in value.runs[\.link] {
@@ -54,6 +61,19 @@ extension String {
 
     var plainText: String {
         String(richText.characters)
+    }
+
+    private var escapingMarkdown: String {
+        replacing(#/(?<tag><\/?[a-zA-Z][^>]*>)|[\\`*_\[\]~]/#) { match in
+            match.output.tag.map(String.init) ?? "\\" + match.output.0
+        }
+    }
+
+    private var markdown: AttributedString? {
+        try? AttributedString(
+            markdown: self,
+            options: .init(interpretedSyntax: .inlineOnlyPreservingWhitespace)
+        )
     }
 }
 
@@ -79,7 +99,7 @@ extension String {
         var attributes = AttributeContainer()
         var intent: InlinePresentationIntent = []
         var htmlBreak: HTMLBreak?
-        var childMarker: ((Int) -> String)?
+        var childMarker: ((_ index: Int, _ depth: Int) -> String)?
         var compactsBreaks = false
         var preservesWhitespace = false
         var isHidden = false
@@ -158,13 +178,13 @@ extension String {
             case .hr:
                 HTMLRule(htmlBreak: .paragraph, isVoid: true)
             case .ul:
-                HTMLRule(htmlBreak: .paragraph, childMarker: { _ in .bullet + .space })
+                HTMLRule(htmlBreak: .paragraph, childMarker: { String(repeating: .space, count: $1 * 4) + .bullet + .space })
             case .ol:
-                HTMLRule(htmlBreak: .paragraph, childMarker: { "\($0)." + .space })
+                HTMLRule(htmlBreak: .paragraph, childMarker: { String(repeating: .space, count: $1 * 4) + "\($0)." + .space })
             case .li:
                 HTMLRule(htmlBreak: .line, compactsBreaks: true)
             case .tr:
-                HTMLRule(htmlBreak: .line, childMarker: { $0 > 1 ? .space : .empty })
+                HTMLRule(htmlBreak: .line, childMarker: { index, _ in index > 1 ? .space : .empty })
             case .td:
                 HTMLRule()
             case .th:
@@ -254,8 +274,10 @@ extension String {
             if let parent = openTags.indices.last {
                 openTags[parent].childCount += 1
 
-                if let marker = openTags[parent].rule.childMarker?(openTags[parent].childCount) {
-                    append(AttributedString(marker))
+                let depth = openTags[..<parent].count { $0.rule.childMarker != nil }
+
+                if let marker = openTags[parent].rule.childMarker?(openTags[parent].childCount, depth) {
+                    append(AttributedString(marker), preservingWhitespace: true)
                 }
             }
 
@@ -306,13 +328,18 @@ extension String {
                 text.mergeAttributes(openTag.rule.attributes)
             }
 
-            append(text)
+            append(text, preservingWhitespace: isOpen(where: \.preservesWhitespace))
         }
 
-        private mutating func append(_ text: AttributedString) {
+        private mutating func append(_ text: AttributedString, preservingWhitespace: Bool) {
             var text = text
+            let isLineStart = pendingBreak != nil || result.characters.isEmpty || result.characters.last == "\n"
 
-            if pendingBreak != nil || result.characters.isEmpty || result.characters.last == "\n" {
+            if preservingWhitespace {
+                if isLineStart, text.characters.first?.isNewline == true {
+                    text.characters.removeFirst()
+                }
+            } else if isLineStart {
                 text.characters.trimPrefix(while: \.isWhitespace)
             } else if result.characters.last == " " {
                 text.characters.trimPrefix { $0 == " " }
