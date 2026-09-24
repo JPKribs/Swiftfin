@@ -181,9 +181,9 @@ final class MediaPlayerManager: ViewModel {
 
         var visiblePrompt = mediaSegmentPromptState.flatMap { $0.isDismissed ? nil : $0.prompt }
 
-        if case let .fixed(duration) = mediaSegmentConfiguration.promptDuration,
+        if let promptDuration = mediaSegmentConfiguration.promptDuration,
            let startSeconds = mediaSegmentPromptState?.startSeconds,
-           seconds - startSeconds >= duration
+           seconds - startSeconds >= promptDuration
         {
             visiblePrompt = nil
         }
@@ -194,10 +194,10 @@ final class MediaPlayerManager: ViewModel {
     }
 
     private func resolveMediaSegmentPrompt(for seconds: Duration) -> MediaSegmentPrompt? {
-        if case let .fromEnd(duration) = mediaSegmentConfiguration.nextEpisode,
+        if let nextEpisodeDuration = mediaSegmentConfiguration.nextEpisode,
            queue?.nextItem != nil,
            let runtime = item.runtime,
-           runtime - seconds <= duration
+           runtime - seconds <= nextEpisodeDuration
         {
             return .nextEpisode
         }
@@ -210,8 +210,13 @@ final class MediaPlayerManager: ViewModel {
         case .ask:
             return .segment(segment)
         case .skip:
-            if let endSeconds = segment.endSeconds {
-                proxy?.setSeconds(endSeconds)
+            if state == .playback,
+               let proxy,
+               let id = segment.id,
+               let endSeconds = segment.endSeconds,
+               skippedMediaSegmentIDs.insert(id).inserted
+            {
+                proxy.setSeconds(endSeconds)
             }
             return nil
         }
@@ -244,6 +249,7 @@ final class MediaPlayerManager: ViewModel {
     private var initialMediaPlayerItemProvider: MediaPlayerItemProvider?
     private var mediaSegmentConfiguration: MediaSegmentConfiguration = Defaults[.VideoPlayer.MediaSegment.configuration]
     private var mediaSegmentPromptState: (prompt: MediaSegmentPrompt, startSeconds: Duration, isDismissed: Bool)?
+    private var skippedMediaSegmentIDs: Set<String> = []
 
     // MARK: init
 
@@ -345,6 +351,7 @@ final class MediaPlayerManager: ViewModel {
     @Function(\Action.Cases.playNewItem)
     private func _playNewItem(_ provider: MediaPlayerItemProvider) async throws {
         item = provider.item
+        skippedMediaSegmentIDs = []
         setSupplements()
         proxy?.stop()
         playbackItem = try await provider()

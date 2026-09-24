@@ -28,11 +28,20 @@ struct MediaSegmentSettingsView: View {
                     PlatformPicker(type.displayTitle, selection: $mediaSegmentConfiguration[type])
                 }
 
-                PlatformPicker(L10n.nextEpisode, selection: $mediaSegmentConfiguration.nextEpisode)
+                DurationPicker(
+                    title: L10n.nextEpisode,
+                    selection: $mediaSegmentConfiguration.nextEpisode,
+                    noneTitle: L10n.disabled,
+                    options: [.seconds(15), .seconds(30), .seconds(60)]
+                )
             }
 
             Section {
-                PlatformPicker(L10n.promptDuration, selection: $mediaSegmentConfiguration.promptDuration)
+                DurationPicker(
+                    title: L10n.promptDuration,
+                    selection: $mediaSegmentConfiguration.promptDuration,
+                    noneTitle: L10n.fullDuration
+                )
             } footer: {
                 Text(L10n.swipeToDismissPrompt)
             }

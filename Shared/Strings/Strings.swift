@@ -648,6 +648,8 @@ internal enum L10n {
   internal static let enhanced = L10n.tr("Localizable", "enhanced", fallback: "Enhanced")
   /// Enter custom bitrate in Mbps
   internal static let enterCustomBitrate = L10n.tr("Localizable", "enterCustomBitrate", fallback: "Enter custom bitrate in Mbps")
+  /// Enter custom duration in seconds
+  internal static let enterCustomDuration = L10n.tr("Localizable", "enterCustomDuration", fallback: "Enter custom duration in seconds")
   /// Enter custom failed logins limit
   internal static let enterCustomFailedLogins = L10n.tr("Localizable", "enterCustomFailedLogins", fallback: "Enter custom failed logins limit")
   /// Enter custom max sessions
@@ -742,6 +744,8 @@ internal enum L10n {
   internal static let framerate = L10n.tr("Localizable", "framerate", fallback: "Framerate")
   /// From beginning
   internal static let fromBeginning = L10n.tr("Localizable", "fromBeginning", fallback: "From beginning")
+  /// Full duration
+  internal static let fullDuration = L10n.tr("Localizable", "fullDuration", fallback: "Full duration")
   /// Full side-by-side
   internal static let fullSideBySide = L10n.tr("Localizable", "fullSideBySide", fallback: "Full side-by-side")
   /// Full top and bottom
@@ -1520,8 +1524,6 @@ internal enum L10n {
   internal static let seek = L10n.tr("Localizable", "seek", fallback: "Seek")
   /// See more
   internal static let seeMore = L10n.tr("Localizable", "seeMore", fallback: "See more")
-  /// Segment
-  internal static let segment = L10n.tr("Localizable", "segment", fallback: "Segment")
   /// Select all
   internal static let selectAll = L10n.tr("Localizable", "selectAll", fallback: "Select all")
   /// Select image
