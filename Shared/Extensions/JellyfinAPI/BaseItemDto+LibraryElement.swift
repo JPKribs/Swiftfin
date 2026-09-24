@@ -128,7 +128,7 @@ private struct BaseItemDtoLibraryListElement: View {
         }
         .matchedTransitionSource(id: "item", in: namespace)
         #if os(tvOS)
-            .focusedValue(\.focusedPoster, AnyPoster(item))
+        .focusedValue(\.focusedPoster, AnyPoster(item))
         #endif
     }
 
@@ -141,7 +141,8 @@ private struct BaseItemDtoLibraryListElement: View {
                 .lineLimit(1)
 
             if let progress = program.progressPercentage {
-                ProgressBar(progress: progress)
+                ProgressView(value: progress)
+                    .progressViewStyle(.playback)
                     .frame(height: 4)
                     .foregroundStyle(Color.accentColor)
             }

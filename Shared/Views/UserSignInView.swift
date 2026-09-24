@@ -154,7 +154,7 @@ struct UserSignInView: View {
             .backport
             .buttonStyle(.glassProminent.shadow(false))
             #if os(iOS)
-                .controlSize(.large)
+            .controlSize(.large)
             #endif
             #if os(iOS)
             .listRowSeparator(.hidden)
@@ -177,11 +177,11 @@ struct UserSignInView: View {
             .buttonStyle(.glassProminent.shadow(false))
             .tint(.jellyfinPurple)
             #if os(iOS)
-                .controlSize(.large)
-                .listRowSeparator(.hidden)
+            .controlSize(.large)
+            .listRowSeparator(.hidden)
             #endif
-                .frame(maxHeight: 75)
-                .disabled(username.isEmpty)
+            .frame(maxHeight: 75)
+            .disabled(username.isEmpty)
         }
 
         if viewModel.isQuickConnectEnabled {
@@ -205,7 +205,7 @@ struct UserSignInView: View {
                 .buttonStyle(.glassProminent.shadow(false))
                 .tint(.jellyfinPurple)
                 #if os(iOS)
-                    .controlSize(.large)
+                .controlSize(.large)
                 #endif
                 #if os(iOS)
                 .listRowSeparator(.hidden)
@@ -258,8 +258,11 @@ struct UserSignInView: View {
                 }
                 #else
                 LazyVGrid(
-                    columns: Array(repeating: GridItem(.flexible()), count: 4),
-                    spacing: 30
+                    columns: Array(
+                        repeating: GridItem(.flexible(), spacing: EdgeInsets.itemSpacing),
+                        count: 4
+                    ),
+                    spacing: EdgeInsets.itemSpacing
                 ) {
                     ForEach(viewModel.publicUsers) { user in
                         UserButton(
@@ -270,7 +273,7 @@ struct UserSignInView: View {
                             password = ""
                             focusedTextField = .password
                         }
-                        .environment(\.isOverComplexContent, true)
+                        .withViewContext(.isOverComplexContent)
                     }
                 }
                 #endif

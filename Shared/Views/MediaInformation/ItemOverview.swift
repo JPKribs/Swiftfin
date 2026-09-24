@@ -16,36 +16,26 @@ struct ItemOverviewView: View {
 
     let item: BaseItemDto
 
-    private var content: some View {
-        VStack(alignment: UIDevice.isTV ? .center : .leading, spacing: 10) {
-            if let firstTagline = item.taglines?.first {
-                Text(firstTagline)
-                    .font(.title3)
-                    .fontWeight(.semibold)
-                    .multilineTextAlignment(.leading)
-            }
-
-            if let itemOverview = item.overview {
-                Text(itemOverview.richText)
-                    .font(.body)
-                    .multilineTextAlignment(.leading)
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .edgePadding()
-    }
-
     var body: some View {
-        InlinePlatformView {
-            ScrollView {
-                content
+        ScrollView {
+            VStack(alignment: UIDevice.isTV ? .center : .leading, spacing: 10) {
+                if let firstTagline = item.taglines?.first {
+                    Text(firstTagline)
+                        .font(.title3)
+                        .fontWeight(.semibold)
+                        .multilineTextAlignment(.leading)
+                }
+
+                if let itemOverview = item.overview {
+                    Text(itemOverview)
+                        .font(.body)
+                        .multilineTextAlignment(.leading)
+                }
             }
-            .scrollIndicators(.hidden)
-        } tvOSView: {
-            Marquee(axis: .vertical, resetType: .bounce) {
-                content
-            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .edgePadding()
         }
+        .scrollIndicators(.hidden)
         .navigationTitle(item.displayTitle)
         .toolbarTitleDisplayMode(.inline)
         .navigationBarCloseButton {
