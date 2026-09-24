@@ -149,16 +149,12 @@ extension String {
     static let empty = ""
     /// " "
     static let space = " "
-    /// "."
-    static let decimal = "."
     /// \n
     static let newLine = "\n"
     /// \n\n
     static let newParagraph = "\n\n"
 
     static let tab = "\u{0009}"
-    /// •
-    static let bullet = "\u{2022}"
     /// —
     static let emDash = "\u{2014}"
     /// –
@@ -220,11 +216,6 @@ extension String {
     var base64: String? {
         guard let input = data(using: .utf8) else { return nil }
         return input.base64EncodedString()
-    }
-
-    /// `String` with any HTML & Markdown tags removed
-    var plainText: String {
-        String(richText.characters)
     }
 
     var url: URL? {

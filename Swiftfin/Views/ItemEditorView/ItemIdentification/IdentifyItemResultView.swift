@@ -57,7 +57,7 @@ struct IdentifyItemResultView: View {
 
             if let overview = result.overview {
                 Section(L10n.overview) {
-                    Text(overview)
+                    Text(overview.richText)
                 }
             }
         }
