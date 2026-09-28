@@ -194,7 +194,7 @@ private struct UserViewLibraryGridElement: View {
                         .opacity(0.75)
                         .overlay {
                             titleLabel
-                                .foregroundColor(.primary)
+                                .foregroundStyle(.primary)
                         }
                 }
                 .id(imageSources.hashValue)
@@ -306,14 +306,14 @@ private extension UserViewLibraryElement {
 
     @MainActor
     func libraryImageSources(useRandomImage: Bool) async -> [ImageSource] {
-        if useRandomImage {
-            return await (try? randomItemImageSources()) ?? []
-        }
-
         switch self {
         case .favorites:
-            return []
+            return await (try? randomItemImageSources()) ?? []
         case let .userView(item):
+            if useRandomImage {
+                return await (try? randomItemImageSources()) ?? []
+            }
+
             return [item.imageSource(.primary, itemID: item.id, environment: ImageSourceOptions(maxWidth: 500))].compactMap(\.self)
         }
     }
