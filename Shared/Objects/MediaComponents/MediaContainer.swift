@@ -46,4 +46,17 @@ enum MediaContainer: String, CaseIterable, Codable, Displayable, Storable {
             L10n.webm
         }
     }
+
+    var ffmpegName: String {
+        switch self {
+        case .m4v:
+            "mp4"
+        case .mkv:
+            "matroska"
+        case .ts:
+            "mpegts"
+        default:
+            rawValue
+        }
+    }
 }

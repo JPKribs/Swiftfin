@@ -153,4 +153,17 @@ enum SubtitleFormat: String, CaseIterable, Codable, Displayable, Storable {
             false
         }
     }
+
+    var ffmpegName: String {
+        switch self {
+        case .subrip:
+            "srt"
+        case .ssa:
+            "ass"
+        case .vtt:
+            "webvtt"
+        default:
+            rawValue
+        }
+    }
 }

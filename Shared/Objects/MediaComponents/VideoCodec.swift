@@ -88,4 +88,13 @@ enum VideoCodec: String, CaseIterable, Codable, Displayable, Storable {
             L10n.wmv3
         }
     }
+
+    var ffmpegName: String {
+        switch self {
+        case .dv:
+            "dvvideo"
+        default:
+            rawValue
+        }
+    }
 }

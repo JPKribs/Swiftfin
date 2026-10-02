@@ -183,7 +183,7 @@ extension VideoPlayerType {
                     isRequired: false,
                     property: .videoRangeType
                 ) {
-                    nativeHDRProfiles
+                    _nativeHDRProfiles
                 }
                 ProfileCondition(
                     condition: .equalsAny,
@@ -223,14 +223,14 @@ extension VideoPlayerType {
                     isRequired: false,
                     property: .videoRangeType
                 ) {
-                    nativeHDRProfiles
+                    _nativeHDRProfiles
                 }
             }
         )
     }
 
     @ArrayBuilder<VideoRangeType>
-    private static var nativeHDRProfiles: [VideoRangeType] {
+    static var _nativeHDRProfiles: [VideoRangeType] {
 
         VideoRangeType.sdr
         VideoRangeType.doviWithSDR

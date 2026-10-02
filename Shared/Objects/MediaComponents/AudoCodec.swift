@@ -109,4 +109,13 @@ enum AudioCodec: String, CaseIterable, Codable, Displayable, Storable {
             L10n.wmaV2
         }
     }
+
+    var ffmpegName: String {
+        switch self {
+        case .dts_hd:
+            "dts"
+        default:
+            rawValue
+        }
+    }
 }
