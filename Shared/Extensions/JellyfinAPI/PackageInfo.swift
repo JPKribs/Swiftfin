@@ -9,9 +9,14 @@
 import Foundation
 import JellyfinAPI
 
-extension LogFile {
+extension PackageInfo: @retroactive Identifiable {
 
-    var type: ServerLogType {
-        ServerLogType(rawValue: name)
+    /// Plugin ID drops the hyphen in URLs
+    public var id: String? {
+        guid?.uppercased().replacing("-", with: "")
+    }
+
+    var pluginCategory: PluginCategory? {
+        category.map { PluginCategory(rawValue: $0) ?? .other }
     }
 }

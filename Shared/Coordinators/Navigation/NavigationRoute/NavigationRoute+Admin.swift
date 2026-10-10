@@ -117,6 +117,37 @@ extension NavigationRoute {
         }
     }
 
+    // MARK: - Plugins
+
+    static func addPluginRepository(viewModel: PluginsViewModel) -> NavigationRoute {
+        NavigationRoute(
+            id: "addPluginRepository",
+            style: .sheet
+        ) {
+            AddPluginRepositoryView(viewModel: viewModel)
+        }
+    }
+
+    static func pluginDetails(viewModel: PluginDetailsViewModel) -> NavigationRoute {
+        NavigationRoute(id: "pluginDetails") {
+            PluginDetailsView(viewModel: viewModel)
+        }
+    }
+
+    static func pluginRepositories(viewModel: PluginsViewModel) -> NavigationRoute {
+        NavigationRoute(id: "pluginRepositories") {
+            PluginRepositoriesView(viewModel: viewModel)
+        }
+    }
+
+    static var plugins: NavigationRoute {
+        NavigationRoute(
+            id: "plugins"
+        ) {
+            PluginsView()
+        }
+    }
+
     // MARK: - Users
 
     static func quickConnectAuthorize(user: UserDto) -> NavigationRoute {
