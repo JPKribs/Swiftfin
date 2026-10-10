@@ -30,7 +30,8 @@ struct JellyfinWebView: View {
         route.path = "/" + path
         route.queryItems = queryItems.isEmpty ? nil : queryItems
 
-        // The server redirects its root to wherever it hosts the web client
+        // The server redirects its root to wherever it hosts the web client.
+        // - This is needed to handle / vs /web vs custom redirections.
         components.path = components.path.trimmingSuffix("/") + "/"
         components.percentEncodedFragment = route.string
 
@@ -73,7 +74,6 @@ private struct JellyfinWebUIView: UIViewRepresentable {
         let configuration = WKWebViewConfiguration()
         configuration.websiteDataStore = .nonPersistent()
         configuration.defaultWebpagePreferences.preferredContentMode = .mobile
-        configuration.applicationNameForUserAgent = "Mobile/15E148 Safari/604.1"
 
         // Provide Jellyfin-Web our session information
         let serverURL = userSession.client.configuration.url
@@ -109,8 +109,8 @@ private struct JellyfinWebUIView: UIViewRepresentable {
             )
         }
 
-        let webView = WKWebView(frame: UIScreen.main.bounds, configuration: configuration)
-
+        /// `.zero` then resizes to fill container
+        let webView = WKWebView(frame: .zero, configuration: configuration)
         webView.load(URLRequest(url: url))
 
         return webView

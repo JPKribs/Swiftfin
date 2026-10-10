@@ -119,7 +119,7 @@ extension NavigationRoute {
 
     // MARK: - Plugins
 
-    static func addPluginRepository(viewModel: PluginsViewModel) -> NavigationRoute {
+    static func addPluginRepository(viewModel: PluginRepositoriesViewModel) -> NavigationRoute {
         NavigationRoute(
             id: "addPluginRepository",
             style: .sheet
@@ -134,7 +134,7 @@ extension NavigationRoute {
         }
     }
 
-    static func pluginRepositories(viewModel: PluginsViewModel) -> NavigationRoute {
+    static func pluginRepositories(viewModel: PluginRepositoriesViewModel) -> NavigationRoute {
         NavigationRoute(id: "pluginRepositories") {
             PluginRepositoriesView(viewModel: viewModel)
         }

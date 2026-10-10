@@ -15,97 +15,121 @@ import OrderedCollections
 @Stateful
 final class PluginsViewModel: ViewModel {
 
+    struct Environment: Hashable, WithDefaultValue {
+
+        var category: PluginCategory?
+        var isInstalled: Bool?
+
+        static var `default`: Self {
+            .init(
+                category: nil,
+                isInstalled: true
+            )
+        }
+    }
+
     @CasePathable
     enum Action {
         case refresh
-        case addRepository(repository: RepositoryInfo)
-        case removeRepository(repository: RepositoryInfo)
+        case getPackages
+        case getPlugins
 
         var transition: Transition {
             switch self {
             case .refresh:
-                .to(.refreshing, then: .initial)
-            case .addRepository, .removeRepository:
-                .background(.updating)
+                .to(.initial, then: .content)
+                    .whenBackground(.refreshing)
+
+            case .getPackages, .getPlugins:
+                .background(.refreshing)
             }
         }
     }
 
     enum BackgroundState {
-        case updating
-    }
-
-    struct Environment: Hashable {
-        var category: PluginCategory?
-        var isInstalled: Bool? = true
-    }
-
-    enum State {
-        case initial
-        case error
         case refreshing
     }
 
-    @Published
-    var environment = Environment()
-    @Published
-    private var allPlugins: OrderedDictionary<String, PluginDetailsViewModel> = [:]
-    @Published
-    private(set) var repositories: [RepositoryInfo] = []
+    enum State {
+        case content
+        case error
+        case initial
+    }
 
-    var plugins: [PluginDetailsViewModel] {
-        allPlugins.values.filter { viewModel in
+    @Published
+    var environment: Environment = .default
+    @Published
+    private(set) var packages: [PackageInfo] = []
+    @Published
+    private(set) var plugins: OrderedDictionary<String, PluginDetailsViewModel> = [:]
+
+    let repositoriesViewModel = PluginRepositoriesViewModel()
+
+    var filteredPlugins: [PluginDetailsViewModel] {
+        plugins.values.filter { viewModel in
             (environment.isInstalled == nil || viewModel.plugin.isInstalled == environment.isInstalled) &&
                 (environment.category == nil || viewModel.package?.pluginCategory == environment.category)
         }
     }
 
     var categories: [PluginCategory] {
-        let categories = Set(allPlugins.values.compactMap(\.package?.pluginCategory))
+        let categories = Set(packages.compactMap(\.pluginCategory))
         return PluginCategory.allCases.filter(categories.contains)
+    }
+
+    override init() {
+        super.init()
+
+        repositoriesViewModel.events
+            .sink { [weak self] _ in
+                self?.refresh()
+            }
+            .store(in: &cancellables)
     }
 
     @Function(\Action.Cases.refresh)
     private func _refresh() async throws {
-        async let installedResponse = send(Paths.getPlugins)
-        async let packagesResponse = send(Paths.getPackages)
-        async let repositoriesResponse = send(Paths.getRepositories)
+        try await _getPackages()
+        try await _getPlugins()
+    }
 
-        let packages = try await Dictionary(
-            packagesResponse.value.compactMap { package in
-                package.id.map { ($0, package) }
-            },
-            uniquingKeysWith: { first, _ in first }
-        )
+    @Function(\Action.Cases.getPackages)
+    private func _getPackages() async throws {
+        let request = Paths.getPackages
+        let response = try await send(request)
 
-        let installed = try await Dictionary(
-            installedResponse.value.compactMap { plugin in
-                plugin.id.map { ($0.uppercased(), plugin) }
-            },
-            uniquingKeysWith: { first, second in
-                first.isInstalled ? first : second
-            }
-        )
+        packages = response.value
+    }
+
+    @Function(\Action.Cases.getPlugins)
+    private func _getPlugins() async throws {
+        let request = Paths.getPlugins
+        let response = try await send(request)
+
+        let installed = response.value.filter(\.isInstalled)
+        let installedIDs = Set(installed.compactMap { $0.id?.uppercased() })
 
         let available = packages
-            .filter { installed[$0.key] == nil }
-            .map { PluginInfo(package: $0.value) }
+            .filter { !installedIDs.contains($0.id ?? "") }
+            .map(PluginInfo.init(package:))
 
-        let incomingPlugins = (Array(installed.values) + available).sorted {
-            $0.displayTitle.localizedCaseInsensitiveCompare($1.displayTitle) == .orderedAscending
-        }
+        updatePlugins(installed + available)
+    }
 
+    private func updatePlugins(_ incomingPlugins: [PluginInfo]) {
         var updatedPlugins: OrderedDictionary<String, PluginDetailsViewModel> = [:]
 
-        for plugin in incomingPlugins {
+        for plugin in incomingPlugins.sorted(using: \.displayTitle) {
             guard let id = plugin.id?.uppercased() else { continue }
 
-            if let existing = allPlugins[id] {
+            let package = packages.first { $0.id == id }
+
+            if let existing = plugins[id] {
                 existing.plugin = plugin
-                existing.package = packages[id] ?? existing.package
+                existing.package = package
                 updatedPlugins[id] = existing
             } else {
-                let viewModel = PluginDetailsViewModel(plugin: plugin, package: packages[id])
+                let viewModel = PluginDetailsViewModel(plugin: plugin, package: package)
 
                 viewModel.objectWillChange
                     .sink { [weak self] _ in
@@ -117,24 +141,6 @@ final class PluginsViewModel: ViewModel {
             }
         }
 
-        allPlugins = updatedPlugins
-
-        repositories = try await repositoriesResponse.value
-    }
-
-    @Function(\Action.Cases.addRepository)
-    private func _addRepository(_ repository: RepositoryInfo) async throws {
-        let request = Paths.setRepositories(repositories + [repository])
-        try await send(request)
-
-        try await _refresh()
-    }
-
-    @Function(\Action.Cases.removeRepository)
-    private func _removeRepository(_ repository: RepositoryInfo) async throws {
-        let request = Paths.setRepositories(repositories.filter { $0 != repository })
-        try await send(request)
-
-        try await _refresh()
+        plugins = updatedPlugins
     }
 }

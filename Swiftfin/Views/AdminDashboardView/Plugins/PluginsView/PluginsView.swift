@@ -23,15 +23,17 @@ struct PluginsView: View {
             ListTitleSection(
                 L10n.plugins,
                 description: L10n.pluginsDescription
-            )
+            ) {
+                UIApplication.shared.open(.jellyfinDocsPlugins)
+            }
 
-            if viewModel.plugins.isEmpty {
+            if viewModel.filteredPlugins.isEmpty {
                 Text(L10n.none)
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .center)
                     .listRowBackground(Color.clear)
             } else {
-                ForEach(viewModel.plugins) { pluginViewModel in
+                ForEach(viewModel.filteredPlugins) { pluginViewModel in
                     pluginViewModel.makeBody(libraryStyle: .default) {
                         router.route(to: .pluginDetails(viewModel: pluginViewModel))
                     }
@@ -43,20 +45,20 @@ struct PluginsView: View {
     var body: some View {
         ZStack {
             switch viewModel.state {
+            case .content:
+                contentView
+
             case .error:
                 viewModel.error.map {
                     ErrorView(error: $0)
                 }
 
             case .initial:
-                contentView
-
-            case .refreshing:
                 ProgressView()
             }
         }
         .animation(.linear(duration: 0.2), value: viewModel.state)
-        .animation(.linear(duration: 0.1), value: viewModel.plugins.map(\.plugin))
+        .animation(.linear(duration: 0.1), value: viewModel.filteredPlugins.map(\.plugin))
         .animation(.linear(duration: 0.1), value: viewModel.environment)
         .navigationTitle(L10n.plugins)
         .toolbarTitleDisplayMode(.inline)
@@ -67,11 +69,11 @@ struct PluginsView: View {
             viewModel.refresh()
         }
         .navigationBarMenuButton(
-            isLoading: viewModel.background.is(.updating)
+            isLoading: viewModel.background.is(.refreshing)
         ) {
             Section {
                 Button(L10n.repositories, systemImage: "shippingbox") {
-                    router.route(to: .pluginRepositories(viewModel: viewModel))
+                    router.route(to: .pluginRepositories(viewModel: viewModel.repositoriesViewModel))
                 }
             }
 

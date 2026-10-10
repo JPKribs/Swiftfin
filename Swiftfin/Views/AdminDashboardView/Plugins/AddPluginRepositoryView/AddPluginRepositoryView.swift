@@ -12,7 +12,7 @@ import SwiftUI
 struct AddPluginRepositoryView: View {
 
     @ObservedObject
-    var viewModel: PluginsViewModel
+    var viewModel: PluginRepositoriesViewModel
 
     @Router
     private var router
@@ -97,8 +97,8 @@ struct AddPluginRepositoryView: View {
         .topBarTrailing {
             let saveAction: () -> Void = {
                 UIDevice.impact(.light)
-                viewModel.addRepository(
-                    repository: RepositoryInfo(
+                viewModel.add(
+                    RepositoryInfo(
                         isEnabled: true,
                         name: trimmedName,
                         url: trimmedURL

@@ -68,6 +68,31 @@ struct PluginDetailsView: View {
                     LabeledContent(L10n.status, value: status.displayTitle)
                 }
             }
+
+            if viewModel.versions.isNotEmpty {
+                Section(L10n.history) {
+                    ForEach(viewModel.versions, id: \.self) { version in
+                        DisclosureGroup(version.version ?? L10n.unknown) {
+                            if let changelog = version.changelog {
+                                Text(changelog)
+                                    .font(.subheadline)
+                                    .foregroundStyle(.secondary)
+                            }
+
+                            if let timestamp = version.timestamp, let date = try? Date(timestamp, strategy: .iso8601) {
+                                LabeledContent(L10n.releaseDate) {
+                                    Text(date, format: .dateTime.year().month().day())
+                                }
+                            }
+
+                            if let targetAbi = version.targetAbi {
+                                LabeledContent(L10n.server, value: targetAbi)
+                            }
+                        }
+                        .monospacedDigit()
+                    }
+                }
+            }
         }
         .animation(.linear(duration: 0.1), value: viewModel.package)
         .navigationTitle(viewModel.plugin.displayTitle)

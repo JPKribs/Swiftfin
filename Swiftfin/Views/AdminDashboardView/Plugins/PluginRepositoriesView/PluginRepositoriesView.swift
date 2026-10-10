@@ -12,7 +12,7 @@ import SwiftUI
 struct PluginRepositoriesView: View {
 
     @ObservedObject
-    var viewModel: PluginsViewModel
+    var viewModel: PluginRepositoriesViewModel
 
     @Router
     private var router
@@ -22,7 +22,9 @@ struct PluginRepositoriesView: View {
             ListTitleSection(
                 L10n.repositories,
                 description: L10n.repositoriesDescription
-            )
+            ) {
+                UIApplication.shared.open(.jellyfinDocsPluginRepositories)
+            }
 
             if viewModel.repositories.isNotEmpty {
                 ForEach(viewModel.repositories, id: \.self) { repository in
@@ -49,7 +51,7 @@ struct PluginRepositoriesView: View {
                             titleVisibility: .visible
                         ) {
                             Button(L10n.delete, role: .destructive) {
-                                viewModel.removeRepository(repository: repository)
+                                viewModel.remove(repository)
                             }
 
                             Button(L10n.cancel, role: .cancel) {}
@@ -82,6 +84,9 @@ struct PluginRepositoriesView: View {
                 .buttonStyle(.glassProminent)
                 .controlSize(.small)
             }
+        }
+        .onFirstAppear {
+            viewModel.refresh()
         }
         .errorMessage($viewModel.error)
     }

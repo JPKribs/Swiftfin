@@ -16,13 +16,16 @@ final class PluginDetailsViewModel: ViewModel, @preconcurrency Identifiable {
     @CasePathable
     enum Action {
         case refresh
+        case getPlugin
+        case getConfigurationPage
+        case getManifest
         case setEnabled(isEnabled: Bool)
         case install
         case uninstall
 
         var transition: Transition {
             switch self {
-            case .refresh:
+            case .refresh, .getPlugin, .getConfigurationPage, .getManifest:
                 .background(.refreshing)
             case .setEnabled, .install, .uninstall:
                 .background(.updating)
@@ -43,12 +46,23 @@ final class PluginDetailsViewModel: ViewModel, @preconcurrency Identifiable {
     @Published
     var plugin: PluginInfo
     @Published
+    var package: PackageInfo?
+
+    @Published
     private(set) var configurationPage: ConfigurationPageInfo?
     @Published
-    var package: PackageInfo?
+    private(set) var manifest: VersionInfo?
 
     var id: String? {
         plugin.id?.uppercased()
+    }
+
+    var versions: [VersionInfo] {
+        if let versions = package?.versions, versions.isNotEmpty {
+            return versions
+        }
+
+        return manifest.map { [$0] } ?? []
     }
 
     init(plugin: PluginInfo, package: PackageInfo?) {
@@ -58,34 +72,53 @@ final class PluginDetailsViewModel: ViewModel, @preconcurrency Identifiable {
 
     @Function(\Action.Cases.refresh)
     private func _refresh() async throws {
-        guard let id = plugin.id, let name = plugin.name else { return }
+        try await _getPlugin()
+        try await _getConfigurationPage()
+        try await _getManifest()
+    }
 
-        async let installedResponse = send(Paths.getPlugins)
-        async let packageResponse = send(Paths.getPackageInfo(name: name, assemblyGuid: id))
-        async let configurationPagesResponse = send(Paths.getConfigurationPages())
+    @Function(\Action.Cases.getPlugin)
+    private func _getPlugin() async throws {
+        guard let id = plugin.id else { return }
 
-        let installed = try await installedResponse.value.filter { $0.id?.caseInsensitiveCompare(id) == .orderedSame }
+        let request = Paths.getPlugins
+        let response = try await send(request)
 
-        if let current = installed.first(where: \.isInstalled) ?? installed.first {
+        let plugins = response.value.filter { $0.id?.caseInsensitiveCompare(id) == .orderedSame }
+
+        if let current = plugins.first(where: \.isInstalled) ?? plugins.first {
             plugin = current
+        } else if let package {
+            plugin = PluginInfo(package: package)
         }
+    }
 
-        // Plugins bundled with the server are not in any repository
-        if let package = try? await packageResponse.value {
-            self.package = package
-        }
+    @Function(\Action.Cases.getConfigurationPage)
+    private func _getConfigurationPage() async throws {
+        guard let id = plugin.id else { return }
 
-        let configurationPages = try await configurationPagesResponse.value.filter {
-            $0.pluginID?.caseInsensitiveCompare(id) == .orderedSame
-        }
+        let request = Paths.getConfigurationPages()
+        let response = try await send(request)
 
-        configurationPage = configurationPages.first { $0.enableInMainMenu == true } ?? configurationPages.first
+        let pages = response.value.filter { $0.pluginID?.caseInsensitiveCompare(id) == .orderedSame }
+
+        configurationPage = pages.first { $0.enableInMainMenu == true } ?? pages.first
+    }
+
+    @Function(\Action.Cases.getManifest)
+    private func _getManifest() async throws {
+        guard plugin.isInstalled, let id = plugin.id else { return }
+
+        let request = Paths.getPluginManifest(pluginID: id).withResponse(VersionInfo.self)
+        let response = try await send(request)
+
+        manifest = response.value
     }
 
     @Function(\Action.Cases.setEnabled)
     private func _setEnabled(_ isEnabled: Bool) async throws {
         guard let id = plugin.id, let version = plugin.version else {
-            logger.error("Plugin ID or version is nil")
+            logger.error("Plugin ID or version is missing")
             throw ErrorMessage(L10n.unknownError)
         }
 
@@ -94,13 +127,14 @@ final class PluginDetailsViewModel: ViewModel, @preconcurrency Identifiable {
             : Paths.disablePlugin(pluginID: id, version: version)
         try await send(request)
 
-        try await _refresh()
+        // Don't assume the result as disabling a plugin can vary in outcome
+        try await _getPlugin()
     }
 
     @Function(\Action.Cases.install)
     private func _install() async throws {
         guard let name = plugin.name else {
-            logger.error("Plugin name is nil")
+            logger.error("Plugin name is missing")
             throw ErrorMessage(L10n.unknownError)
         }
 
@@ -110,19 +144,19 @@ final class PluginDetailsViewModel: ViewModel, @preconcurrency Identifiable {
         )
         try await send(request)
 
-        try await _refresh()
+        try await _getPlugin()
     }
 
     @Function(\Action.Cases.uninstall)
     private func _uninstall() async throws {
         guard let id = plugin.id, let version = plugin.version else {
-            logger.error("Plugin ID or version is nil")
+            logger.error("Plugin ID or version is missing")
             throw ErrorMessage(L10n.unknownError)
         }
 
         let request = Paths.uninstallPluginByVersion(pluginID: id, version: version)
         try await send(request)
 
-        try await _refresh()
+        try await _getPlugin()
     }
 }

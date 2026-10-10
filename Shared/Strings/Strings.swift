@@ -824,6 +824,8 @@ internal enum L10n {
   internal static let hideUserFromLoginScreen = L10n.tr("Localizable", "hideUserFromLoginScreen", fallback: "Hide user from login screen")
   /// Hint
   internal static let hint = L10n.tr("Localizable", "hint", fallback: "Hint")
+  /// History
+  internal static let history = L10n.tr("Localizable", "history", fallback: "History")
   /// Home
   internal static let home = L10n.tr("Localizable", "home", fallback: "Home")
   /// Horizontal pan
@@ -1316,8 +1318,8 @@ internal enum L10n {
   internal static let playPreviousItem = L10n.tr("Localizable", "playPreviousItem", fallback: "Play previous item")
   /// Plugins
   internal static let plugins = L10n.tr("Localizable", "plugins", fallback: "Plugins")
-  /// Browse, enable and disable the plugins available to your server.
-  internal static let pluginsDescription = L10n.tr("Localizable", "pluginsDescription", fallback: "Browse, enable and disable the plugins available to your server.")
+  /// Jellyfin has a collection of optional plugins that can be installed to provide additional features.
+  internal static let pluginsDescription = L10n.tr("Localizable", "pluginsDescription", fallback: "Jellyfin has a collection of optional plugins that can be installed to provide additional features.")
   /// Portrait
   internal static let portrait = L10n.tr("Localizable", "portrait", fallback: "Portrait")
   /// Community rating: %1$@ out of 10 - Spoken community rating on a scale of ten.
