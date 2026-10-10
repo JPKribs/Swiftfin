@@ -26,21 +26,36 @@ struct PluginRepositoriesView: View {
 
             if viewModel.repositories.isNotEmpty {
                 ForEach(viewModel.repositories, id: \.self) { repository in
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(repository.name ?? L10n.unknown)
-                            .fontWeight(.semibold)
-                            .lineLimit(2)
+                    StateAdapter(initialValue: false) { isPresentingConfirmation in
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(repository.name ?? L10n.unknown)
+                                .fontWeight(.semibold)
+                                .lineLimit(2)
 
-                        Text(repository.url ?? L10n.unknown)
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                            .lineLimit(2)
-                    }
-                    .swipeActions {
-                        Button(L10n.delete, systemImage: "trash") {
-                            viewModel.removeRepository(repository: repository)
+                            Text(repository.url ?? L10n.unknown)
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(2)
                         }
-                        .tint(.red)
+                        .swipeActions {
+                            Button(L10n.delete, systemImage: "trash") {
+                                isPresentingConfirmation.wrappedValue = true
+                            }
+                            .tint(.red)
+                        }
+                        .confirmationDialog(
+                            L10n.delete,
+                            isPresented: isPresentingConfirmation,
+                            titleVisibility: .visible
+                        ) {
+                            Button(L10n.delete, role: .destructive) {
+                                viewModel.removeRepository(repository: repository)
+                            }
+
+                            Button(L10n.cancel, role: .cancel) {}
+                        } message: {
+                            Text(L10n.deleteItemConfirmation)
+                        }
                     }
                 }
             } else {
