@@ -98,7 +98,7 @@ struct PluginDetailsView: View {
                             Button(L10n.uninstall, role: .destructive) {
                                 viewModel.uninstall()
                             }
-                            
+
                             Button(L10n.cancel, role: .cancel) {}
                         } message: {
                             Text(L10n.uninstallPluginWarning)
