@@ -1482,6 +1482,8 @@ internal enum L10n {
   internal static let regional = L10n.tr("Localizable", "regional", fallback: "Regional")
   /// Regular
   internal static let regular = L10n.tr("Localizable", "regular", fallback: "Regular")
+  /// Release
+  internal static let release = L10n.tr("Localizable", "release", fallback: "Release")
   /// Release date
   internal static let releaseDate = L10n.tr("Localizable", "releaseDate", fallback: "Release date")
   /// Remember layout

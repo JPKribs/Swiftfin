@@ -72,24 +72,36 @@ struct PluginDetailsView: View {
             if viewModel.versions.isNotEmpty {
                 Section(L10n.history) {
                     ForEach(viewModel.versions, id: \.self) { version in
-                        DisclosureGroup(version.version ?? L10n.unknown) {
-                            if let changelog = version.changelog {
-                                Text(changelog)
-                                    .font(.subheadline)
-                                    .foregroundStyle(.secondary)
-                            }
-
-                            if let timestamp = version.timestamp, let date = try? Date(timestamp, strategy: .iso8601) {
-                                LabeledContent(L10n.releaseDate) {
-                                    Text(date, format: .dateTime.year().month().day())
+                        DisclosureGroup {
+                            Group {
+                                if let changelog = version.changelog?.nilIfBlank {
+                                    Text(changelog.richText)
+                                } else {
+                                    Text(L10n.none)
+                                        .frame(maxWidth: .infinity, alignment: .center)
                                 }
                             }
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                        } label: {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(version.version ?? L10n.unknown)
+                                    .fontWeight(.semibold)
 
-                            if let targetAbi = version.targetAbi {
-                                LabeledContent(L10n.server, value: targetAbi)
+                                Group {
+                                    if let timestamp = version.timestamp, let date = try? Date(timestamp, strategy: .iso8601) {
+                                        LabeledContent(L10n.release, value: date, format: .dateTime.year().month().day())
+                                    }
+
+                                    if let targetAbi = version.targetAbi {
+                                        LabeledContent(L10n.jellyfin, value: targetAbi)
+                                    }
+                                }
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
                             }
+                            .monospacedDigit()
                         }
-                        .monospacedDigit()
                     }
                 }
             }

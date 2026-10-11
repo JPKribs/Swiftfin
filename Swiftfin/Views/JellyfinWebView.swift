@@ -46,11 +46,11 @@ struct JellyfinWebView: View {
                     url: url
                 )
                 .ignoresSafeArea(edges: .bottom)
-                .navigationTitle(userSession.server.name)
             } else {
                 ErrorView(error: ErrorMessage(L10n.unknownError))
             }
         }
+        .navigationTitle(userSession?.server.name ?? L10n.jellyfin)
         .toolbarTitleDisplayMode(.inline)
         .navigationBarCloseButton {
             router.dismiss()
