@@ -75,7 +75,7 @@ struct PluginDetailsView: View {
                         DisclosureGroup {
                             Group {
                                 if let changelog = version.changelog?.nilIfBlank {
-                                    Text(changelog.richText)
+                                    Text(changelog.markdown)
                                 } else {
                                     Text(L10n.none)
                                         .frame(maxWidth: .infinity, alignment: .center)

@@ -230,7 +230,7 @@ extension String {
         return trimmed.isEmpty ? nil : trimmed
     }
 
-    var richText: AttributedString {
+    var markdown: AttributedString {
         (try? AttributedString(
             markdown: self,
             options: .init(interpretedSyntax: .inlineOnlyPreservingWhitespace)
